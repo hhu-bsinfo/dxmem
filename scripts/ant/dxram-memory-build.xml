@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<project name="dxram-memory" default="build" basedir="../..">
+    <property name="buildtype" value="develop"/>
+    <include file="dxram-memory-build-config.xml"/>
+    <target name="build" description="build a concurrency optimized memory management">
+        <mkdir dir="bin"/>
+        <mkdir dir="${build_proj_dir}/classes"/>
+        <mkdir dir="${build_proj_dir}/classes/${buildtype}"/>
+        <javac srcdir="${source_dir}" destdir="${build_proj_dir}/classes/${buildtype}" 
+            includeantruntime="false" target="1.8" encoding="utf-8">
+            <compilerarg line="-Xlint:sunapi -XDenableSunApiLintControl"/>
+            <include name="**/*.java"/>
+            <classpath>
+                <fileset dir="${lib_dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+
+        <tstamp>
+            <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss"/>
+        </tstamp>
+
+        <jar destfile="bin/${name_dxram}-${buildtype}.jar"
+            basedir="${build_proj_dir}/classes/${buildtype}">
+            <manifest>
+                <attribute name="BuildUser" value="${user.name}"/>
+                <attribute name="BuildDate" value="${TODAY}"/>
+                <attribute name="Main-Class" value="de.hhu.bsinfo.DXRAMMemory"/>
+                <attribute name="Class-Path" value="${jar.classpath}"/>
+            </manifest>
+        </jar>
+
+        <delete dir="${build_proj_dir}/classes"/>
+
+    </target>
+</project>
+

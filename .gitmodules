@@ -1,0 +1,3 @@
+[submodule "src/de/hhu/bsinfo/dxutils"]
+	path = src/de/hhu/bsinfo/dxutils
+	url = git@github.com:hhu-bsinfo/dxutils-src.git

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="dxram-memory-build-config" basedir=".">
+    <property name="name_dxram" value="dxram-memory"/>
+    <property name="bin_dir" value="bin"/>
+    <property name="build_dir" value="build"/>
+    <property name="conf_dir" value="config"/>
+    <property name="lib_dir" value="lib"/>
+    <property name="log_dir" value="log"/>
+    <property name="source_dir" value="src"/>
+
+    <property name="build_proj_dir" value="${build_dir}/${name_dxram}"/>
+    <property name="build_proj_conf_dir" value="${build_proj_dir}/${conf_dir}"/>
+    <property name="build_proj_lib_dir" value="${build_proj_dir}/${lib_dir}"/>
+    <property name="build_proj_log_dir" value="${build_proj_dir}/${log_dir}"/>
+</project>
