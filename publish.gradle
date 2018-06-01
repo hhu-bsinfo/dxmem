@@ -1,0 +1,85 @@
+def pomConfig = {
+    licenses {
+        license {
+            name 'GNU General Public License, Version 3.0'
+            url 'https://www.gnu.org/licenses/gpl-3.0.txt'
+            distribution "repo"
+        }
+    }
+
+    developers {
+        developer {
+            id 'stnot'
+            name 'Stefan Nothaas'
+            email 'stefan.nothaas@uni-duesseldorf.de'
+        }
+
+        developer {
+            id 'Kevin Beineke'
+            name 'Kevin Beineke'
+            email 'kevin.beineke@uni-duesseldorf.de'
+        }
+
+        developer {
+            id 'filkra'
+            name 'Filip Krakowski'
+            email 'filip.krakowski@uni-duesseldorf.de'
+        }
+    }
+
+    scm {
+        url 'https://github.com/hhu-bsinfo/dxmem'
+    }
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar {
+                classifier 'sources'
+            }
+
+            artifact javadocJar {
+                classifier 'javadoc'
+            }
+
+            groupId project.group
+            artifactId project.name
+            version project.version
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'DXRAM\'s memory management for many very small object')
+                root.appendNode('name', 'dxmem')
+                root.appendNode('url', 'https://github.com/hhu-bsinfo/dxmem')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    publications = ['mavenPublication']
+    publish = true
+    override = true
+
+    pkg {
+        repo = 'dxram'
+        name = 'dxutils'
+        userOrg = 'hhu-bsinfo'
+        licenses = ['GPL-3.0']
+        websiteUrl = 'https://www.dxram.io'
+        vcsUrl = 'https://github.com/hhu-bsinfo/dxmem.git'
+        labels = ['utilities']
+        githubRepo = 'hhu-bsinfo/dxmem'
+        //githubReleaseNotesFile = 'README.md'
+        version {
+            name = project.version
+            released = new Date()
+        }
+    }
+}

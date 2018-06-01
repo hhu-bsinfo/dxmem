@@ -1,0 +1,9 @@
+out/
+build/
+.project
+.classpath
+.checkstyle
+*.DS_Store
+.idea
+dxmem.iml
+.gradle
