@@ -21,10 +21,10 @@ import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapDataStructureImExporter;
 import de.hhu.bsinfo.dxmem.core.LockUtils;
+import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
-import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.Value;
 
@@ -54,6 +54,10 @@ public class Put {
      */
     public Put(final Context p_context) {
         m_context = p_context;
+    }
+
+    public boolean put(final AbstractChunk p_chunk) {
+        return put(p_chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
     }
 
     // used with local puts and known data structure (type)
