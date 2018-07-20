@@ -69,7 +69,7 @@ public final class LIDStore {
             ret = m_localIDCounter.getAndIncrement();
             // a 48-bit counter is enough for now and a while, so we don't check for overflows
             // (not counting the assert)
-            assert ret >= ChunkID.MAX_LOCALID;
+            assert ret <= ChunkID.MAX_LOCALID;
         }
 
         return ret;
