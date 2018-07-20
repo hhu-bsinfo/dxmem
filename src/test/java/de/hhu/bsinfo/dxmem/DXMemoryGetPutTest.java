@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
+import de.hhu.bsinfo.dxutils.RandomUtils;
 
 public class DXMemoryGetPutTest {
     @Test
@@ -93,7 +94,39 @@ public class DXMemoryGetPutTest {
         putGetSize(DXMemoryTestConstants.CHUNK_SIZE_6);
     }
 
-    private void putGetSize(final int p_size) {
+    @Test
+    public void putGetTestChunk1() {
+        Configurator.setRootLevel(Level.TRACE);
+        putGetTestChunk(1, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
+    }
+
+    @Test
+    public void putGetTestChunk2() {
+        Configurator.setRootLevel(Level.TRACE);
+        putGetTestChunk(10, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
+    }
+
+    @Test
+    public void putGetTestChunk3() {
+        Configurator.setRootLevel(Level.TRACE);
+        putGetTestChunk(100, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
+    }
+
+    @Test
+    public void putGetTestChunk4() {
+        Configurator.setRootLevel(Level.TRACE);
+        putGetTestChunk(1000, DXMemoryTestConstants.HEAP_SIZE_LARGE);
+    }
+
+    @Test
+    public void putGetTestChunkRandom() {
+        Configurator.setRootLevel(Level.TRACE);
+        for (int i = 0; i < 20; i++) {
+            putGetTestChunk(RandomUtils.getRandomValue(0, 1000), DXMemoryTestConstants.HEAP_SIZE_LARGE);
+        }
+    }
+
+    private static void putGetSize(final int p_size) {
         DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID,
                 p_size > DXMemoryTestConstants.HEAP_SIZE_SMALL * 0.8 ?
                         (long) ((long) 1024 * 1024 + p_size + p_size * 0.1) :
@@ -128,6 +161,41 @@ public class DXMemoryGetPutTest {
 
         memory.remove().remove(ds);
         Assert.assertTrue(ds.isStateOk());
+
+        memory.shutdown();
+    }
+
+    private static void putGetTestChunk(final int p_count, final long p_heapSize) {
+        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
+
+        TestChunk[] chunks = new TestChunk[p_count];
+
+        for (int i = 0; i < p_count; i++) {
+            chunks[i] = new TestChunk(true);
+            memory.create().create(chunks[i]);
+
+            Assert.assertTrue(chunks[i].isStateOk());
+            Assert.assertTrue(chunks[i].isIDValid());
+        }
+
+        Assert.assertTrue(memory.analyze().analyze());
+
+        for (TestChunk chunk : chunks) {
+            memory.put().put(chunk);
+            Assert.assertTrue(chunk.isStateOk());
+            chunk.clear();
+        }
+
+        for (TestChunk chunk : chunks) {
+            memory.get().get(chunk);
+            Assert.assertTrue(chunk.isStateOk());
+            chunk.verifyContents();
+        }
+
+        for (TestChunk chunk : chunks) {
+            memory.remove().remove(chunk);
+            Assert.assertTrue(chunk.isStateOk());
+        }
 
         memory.shutdown();
     }
