@@ -70,11 +70,11 @@ public final class CIDTableChunkEntry {
 
     private long m_address;
 
-    CIDTableChunkEntry() {
+    public CIDTableChunkEntry() {
 
     }
 
-    CIDTableChunkEntry(final long p_pointer, final long p_value) {
+    public CIDTableChunkEntry(final long p_pointer, final long p_value) {
         set(p_pointer, p_value);
     }
 
@@ -203,6 +203,10 @@ public final class CIDTableChunkEntry {
         assert m_readLock > 0;
 
         m_readLock--;
+    }
+
+    public int getReadLockCounter() {
+        return m_readLock;
     }
 
     public boolean isLengthFieldEmbedded() {

@@ -101,7 +101,7 @@ public final class LIDStore {
 
                 // a 48-bit counter is enough for now and a while, so we don't check for overflows
                 // (not counting the assert)
-                assert endId >= ChunkID.MAX_LOCALID;
+                assert endId <= ChunkID.MAX_LOCALID;
             } while (!m_localIDCounter.compareAndSet(startId, endId));
 
             for (int i = 0; i < p_count - (offset - p_offset); i++) {
@@ -128,7 +128,7 @@ public final class LIDStore {
 
             // a 48-bit counter is enough for now and a while, so we don't check for overflows
             // (not counting the assert)
-            assert endId >= ChunkID.MAX_LOCALID;
+            assert endId <= ChunkID.MAX_LOCALID;
         } while (!m_localIDCounter.compareAndSet(startId, endId));
 
         for (int i = 0; i < p_count; i++) {

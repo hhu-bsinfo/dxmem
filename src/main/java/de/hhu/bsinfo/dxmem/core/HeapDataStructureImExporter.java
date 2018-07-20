@@ -233,7 +233,9 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
 
     @Override
     public char[] readCharArray(char[] p_array) {
-        return new char[0];
+        char[] arr = new char[readCompactNumber(0)];
+        readChars(arr);
+        return arr;
     }
 
     @Override

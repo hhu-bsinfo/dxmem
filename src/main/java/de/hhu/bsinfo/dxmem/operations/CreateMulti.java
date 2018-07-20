@@ -18,9 +18,9 @@ package de.hhu.bsinfo.dxmem.operations;
 
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
-import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 
 public class CreateMulti {
     private final Context m_context;
@@ -51,6 +51,10 @@ public class CreateMulti {
 
         // can't use thread local pool here
         CIDTableChunkEntry[] entries = new CIDTableChunkEntry[p_count];
+
+        for (int i = 0; i < entries.length; i++) {
+            entries[i] = new CIDTableChunkEntry();
+        }
 
         int successfulMallocs = m_context.getHeap().malloc(p_size, p_count, entries);
 
@@ -98,6 +102,10 @@ public class CreateMulti {
 
         // can't use thread local pool here
         CIDTableChunkEntry[] entries = new CIDTableChunkEntry[p_sizes.length];
+
+        for (int i = 0; i < entries.length; i++) {
+            entries[i] = new CIDTableChunkEntry();
+        }
 
         int successfulMallocs = m_context.getHeap().malloc(entries, p_sizes);
 

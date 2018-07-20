@@ -25,7 +25,7 @@ public class CIDTableZombieEntry {
     private long m_cid;
 
     CIDTableZombieEntry() {
-
+        clear();
     }
 
     CIDTableZombieEntry(final long p_pointer, final long p_cid) {
