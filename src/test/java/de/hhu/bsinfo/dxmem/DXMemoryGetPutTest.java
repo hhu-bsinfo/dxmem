@@ -1,8 +1,6 @@
 package de.hhu.bsinfo.dxmem;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,8 +8,6 @@ import org.junit.Test;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 
 public class DXMemoryGetPutTest {
-    private static final Logger LOGGER = LogManager.getFormatterLogger(DXMemoryGetPutTest.class.getSimpleName());
-
     @Test
     public void getSimple() {
         Configurator.setRootLevel(Level.TRACE);
@@ -99,7 +95,8 @@ public class DXMemoryGetPutTest {
 
     private void putGetSize(final int p_size) {
         DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID,
-                p_size > DXMemoryTestConstants.HEAP_SIZE_SMALL * 0.8 ? (long) ((long) p_size + p_size * 0.2) :
+                p_size > DXMemoryTestConstants.HEAP_SIZE_SMALL * 0.8 ?
+                        (long) ((long) 1024 * 1024 + p_size + p_size * 0.1) :
                         DXMemoryTestConstants.HEAP_SIZE_SMALL);
 
         ChunkByteArray ds = new ChunkByteArray(p_size);

@@ -246,7 +246,7 @@ public class DXMemoryCreateRemoveTest {
         }
     }
 
-    private void createSizes(final long p_heapSize, final int... p_sizes) {
+    private static void createSizes(final long p_heapSize, final int... p_sizes) {
         DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_sizes.length];
@@ -276,7 +276,7 @@ public class DXMemoryCreateRemoveTest {
         memory.shutdown();
     }
 
-    private void createSize(final long p_heapSize, final int p_chunkCount, final int p_chunkSize) {
+    private static void createSize(final long p_heapSize, final int p_chunkCount, final int p_chunkSize) {
         DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_chunkCount];
@@ -306,7 +306,7 @@ public class DXMemoryCreateRemoveTest {
         memory.shutdown();
     }
 
-    private void createRandomSizes(final int p_count, final float p_additionalMemoryPercent) {
+    private static void createRandomSizes(final int p_count, final float p_additionalMemoryPercent) {
         int[] sizes = new int[p_count];
         long totalSize = 0;
 

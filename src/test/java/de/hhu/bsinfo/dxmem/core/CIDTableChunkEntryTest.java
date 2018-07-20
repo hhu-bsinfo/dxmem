@@ -6,18 +6,18 @@ import org.junit.Test;
 public class CIDTableChunkEntryTest {
     private long m_pointer = 0xAABBCCDDEEL;
     private long m_address = 0x11223344L;
-    private CIDTableChunkEntry.State m_state = CIDTableChunkEntry.State.PINNED;
-    private int m_size = 1023;
-    private int m_size2 = 1024;
+    private boolean m_pinned = true;
+    private int m_size = 2047;
+    private int m_size2 = 2048;
     private long m_value = m_address << CIDTableChunkEntry.OFFSET_ADDRESS |
             (long) m_size << CIDTableChunkEntry.OFFSET_EMBEDDED_LENGTH_FIELD |
             1L << CIDTableChunkEntry.OFFSET_LENGTH_FIELD_IS_EMBEDDED |
             1L << CIDTableChunkEntry.OFFSET_READ_LOCK |
             1L << CIDTableChunkEntry.OFFSET_WRITE_LOCK |
-            (long) CIDTableChunkEntry.State.values()[m_state.ordinal()].ordinal() << CIDTableChunkEntry.OFFSET_PINNED;
+            (long) (m_pinned ? 1 : 0) << CIDTableChunkEntry.OFFSET_PINNED;
 
     private long m_value2 =
-            (long) CIDTableChunkEntry.State.values()[m_state.ordinal()].ordinal() << CIDTableChunkEntry.OFFSET_PINNED |
+            (long) (m_pinned ? 1 : 0) << CIDTableChunkEntry.OFFSET_PINNED |
                     1L << CIDTableChunkEntry.OFFSET_WRITE_LOCK |
                     1L << CIDTableChunkEntry.OFFSET_READ_LOCK |
                     0L << CIDTableChunkEntry.OFFSET_LENGTH_FIELD_IS_EMBEDDED |
@@ -39,7 +39,7 @@ public class CIDTableChunkEntryTest {
         Assert.assertEquals(false, entry1.areReadLocksAcquired());
         Assert.assertEquals(false, entry1.isWriteLockAcquired());
 
-        entry1.setState(CIDTableChunkEntry.State.PINNED);
+        entry1.setPinned(m_pinned);
         Assert.assertTrue(entry1.acquireReadLock());
         Assert.assertTrue(entry1.acquireWriteLock());
         entry1.setLengthField(m_size);
@@ -47,7 +47,7 @@ public class CIDTableChunkEntryTest {
         entry1.setPointer(m_pointer);
 
         Assert.assertEquals(m_address, entry1.getAddress());
-        Assert.assertEquals(m_state, entry1.getState());
+        Assert.assertEquals(m_pinned, entry1.isPinned());
         Assert.assertEquals(true, entry1.isLengthFieldEmbedded());
         Assert.assertEquals(true, entry1.isAddressValid());
         Assert.assertEquals(true, entry1.areReadLocksAcquired());
@@ -74,7 +74,7 @@ public class CIDTableChunkEntryTest {
         Assert.assertEquals(false, entry1.areReadLocksAcquired());
         Assert.assertEquals(false, entry1.isWriteLockAcquired());
 
-        entry1.setState(CIDTableChunkEntry.State.PINNED);
+        entry1.setPinned(true);
         Assert.assertTrue(entry1.acquireReadLock());
         Assert.assertTrue(entry1.acquireWriteLock());
         entry1.setLengthField(m_size2);
@@ -82,7 +82,7 @@ public class CIDTableChunkEntryTest {
         entry1.setPointer(m_pointer);
 
         Assert.assertEquals(m_address, entry1.getAddress());
-        Assert.assertEquals(m_state, entry1.getState());
+        Assert.assertEquals(m_pinned, entry1.isPinned());
         Assert.assertEquals(false, entry1.isLengthFieldEmbedded());
         Assert.assertEquals(true, entry1.isAddressValid());
         Assert.assertEquals(true, entry1.areReadLocksAcquired());
@@ -102,12 +102,12 @@ public class CIDTableChunkEntryTest {
 
     @Test
     public void staticHelpers() {
-        Assert.assertEquals(m_address, CIDTableChunkEntry.getAddressOfRawTableEntry(m_value));
+        Assert.assertEquals(m_address, CIDTableChunkEntry.getAddressOfRawEntry(m_value));
 
         Assert.assertEquals(0, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0xFF));
         Assert.assertEquals(0, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x100));
-        Assert.assertEquals(0, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x3FF));
-        Assert.assertEquals(1, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x400));
+        Assert.assertEquals(0, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x7FF));
+        Assert.assertEquals(1, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x800));
         Assert.assertEquals(2, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x3FFFF));
         Assert.assertEquals(3, CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(0x1000000));
 
