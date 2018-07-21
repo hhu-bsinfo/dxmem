@@ -6,6 +6,9 @@ import java.util.concurrent.locks.LockSupport;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
+import de.hhu.bsinfo.dxmonitor.progress.CpuProgress;
+import de.hhu.bsinfo.dxmonitor.state.MemState;
+import de.hhu.bsinfo.dxmonitor.state.StateUpdateException;
 import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentile;
 
@@ -65,17 +68,55 @@ public class BenchmarkPhase {
             thread.start();
         }
 
+        final long printIntervalNs = 1000 * 1000 * 1000;
+        long totalTime = 0;
         long printTime = System.nanoTime();
 
-        System.out.print("Benchmark running");
-        System.out.flush();
+        CpuProgress cpuProgress = new CpuProgress();
+        MemState memoryState = new MemState();
+
+        System.out.println("Benchmark running");
 
         while (m_threadsRunning.get() > 0) {
             long time = System.nanoTime();
 
-            if (time - printTime >= 1000 * 1000 * 1000) {
-                System.out.print('.');
-                System.out.flush();
+            if (time - printTime >= printIntervalNs) {
+                long opsExecuted = 0;
+
+                for (Thread thread : m_threads) {
+                    opsExecuted += thread.getProgressOperations();
+                }
+
+                totalTime += (time - printTime) / (1000 * 1000 * 1000);
+
+                try {
+                    cpuProgress.update();
+                } catch (StateUpdateException e) {
+                    System.out.println("Updating cpu progress failed: " + e);
+                }
+
+                try {
+                    memoryState.update();
+                } catch (StateUpdateException e) {
+                    System.out.println("Updating memory state failed: " + e);
+                }
+
+                StringBuilder builder = new StringBuilder();
+
+                builder.append(
+                        String.format("[PROGRESS: %s] %d sec [TOTAL: OPS %d/%d (%.2f)]",
+                                m_name, totalTime, opsExecuted, m_totalNumOperations,
+                                ((double) opsExecuted / m_totalNumOperations) * 100));
+
+                builder.append(
+                        String.format("[CPU: Cur=%f][MEM: Used=%f, UsedMB=%f, FreeMB=%f]",
+                                cpuProgress.getCpuUsagePercent(),
+                                memoryState.getUsedPercent(),
+                                memoryState.getUsed().getMBDouble(),
+                                memoryState.getFree().getMBDouble()));
+
+                System.out.println(builder);
+
                 printTime = time;
             }
 
@@ -134,6 +175,8 @@ public class BenchmarkPhase {
         private final long[] m_opCountExecuted;
         private final TimePercentile[] m_threadLocalTimePercentiles;
 
+        private volatile long m_progressOperations;
+
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
                 final AtomicInteger p_threadsRunning) {
             m_id = p_id;
@@ -143,6 +186,10 @@ public class BenchmarkPhase {
 
             m_opCountExecuted = new long[m_operations.length];
             m_threadLocalTimePercentiles = new TimePercentile[m_operations.length];
+        }
+
+        public long getProgressOperations() {
+            return m_progressOperations;
         }
 
         String parameterToString() {
@@ -217,6 +264,8 @@ public class BenchmarkPhase {
         public void run() {
             boolean operationExecuted = true;
 
+            m_progressOperations = 0;
+
             while (operationExecuted) {
                 if (m_delayNsBetweenOps > 0) {
                     LockSupport.parkNanos(m_delayNsBetweenOps);
@@ -255,6 +304,10 @@ public class BenchmarkPhase {
                 } else {
                     // no more ops left
                     operationExecuted = false;
+                }
+
+                if (operationExecuted) {
+                    m_progressOperations++;
                 }
             }
 
