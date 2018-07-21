@@ -11,14 +11,14 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
-public class DXMemoryCreateRemoveTest {
-    private static final Logger LOGGER = LogManager.getFormatterLogger(DXMemoryCreateRemoveTest.class.getSimpleName());
+public class DXMemCreateRemoveTest {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(DXMemCreateRemoveTest.class.getSimpleName());
 
     @Test
     public void empty() {
         Configurator.setRootLevel(Level.TRACE);
 
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
         Assert.assertTrue(memory.analyze().analyze());
         memory.shutdown();
     }
@@ -27,7 +27,7 @@ public class DXMemoryCreateRemoveTest {
     public void createSimple() {
         Configurator.setRootLevel(Level.TRACE);
 
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
 
         long cid = memory.create().create(DXMemoryTestConstants.CHUNK_SIZE_1);
 
@@ -45,7 +45,7 @@ public class DXMemoryCreateRemoveTest {
     public void createAndRemoveSimple() {
         Configurator.setRootLevel(Level.TRACE);
 
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
 
         long cid = memory.create().create(DXMemoryTestConstants.CHUNK_SIZE_1);
 
@@ -359,7 +359,7 @@ public class DXMemoryCreateRemoveTest {
     }
 
     private static void createSizes(final long p_heapSize, final int... p_sizes) {
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_sizes.length];
 
@@ -389,7 +389,7 @@ public class DXMemoryCreateRemoveTest {
     }
 
     private static void createSize(final long p_heapSize, final int p_chunkCount, final int p_chunkSize) {
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_chunkCount];
 
@@ -433,7 +433,7 @@ public class DXMemoryCreateRemoveTest {
         totalSize += (int) (totalSize * p_additionalMemoryPercent);
 
         // note: depending on the sizes created, this test might crash if you don't have sufficient memory available
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID,
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize);
 
         long[] cids = new long[sizes.length];
@@ -464,7 +464,7 @@ public class DXMemoryCreateRemoveTest {
     private void createTestChunk(final long p_heapSize, final int p_count) {
         Configurator.setRootLevel(Level.TRACE);
 
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         TestChunk[] chunks = new TestChunk[p_count];
 
@@ -514,7 +514,7 @@ public class DXMemoryCreateRemoveTest {
         totalSize += (int) (totalSize * p_additionalMemoryPercent);
 
         // note: depending on the sizes created, this test might crash if you don't have sufficient memory available
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID,
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize);
 
         long[] cids = new long[sizes.length];
@@ -552,7 +552,7 @@ public class DXMemoryCreateRemoveTest {
         long totalSize = (long) (p_size * p_count * p_additionalMemoryPercent);
 
         // note: depending on the sizes created, this test might crash if you don't have sufficient memory available
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID,
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize);
 
         long[] cids = new long[p_count];
@@ -584,7 +584,7 @@ public class DXMemoryCreateRemoveTest {
     // to create and test zombie entries
     private static void createAndRemoveRepetitive(final long p_heapSize, final int p_chunkCount,
             final int p_chunkSize) {
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_chunkCount];
 

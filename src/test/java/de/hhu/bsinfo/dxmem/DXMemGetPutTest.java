@@ -8,12 +8,12 @@ import org.junit.Test;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
-public class DXMemoryGetPutTest {
+public class DXMemGetPutTest {
     @Test
     public void getSimple() {
         Configurator.setRootLevel(Level.TRACE);
 
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
 
         ChunkByteArray ds = new ChunkByteArray(DXMemoryTestConstants.CHUNK_SIZE_1);
         memory.create().create(ds);
@@ -36,7 +36,7 @@ public class DXMemoryGetPutTest {
     public void putGetSimple() {
         Configurator.setRootLevel(Level.TRACE);
 
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
 
         ChunkByteArray ds = new ChunkByteArray(DXMemoryTestConstants.CHUNK_SIZE_1);
         memory.create().create(ds);
@@ -127,7 +127,7 @@ public class DXMemoryGetPutTest {
     }
 
     private static void putGetSize(final int p_size) {
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID,
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 p_size > DXMemoryTestConstants.HEAP_SIZE_SMALL * 0.8 ?
                         (long) ((long) 1024 * 1024 + p_size + p_size * 0.1) :
                         DXMemoryTestConstants.HEAP_SIZE_SMALL);
@@ -166,7 +166,7 @@ public class DXMemoryGetPutTest {
     }
 
     private static void putGetTestChunk(final int p_count, final long p_heapSize) {
-        DXMemory memory = new DXMemory(DXMemoryTestConstants.NODE_ID, p_heapSize);
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         TestChunk[] chunks = new TestChunk[p_count];
 

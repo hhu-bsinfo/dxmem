@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
@@ -30,10 +30,10 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class CreateReservedMulti {
-    private static final Value SOP_CREATE_RESERVE = new Value(DXMemory.class, "CreateReserve");
+    private static final Value SOP_CREATE_RESERVE = new Value(DXMem.class, "CreateReserve");
 
     static {
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_CREATE_RESERVE);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_CREATE_RESERVE);
     }
 
     private final Context m_context;

@@ -1,6 +1,6 @@
 package de.hhu.bsinfo.dxmem.benchmark.workload;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
 import de.hhu.bsinfo.dxmem.benchmark.BenchmarkPhase;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Create;
@@ -42,7 +42,7 @@ public class YcsbA implements Workload {
 
     private Benchmark create(final StorageUnit p_heapSize, final int p_loadThreads,
             final long p_loadTotalObjects, final int p_runThreads, final long p_runTotalOperations) {
-        DXMemory memory = new DXMemory((short) 0, p_heapSize.getBytes());
+        DXMem memory = new DXMem((short) 0, p_heapSize.getBytes());
 
         Benchmark benchmark = new Benchmark(getName());
 

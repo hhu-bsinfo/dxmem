@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapDataStructureImExporter;
@@ -34,14 +34,14 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public final class Get {
-    private static final Value SOP_GET = new Value(DXMemory.class, "Get");
-    private static final Value SOP_GET_INVALID_ID = new Value(DXMemory.class, "GetInvalidID");
-    private static final Value SOP_GET_NOT_EXISTS = new Value(DXMemory.class, "GetNotExists");
+    private static final Value SOP_GET = new Value(DXMem.class, "Get");
+    private static final Value SOP_GET_INVALID_ID = new Value(DXMem.class, "GetInvalidID");
+    private static final Value SOP_GET_NOT_EXISTS = new Value(DXMem.class, "GetNotExists");
 
     static {
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_GET);
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_GET_INVALID_ID);
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_GET_NOT_EXISTS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_GET);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_GET_INVALID_ID);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_GET_NOT_EXISTS);
     }
 
     private final Context m_context;

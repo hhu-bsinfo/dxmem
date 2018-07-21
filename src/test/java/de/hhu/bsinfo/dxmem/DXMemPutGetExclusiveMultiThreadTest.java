@@ -6,7 +6,7 @@ import org.junit.Test;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 
-public class DXMemoryPutGetExclusiveMultiThreadTest {
+public class DXMemPutGetExclusiveMultiThreadTest {
     private static final int CHUNK_SIZE = 1;
 
     @Test
@@ -35,7 +35,7 @@ public class DXMemoryPutGetExclusiveMultiThreadTest {
     }
 
     private void testThreaded(final int p_numThreads, final int p_iterations) {
-        DXMemory memory = init();
+        DXMem memory = init();
 
         long cid = createChunk(memory);
 
@@ -44,7 +44,7 @@ public class DXMemoryPutGetExclusiveMultiThreadTest {
         Assert.assertTrue(memory.analyze().analyze());
     }
 
-    private void execute(final DXMemory p_memory, final long p_cid, final int p_numThreads, final int p_iterations) {
+    private void execute(final DXMem p_memory, final long p_cid, final int p_numThreads, final int p_iterations) {
         Thread[] threads = new Thread[p_numThreads];
 
         for (int i = 0; i < p_numThreads; i++) {
@@ -69,15 +69,15 @@ public class DXMemoryPutGetExclusiveMultiThreadTest {
         }
     }
 
-    private DXMemory init() {
-        return new DXMemory(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+    private DXMem init() {
+        return new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
     }
 
-    private long createChunk(final DXMemory p_memory) {
+    private long createChunk(final DXMem p_memory) {
         return p_memory.create().create(1);
     }
 
-    private void putGetExclusive(final DXMemory p_memory, final ChunkByteArray p_chunk) {
+    private void putGetExclusive(final DXMem p_memory, final ChunkByteArray p_chunk) {
         p_chunk.getData()[0] = (byte) Thread.currentThread().getId();
 
         p_memory.put().put(p_chunk, ChunkLockOperation.ACQUIRE_BEFORE_OP, -1);

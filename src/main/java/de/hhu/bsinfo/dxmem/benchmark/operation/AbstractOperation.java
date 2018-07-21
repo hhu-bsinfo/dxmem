@@ -2,7 +2,7 @@ package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentilePool;
@@ -17,7 +17,7 @@ public abstract class AbstractOperation {
     private final AtomicLong m_opsSuccessful;
     private final AtomicLong m_opsError;
 
-    private DXMemory m_memory;
+    private DXMem m_memory;
     private long m_totalOps;
 
     public AbstractOperation(final String p_name, final float p_probability, final int p_batchCount) {
@@ -47,7 +47,7 @@ public abstract class AbstractOperation {
         return '[' + m_name + ']';
     }
 
-    public void init(final DXMemory p_memory, final long p_totalOps) {
+    public void init(final DXMem p_memory, final long p_totalOps) {
         m_memory = p_memory;
         m_totalOps = p_totalOps;
 
@@ -148,5 +148,5 @@ public abstract class AbstractOperation {
         return state;
     }
 
-    protected abstract ChunkState execute(final DXMemory p_memory);
+    protected abstract ChunkState execute(final DXMem p_memory);
 }

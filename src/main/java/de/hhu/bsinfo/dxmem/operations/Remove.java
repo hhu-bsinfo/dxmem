@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.LockUtils;
@@ -29,12 +29,12 @@ import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.Value;
 
 public class Remove {
-    private static final Value SOP_REMOVE = new Value(DXMemory.class, "Remove");
-    private static final Value SOP_REMOVE_MIGRATED = new Value(DXMemory.class, "RemoveMigrated");
+    private static final Value SOP_REMOVE = new Value(DXMem.class, "Remove");
+    private static final Value SOP_REMOVE_MIGRATED = new Value(DXMem.class, "RemoveMigrated");
 
     static {
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_REMOVE);
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_REMOVE_MIGRATED);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_REMOVE);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_REMOVE_MIGRATED);
     }
 
     private final Context m_context;

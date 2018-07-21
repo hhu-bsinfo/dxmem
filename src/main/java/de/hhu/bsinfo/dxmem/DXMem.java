@@ -33,7 +33,7 @@ import de.hhu.bsinfo.dxmem.operations.Recovery;
 import de.hhu.bsinfo.dxmem.operations.Remove;
 import de.hhu.bsinfo.dxmem.operations.Stats;
 
-public class DXMemory {
+public class DXMem {
     private final short m_nodeId;
     private final long m_heapSize;
 
@@ -59,7 +59,7 @@ public class DXMemory {
     private Analyze m_analyze;
     private Dump m_dump;
 
-    public DXMemory(final short p_nodeId, final long p_heapSize) {
+    public DXMem(final short p_nodeId, final long p_heapSize) {
         m_nodeId = p_nodeId;
         m_heapSize = p_heapSize;
 

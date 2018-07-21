@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
@@ -31,10 +31,10 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public final class Create {
-    private static final Value SOP_CREATE = new Value(DXMemory.class, "Create");
+    private static final Value SOP_CREATE = new Value(DXMem.class, "Create");
 
     static {
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_CREATE);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_CREATE);
     }
 
     private final Context m_context;

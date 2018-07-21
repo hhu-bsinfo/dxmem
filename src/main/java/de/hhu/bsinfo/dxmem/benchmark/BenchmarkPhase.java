@@ -3,7 +3,7 @@ package de.hhu.bsinfo.dxmem.benchmark;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.Time;
@@ -20,7 +20,7 @@ public class BenchmarkPhase {
     private AtomicInteger m_threadsRunning;
     private long m_totalTimeNs;
 
-    public BenchmarkPhase(final String p_name, final DXMemory p_memory, final int p_numThreads,
+    public BenchmarkPhase(final String p_name, final DXMem p_memory, final int p_numThreads,
             final long p_totalNumOperations, final long p_delayNsBetweenOps, final AbstractOperation... p_operations) {
         m_name = p_name;
         m_numThreads = p_numThreads;

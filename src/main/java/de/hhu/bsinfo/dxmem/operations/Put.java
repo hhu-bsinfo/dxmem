@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
-import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapDataStructureImExporter;
@@ -34,14 +34,14 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Put {
-    private static final Value SOP_PUT = new Value(DXMemory.class, "Put");
-    private static final Value SOP_PUT_INVALID_ID = new Value(DXMemory.class, "PutInvalidID");
-    private static final Value SOP_PUT_NOT_EXISTS = new Value(DXMemory.class, "PutNotExists");
+    private static final Value SOP_PUT = new Value(DXMem.class, "Put");
+    private static final Value SOP_PUT_INVALID_ID = new Value(DXMem.class, "PutInvalidID");
+    private static final Value SOP_PUT_NOT_EXISTS = new Value(DXMem.class, "PutNotExists");
 
     static {
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_PUT);
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_PUT_INVALID_ID);
-        StatisticsManager.get().registerOperation(DXMemory.class, SOP_PUT_NOT_EXISTS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_PUT);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_PUT_INVALID_ID);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_PUT_NOT_EXISTS);
     }
 
     private final Context m_context;
