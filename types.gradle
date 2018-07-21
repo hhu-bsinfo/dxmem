@@ -1,0 +1,28 @@
+buildTypes {
+    debug {
+        buildConfig {
+            typedField "DEBUG", Boolean, true
+            typedField "BUILD_TYPE", String, buildType
+            typedField "GIT_COMMIT", String, gitCommit
+            typedField "BUILD_USER", String, System.getProperty("user.name")
+            typedField "BUILD_DATE", String, currentDate
+        }
+    }
+
+    release {
+        excludeLogger 'RELEASE'
+
+        buildConfig {
+            inheritsFrom 'debug'
+            typedField "DEBUG", Boolean, false
+        }
+    }
+
+    performance {
+        excludeLogger 'PERFORMANCE'
+
+        buildConfig {
+            inheritsFrom 'debug'
+        }
+    }
+}

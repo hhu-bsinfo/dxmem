@@ -13,18 +13,6 @@ def pomConfig = {
             name 'Stefan Nothaas'
             email 'stefan.nothaas@uni-duesseldorf.de'
         }
-
-        developer {
-            id 'Kevin Beineke'
-            name 'Kevin Beineke'
-            email 'kevin.beineke@uni-duesseldorf.de'
-        }
-
-        developer {
-            id 'filkra'
-            name 'Filip Krakowski'
-            email 'filip.krakowski@uni-duesseldorf.de'
-        }
     }
 
     scm {
