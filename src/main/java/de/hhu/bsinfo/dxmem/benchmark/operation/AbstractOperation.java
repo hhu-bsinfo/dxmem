@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.dxmem.benchmark;
+package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import java.util.concurrent.atomic.AtomicLong;
 

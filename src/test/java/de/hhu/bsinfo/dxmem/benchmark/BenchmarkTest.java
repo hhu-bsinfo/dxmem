@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import de.hhu.bsinfo.dxmem.DXMemory;
 import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
+import de.hhu.bsinfo.dxmem.benchmark.operation.CreateOperation;
+import de.hhu.bsinfo.dxmem.benchmark.operation.GetOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 
 public class BenchmarkTest {

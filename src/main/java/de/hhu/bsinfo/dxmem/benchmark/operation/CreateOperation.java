@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.dxmem.benchmark;
+package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import de.hhu.bsinfo.dxmem.DXMemory;
 import de.hhu.bsinfo.dxmem.data.ChunkID;

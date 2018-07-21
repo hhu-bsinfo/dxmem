@@ -3,8 +3,8 @@ package de.hhu.bsinfo.dxmem.benchmark.workload;
 import de.hhu.bsinfo.dxmem.DXMemory;
 import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
 import de.hhu.bsinfo.dxmem.benchmark.BenchmarkPhase;
-import de.hhu.bsinfo.dxmem.benchmark.CreateOperation;
-import de.hhu.bsinfo.dxmem.benchmark.GetOperation;
+import de.hhu.bsinfo.dxmem.benchmark.operation.CreateOperation;
+import de.hhu.bsinfo.dxmem.benchmark.operation.GetOperation;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 public class YcsbA implements Workload {

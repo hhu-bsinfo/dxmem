@@ -4,10 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import de.hhu.bsinfo.dxmem.DXMemory;
+import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentile;
-import de.hhu.bsinfo.dxutils.stats.TimePercentilePool;
 
 public class BenchmarkPhase {
     private final String m_name;
