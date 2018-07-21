@@ -5,11 +5,11 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
-public class CreateOperation extends AbstractOperation {
+public class Create extends AbstractOperation {
     private final int m_minSize;
     private final int m_maxSize;
 
-    public CreateOperation(final float p_probability, final int p_batchCount, final int p_minSize,
+    public Create(final float p_probability, final int p_batchCount, final int p_minSize,
             final int p_maxSize) {
         super("create", p_probability, p_batchCount);
 

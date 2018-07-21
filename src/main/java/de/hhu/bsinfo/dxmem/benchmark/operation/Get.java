@@ -6,12 +6,12 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
-public class GetOperation extends AbstractOperation {
+public class Get extends AbstractOperation {
     private final long m_cidRangeStart;
     private final long m_cidRangeEnd;
     private final ChunkByteArray m_chunk;
 
-    public GetOperation(final float p_probability, final int p_batchCount, final long p_cidRangeStart,
+    public Get(final float p_probability, final int p_batchCount, final long p_cidRangeStart,
             final long p_cidRangeEnd, final int p_chunkSize) {
         super("get", p_probability, p_batchCount);
 
