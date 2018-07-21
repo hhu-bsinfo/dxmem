@@ -5,6 +5,7 @@ import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
 import de.hhu.bsinfo.dxmem.benchmark.BenchmarkPhase;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Create;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Get;
+import de.hhu.bsinfo.dxmem.benchmark.operation.Put;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 public class YcsbA implements Workload {
@@ -50,8 +51,7 @@ public class YcsbA implements Workload {
                 new Create(1.0f, BATCH_COUNT, OBJECT_SIZE, OBJECT_SIZE)));
         benchmark.addPhase(new BenchmarkPhase("run", memory, p_runThreads, p_runTotalOperations, 0,
                 new Get(0.5f, BATCH_COUNT, 0, p_loadTotalObjects - 1, OBJECT_SIZE),
-                new Get(0.5f, BATCH_COUNT, 0, p_loadTotalObjects - 1, OBJECT_SIZE)));
-        // TODO put operation
+                new Put(0.5f, BATCH_COUNT, 0, p_loadTotalObjects - 1, OBJECT_SIZE)));
 
         return benchmark;
     }
