@@ -1,6 +1,7 @@
 package de.hhu.bsinfo.dxmem.benchmark;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
 import de.hhu.bsinfo.dxmem.DXMem;
@@ -109,7 +110,7 @@ public class BenchmarkPhase {
                                 ((double) opsExecuted / m_totalNumOperations) * 100));
 
                 builder.append(
-                        String.format("[CPU: Cur=%f][MEM: Used=%f, UsedMB=%f, FreeMB=%f]",
+                        String.format("[CPU: Cur=%f][MEM: Used=%.2f, UsedMB=%.3f, FreeMB=%.3f]",
                                 cpuProgress.getCpuUsagePercent(),
                                 memoryState.getUsedPercent(),
                                 memoryState.getUsed().getMBDouble(),
@@ -175,7 +176,7 @@ public class BenchmarkPhase {
         private final long[] m_opCountExecuted;
         private final TimePercentile[] m_threadLocalTimePercentiles;
 
-        private volatile long m_progressOperations;
+        private final AtomicLong m_progressOperations;
 
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
                 final AtomicInteger p_threadsRunning) {
@@ -186,10 +187,12 @@ public class BenchmarkPhase {
 
             m_opCountExecuted = new long[m_operations.length];
             m_threadLocalTimePercentiles = new TimePercentile[m_operations.length];
+
+            m_progressOperations = new AtomicLong(0);
         }
 
         public long getProgressOperations() {
-            return m_progressOperations;
+            return m_progressOperations.get();
         }
 
         String parameterToString() {
@@ -262,11 +265,9 @@ public class BenchmarkPhase {
 
         @Override
         public void run() {
-            boolean operationExecuted = true;
+                 m_progressOperations.set(0);
 
-            m_progressOperations = 0;
-
-            while (operationExecuted) {
+            while (true) {
                 if (m_delayNsBetweenOps > 0) {
                     LockSupport.parkNanos(m_delayNsBetweenOps);
                 }
@@ -277,8 +278,10 @@ public class BenchmarkPhase {
                 // select op
                 for (int i = 0; i < m_operations.length; i++) {
                     if (opProbability < m_operations[i].getProbability()) {
-                        opSelected = i;
-                        break;
+                        if (m_operations[i].consumeOperation()) {
+                            opSelected = i;
+                            break;
+                        }
                     } else {
                         opProbability -= m_operations[i].getProbability();
                     }
@@ -287,10 +290,6 @@ public class BenchmarkPhase {
                 if (opSelected != -1) {
                     // execute in batches
                     for (int j = 0; j < m_operations[opSelected].getBatchCount(); j++) {
-                        if (!m_operations[opSelected].consumeOperation()) {
-                            break;
-                        }
-
                         ChunkState state = m_operations[opSelected].execute();
 
                         if (state == ChunkState.OK) {
@@ -301,13 +300,11 @@ public class BenchmarkPhase {
 
                         m_opCountExecuted[opSelected]++;
                     }
+
+                    m_progressOperations.incrementAndGet();
                 } else {
                     // no more ops left
-                    operationExecuted = false;
-                }
-
-                if (operationExecuted) {
-                    m_progressOperations++;
+                    break;
                 }
             }
 
