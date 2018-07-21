@@ -6,6 +6,9 @@ import java.util.concurrent.locks.LockSupport;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
+import de.hhu.bsinfo.dxmem.core.CIDTableStatus;
+import de.hhu.bsinfo.dxmem.core.HeapStatus;
+import de.hhu.bsinfo.dxmem.core.LIDStoreStatus;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxmonitor.progress.CpuProgress;
 import de.hhu.bsinfo.dxmonitor.state.MemState;
@@ -15,6 +18,7 @@ import de.hhu.bsinfo.dxutils.stats.TimePercentile;
 
 public class BenchmarkPhase {
     private final String m_name;
+    private final DXMem m_memory;
     private final int m_numThreads;
     private final long m_totalNumOperations;
     private final long m_delayNsBetweenOps;
@@ -27,6 +31,7 @@ public class BenchmarkPhase {
     public BenchmarkPhase(final String p_name, final DXMem p_memory, final int p_numThreads,
             final long p_totalNumOperations, final long p_delayNsBetweenOps, final AbstractOperation... p_operations) {
         m_name = p_name;
+        m_memory = p_memory;
         m_numThreads = p_numThreads;
         m_totalNumOperations = p_totalNumOperations;
         m_delayNsBetweenOps = p_delayNsBetweenOps;
@@ -44,7 +49,7 @@ public class BenchmarkPhase {
         }
 
         for (AbstractOperation op : m_operations) {
-            op.init(p_memory, (long) (p_totalNumOperations * op.getProbability()));
+            op.init(m_memory, (long) (p_totalNumOperations * op.getProbability()));
         }
 
         m_threadsRunning = new AtomicInteger(0);
@@ -103,6 +108,10 @@ public class BenchmarkPhase {
                     System.out.println("Updating memory state failed: " + e);
                 }
 
+                HeapStatus heapStatus = m_memory.stats().getHeapStatus();
+                CIDTableStatus cidTableStatus = m_memory.stats().getCIDTableStatus();
+                LIDStoreStatus lidStoreStatus = m_memory.stats().getLIDStoreStatus();
+
                 StringBuilder builder = new StringBuilder();
 
                 builder.append(
@@ -110,6 +119,33 @@ public class BenchmarkPhase {
                                 m_name, totalTime, opsExecuted - prevOpsExecuted,
                                 ((double) opsExecuted / m_totalNumOperations) * 100, opsExecuted,
                                 m_totalNumOperations));
+
+                builder.append(
+                        String.format("[HEAP: TotalMB=%f, FreeMB=%f, UsedMB=%f, AllocPayloadMB=%f, AllocBlocks=%d, " +
+                                "FreeBlocks=%d, FreeSmallBlocks=%d",
+                                        heapStatus.getTotalSize().getMBDouble(),
+                                        heapStatus.getFreeSize().getMBDouble(),
+                                        heapStatus.getUsedSize().getMBDouble(),
+                                        heapStatus.getAllocatedPayload().getMBDouble(),
+                                        heapStatus.getAllocatedBlocks(),
+                                        heapStatus.getFreeBlocks(),
+                                        heapStatus.getFreeSmall64ByteBlocks()));
+
+                builder.append(
+                        String.format("[CIDT: TableCount=%d, Level3=%d, Level2=%d, Level1=%d, Level0=%d, " +
+                                "TableMemoryMB=%f]",
+                                        cidTableStatus.getTotalTableCount(),
+                                        cidTableStatus.getTableCountOfLevel(3),
+                                        cidTableStatus.getTableCountOfLevel(2),
+                                        cidTableStatus.getTableCountOfLevel(1),
+                                        cidTableStatus.getTableCountOfLevel(0),
+                                        cidTableStatus.getTotalPayloadMemoryTables().getMBDouble()));
+
+                builder.append(
+                        String.format("[LIDS: Counter=%d, TotalFree=%d, FreeStore=%d]",
+                                lidStoreStatus.getCurrentLIDCounter(),
+                                lidStoreStatus.getTotalFreeLIDs(),
+                                lidStoreStatus.getTotalLIDsInStore()));
 
                 builder.append(
                         String.format("[CPU: Cur=%f][MEM: Used=%.2f, UsedMB=%.3f, FreeMB=%.3f]",
