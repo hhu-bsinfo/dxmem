@@ -89,6 +89,11 @@ public abstract class AbstractOperation {
         builder.append('\n');
 
         builder.append(getNameTag());
+        builder.append(",BatchCount,");
+        builder.append(m_batchCount);
+        builder.append('\n');
+
+        builder.append(getNameTag());
         builder.append(",TotalOperations,");
         builder.append(m_totalOps);
         builder.append('\n');

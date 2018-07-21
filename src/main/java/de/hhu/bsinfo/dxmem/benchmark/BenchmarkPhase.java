@@ -72,6 +72,7 @@ public class BenchmarkPhase {
         final long printIntervalNs = 1000 * 1000 * 1000;
         long totalTime = 0;
         long printTime = System.nanoTime();
+        long prevOpsExecuted = 0;
 
         CpuProgress cpuProgress = new CpuProgress();
         MemState memoryState = new MemState();
@@ -105,9 +106,10 @@ public class BenchmarkPhase {
                 StringBuilder builder = new StringBuilder();
 
                 builder.append(
-                        String.format("[PROGRESS: %s] %d sec [TOTAL: OPS %d/%d (%.2f)]",
-                                m_name, totalTime, opsExecuted, m_totalNumOperations,
-                                ((double) opsExecuted / m_totalNumOperations) * 100));
+                        String.format("[PROGRESS: %s] %d sec [OPS: Avg=%d, Perc=%.2f, Total=%d/%d]",
+                                m_name, totalTime, opsExecuted - prevOpsExecuted,
+                                ((double) opsExecuted / m_totalNumOperations) * 100, opsExecuted,
+                                m_totalNumOperations));
 
                 builder.append(
                         String.format("[CPU: Cur=%f][MEM: Used=%.2f, UsedMB=%.3f, FreeMB=%.3f]",
@@ -119,6 +121,7 @@ public class BenchmarkPhase {
                 System.out.println(builder);
 
                 printTime = time;
+                prevOpsExecuted = opsExecuted;
             }
 
             try {
