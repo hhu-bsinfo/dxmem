@@ -36,7 +36,7 @@ import de.hhu.bsinfo.dxmonitor.info.InstanceInfo;
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.07.2018
  */
-public class DXMemoryMain {
+public class DXMemMain {
     private static final Map<String, Workload> ms_workloads = new HashMap<>();
 
     /**

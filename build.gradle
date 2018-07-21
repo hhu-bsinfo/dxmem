@@ -28,7 +28,7 @@ version '1.0.0'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-mainClassName = 'de.hhu.bsinfo.dxmem.DXMemoryMain'
+mainClassName = 'de.hhu.bsinfo.dxmem.DXMemMain'
 
 repositories {
     mavenCentral()
