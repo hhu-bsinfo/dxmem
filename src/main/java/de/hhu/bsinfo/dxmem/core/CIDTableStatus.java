@@ -20,6 +20,7 @@ import de.hhu.bsinfo.dxutils.serialization.Exportable;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importable;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 public class CIDTableStatus implements Importable, Exportable {
     int m_totalTableCount;
@@ -56,9 +57,18 @@ public class CIDTableStatus implements Importable, Exportable {
      *
      * @return Amount of memory used by the tables (in bytes)
      */
-    public long getTotalPayloadMemoryTables() {
+    public long getTotalPayloadMemoryTablesBytes() {
         return m_totalPayloadMemoryTables;
     }
+
+    /**
+     * Get the total amount of memory used by the tables.
+     *
+     * @return Amount of memory used by the tables (as StorageUnit)
+     */
+   public StorageUnit getTotalPayloadMemoryTables() {
+        return new StorageUnit(m_totalPayloadMemoryTables, "b");
+   }
 
     @Override
     public String toString() {
