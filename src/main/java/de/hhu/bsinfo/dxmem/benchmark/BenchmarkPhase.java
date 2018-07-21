@@ -187,11 +187,83 @@ public class BenchmarkPhase {
     public void printResults() {
         StringBuilder builder = new StringBuilder();
 
+        HeapStatus heapStatus = m_memory.stats().getHeapStatus();
+        CIDTableStatus cidTableStatus = m_memory.stats().getCIDTableStatus();
+        LIDStoreStatus lidStoreStatus = m_memory.stats().getLIDStoreStatus();
+
         builder.append("[OVERALL],BenchmarkPhase,");
         builder.append(m_name);
         builder.append('\n');
+
         builder.append("[OVERALL],RunTime(ms),");
         builder.append(m_totalTimeNs / 1000.0 / 1000.0);
+        builder.append('\n');
+
+        builder.append("[HEAP],Total(mb),");
+        builder.append(heapStatus.getTotalSize().getMBDouble());
+        builder.append('\n');
+
+        builder.append("[HEAP],Free(mb),");
+        builder.append(heapStatus.getFreeSize().getMBDouble());
+        builder.append('\n');
+
+        builder.append("[HEAP],Used(mb),");
+        builder.append(heapStatus.getUsedSize().getMBDouble());
+        builder.append('\n');
+
+        builder.append("[HEAP],AllocPayload(mb),");
+        builder.append(heapStatus.getAllocatedPayload().getMBDouble());
+        builder.append('\n');
+
+        builder.append("[HEAP],AllocBlocks,");
+        builder.append(heapStatus.getAllocatedBlocks());
+        builder.append('\n');
+
+        builder.append("[HEAP],FreeBlocks,");
+        builder.append(heapStatus.getFreeBlocks());
+        builder.append('\n');
+
+        builder.append("[HEAP],FreeSmall64ByteBlocks,");
+        builder.append(heapStatus.getFreeSmall64ByteBlocks());
+        builder.append('\n');
+
+        builder.append("[CIDTable],TotalTableCount,");
+        builder.append(cidTableStatus.getTotalTableCount());
+        builder.append('\n');
+
+        builder.append("[CIDTable],TablesLevel3,");
+        builder.append(cidTableStatus.getTableCountOfLevel(3));
+        builder.append('\n');
+
+        builder.append("[CIDTable],TablesLevel2,");
+        builder.append(cidTableStatus.getTableCountOfLevel(2));
+        builder.append('\n');
+
+        builder.append("[CIDTable],TablesLevel1,");
+        builder.append(cidTableStatus.getTableCountOfLevel(1));
+        builder.append('\n');
+
+        builder.append("[CIDTable],TablesLevel0,");
+        builder.append(cidTableStatus.getTableCountOfLevel(0));
+        builder.append('\n');
+
+        builder.append("[CIDTable],TableMemoryPayload(mb),");
+        builder.append(cidTableStatus.getTotalPayloadMemoryTables().getMBDouble());
+        builder.append('\n');
+
+        builder.append("[LIDStore],CurrentLIDCounter,");
+        builder.append(lidStoreStatus.getCurrentLIDCounter());
+        builder.append('\n');
+
+        builder.append("[LIDStore],TotalFreeLIDs,");
+        builder.append(lidStoreStatus.getTotalFreeLIDs());
+        builder.append('\n');
+
+        builder.append("[LIDStore],TotalLIDsInStore,");
+        builder.append(lidStoreStatus.getTotalLIDsInStore());
+        builder.append('\n');
+
+        // TODO memory overhead
 
         for (AbstractOperation op : m_operations) {
             builder.append('\n');
