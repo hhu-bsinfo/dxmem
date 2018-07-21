@@ -52,6 +52,15 @@ public class MemoryOverheadCalculator
         System.out.println(calc);
     }
 
+    public static double calculate(final HeapStatus p_heapStatus, final CIDTableStatus p_cidTableStatus) {
+        long dataPayloadBytes = p_heapStatus.getAllocatedPayloadBytes() -
+                p_cidTableStatus.getTotalPayloadMemoryTablesBytes();
+
+        long metadataOverheadBytes = p_heapStatus.getUsedSizeBytes() - dataPayloadBytes;
+
+        return (double) metadataOverheadBytes / p_heapStatus.getUsedSizeBytes();
+    }
+
     public int getChunkPayloadSize() {
         return m_chunkPayloadSize;
     }

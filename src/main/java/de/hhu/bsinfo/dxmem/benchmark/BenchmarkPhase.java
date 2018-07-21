@@ -9,6 +9,7 @@ import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
 import de.hhu.bsinfo.dxmem.core.CIDTableStatus;
 import de.hhu.bsinfo.dxmem.core.HeapStatus;
 import de.hhu.bsinfo.dxmem.core.LIDStoreStatus;
+import de.hhu.bsinfo.dxmem.core.MemoryOverheadCalculator;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxmonitor.progress.CpuProgress;
 import de.hhu.bsinfo.dxmonitor.state.MemState;
@@ -121,6 +122,10 @@ public class BenchmarkPhase {
                                 m_totalNumOperations));
 
                 builder.append(
+                        String.format("[MEMOVERHEAD: Perc=%f.2f",
+                                MemoryOverheadCalculator.calculate(heapStatus, cidTableStatus) * 100.f));
+
+                builder.append(
                         String.format("[HEAP: TotalMB=%f, FreeMB=%f, UsedMB=%f, AllocPayloadMB=%f, AllocBlocks=%d, " +
                                 "FreeBlocks=%d, FreeSmallBlocks=%d",
                                         heapStatus.getTotalSize().getMBDouble(),
@@ -197,6 +202,10 @@ public class BenchmarkPhase {
 
         builder.append("[OVERALL],RunTime(ms),");
         builder.append(m_totalTimeNs / 1000.0 / 1000.0);
+        builder.append('\n');
+
+        builder.append("[OVERALL],MemoryMetadataOverhead(%),");
+        builder.append(MemoryOverheadCalculator.calculate(heapStatus, cidTableStatus) * 100.f);
         builder.append('\n');
 
         builder.append("[HEAP],Total(mb),");
