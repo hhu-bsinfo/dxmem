@@ -43,6 +43,9 @@ public final class LockUtils {
         }
 
         while (true) {
+            // always get the current state first before CAS
+            p_cidTable.entryReread(p_entry);
+
             // entry turned invalid, e.g. chunk was deleted
             if (!p_entry.isValid()) {
                 return LockStatus.INVALID;
@@ -61,19 +64,26 @@ public final class LockUtils {
 
             if (p_retryTimeoutMs >= 0) {
                 if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >= p_retryTimeoutMs * 1000 * 1000) {
+                    // return with current state
+                    p_cidTable.entryReread(p_entry);
                     return LockStatus.TIMEOUT;
                 }
             }
 
             Thread.yield();
-            p_cidTable.entryReread(p_entry);
         }
     }
 
     public static void releaseReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
         while (true) {
+            // always get the current state first before CAS
+            p_cidTable.entryReread(p_entry);
+
             // invalid state, chunk was deleted but a lock was still acquired
             assert p_entry.isValid();
+            // write lock might be acquired: writer thread blocks all further reader threads and waits for
+            // current readers in critical section to exit
+            assert p_entry.areReadLocksAcquired();
 
             p_entry.releaseReadLock();
 
@@ -83,7 +93,6 @@ public final class LockUtils {
             }
 
             Thread.yield();
-            p_cidTable.entryReread(p_entry);
         }
     }
 
@@ -99,6 +108,9 @@ public final class LockUtils {
         }
 
         while (true) {
+            // always get the current state first before CAS
+            p_cidTable.entryReread(p_entry);
+
             // entry turned invalid, e.g. chunk was deleted
             if (!p_entry.isValid()) {
                 return LockStatus.INVALID;
@@ -110,6 +122,29 @@ public final class LockUtils {
                     // now, wait for all readers to exit the section
 
                     while (p_entry.areReadLocksAcquired()) {
+                        if (p_retryTimeoutMs >= 0) {
+                            if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >=
+                                    p_retryTimeoutMs * 1000 * 1000) {
+                                // reset reserved write lock flag
+                                p_entry.releaseWriteLock();
+                                assert !p_entry.isWriteLockAcquired();
+
+                                // enforce this state in order to get out of here with a consistent lock state
+                                while (!p_cidTable.entryAtomicUpdate(p_entry)) {
+                                    Thread.yield();
+                                    p_cidTable.entryReread(p_entry);
+
+                                    assert !p_entry.isWriteLockAcquired();
+
+                                    p_entry.releaseWriteLock();
+                                }
+
+                                // return with current state
+                                p_cidTable.entryReread(p_entry);
+                                return LockStatus.TIMEOUT;
+                            }
+                        }
+
                         Thread.yield();
                         p_cidTable.entryReread(p_entry);
                     }
@@ -122,19 +157,25 @@ public final class LockUtils {
 
             if (p_retryTimeoutMs >= 0) {
                 if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >= p_retryTimeoutMs * 1000 * 1000) {
+                    // return with current state
+                    p_cidTable.entryReread(p_entry);
                     return LockStatus.TIMEOUT;
                 }
             }
 
             Thread.yield();
-            p_cidTable.entryReread(p_entry);
         }
     }
 
     public static void releaseWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
         while (true) {
+            // always get the current state first before CAS
+            p_cidTable.entryReread(p_entry);
+
             // invalid state, chunk was deleted but a lock was still acquired
             assert p_entry.isValid();
+            assert p_entry.isWriteLockAcquired();
+            assert !p_entry.areReadLocksAcquired();
 
             p_entry.releaseWriteLock();
 
@@ -144,7 +185,6 @@ public final class LockUtils {
             }
 
             Thread.yield();
-            p_cidTable.entryReread(p_entry);
         }
     }
 }
