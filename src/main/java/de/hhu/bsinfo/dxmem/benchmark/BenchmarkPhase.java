@@ -300,6 +300,8 @@ public class BenchmarkPhase {
 
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
                 final AtomicInteger p_threadsRunning) {
+            super("Benchmark-" + p_id);
+
             m_id = p_id;
             m_operations = p_operations;
             m_delayNsBetweenOps = p_delayNsBetweenOps;
