@@ -122,12 +122,12 @@ public class BenchmarkPhase {
                                 m_totalNumOperations));
 
                 builder.append(
-                        String.format("[MEMOVERHEAD: Perc=%f.2f",
+                        String.format("[MEMOVERHEAD: Perc=%.2f]",
                                 MemoryOverheadCalculator.calculate(heapStatus, cidTableStatus) * 100.f));
 
                 builder.append(
                         String.format("[HEAP: TotalMB=%f, FreeMB=%f, UsedMB=%f, AllocPayloadMB=%f, AllocBlocks=%d, " +
-                                "FreeBlocks=%d, FreeSmallBlocks=%d",
+                                "FreeBlocks=%d, FreeSmallBlocks=%d]",
                                         heapStatus.getTotalSize().getMBDouble(),
                                         heapStatus.getFreeSize().getMBDouble(),
                                         heapStatus.getUsedSize().getMBDouble(),
@@ -410,7 +410,16 @@ public class BenchmarkPhase {
                 if (opSelected != -1) {
                     // execute in batches
                     for (int j = 0; j < m_operations[opSelected].getBatchCount(); j++) {
-                        ChunkState state = m_operations[opSelected].execute();
+                        ChunkState state = ChunkState.UNDEFINED;
+
+                        try {
+                            state = m_operations[opSelected].execute();
+                        } catch (final Exception e) {
+                            // abort benchmark on critical errors
+                            System.out.println("ERROR: " + e.getMessage());
+                            e.printStackTrace();
+                            System.exit(-1);
+                        }
 
                         if (state == ChunkState.OK) {
                             m_operations[opSelected].incSuccessful();

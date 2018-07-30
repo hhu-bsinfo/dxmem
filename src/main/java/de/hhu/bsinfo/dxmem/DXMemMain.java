@@ -25,8 +25,17 @@ import java.util.Locale;
 import java.util.Map;
 
 import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
+import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookA;
+import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookB;
+import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookC;
+import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookD;
+import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookE;
+import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookF;
+import de.hhu.bsinfo.dxmem.benchmark.workload.MemA;
 import de.hhu.bsinfo.dxmem.benchmark.workload.Workload;
 import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbA;
+import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbB;
+import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbC;
 import de.hhu.bsinfo.dxmem.generated.BuildConfig;
 import de.hhu.bsinfo.dxmonitor.info.InstanceInfo;
 
@@ -162,7 +171,18 @@ public class DXMemMain {
      * Add all selectable workloads to the list
      */
     private static void initWorkloads() {
+        addWorkload(new FacebookA());
+        addWorkload(new FacebookB());
+        addWorkload(new FacebookC());
+        addWorkload(new FacebookD());
+        addWorkload(new FacebookE());
+        addWorkload(new FacebookF());
+
+        addWorkload(new MemA());
+
         addWorkload(new YcsbA());
+        addWorkload(new YcsbB());
+        addWorkload(new YcsbC());
     }
 
     /**
