@@ -13,6 +13,12 @@ def pomConfig = {
             name 'Stefan Nothaas'
             email 'stefan.nothaas@uni-duesseldorf.de'
         }
+
+        developer {
+            id 'KevinBeineke'
+            name 'Kevin Beineke'
+            email 'kevin.beineke@uni-duesseldorf.de'
+        }
     }
 
     scm {
@@ -39,35 +45,11 @@ publishing {
 
             pom.withXml {
                 def root = asNode()
-                root.appendNode('description', 'DXRAM\'s memory management for many very small object')
+                root.appendNode('description', 'DXRAM\'s memory allocator for many small objects')
                 root.appendNode('name', 'dxmem')
                 root.appendNode('url', 'https://github.com/hhu-bsinfo/dxmem')
                 root.children().last() + pomConfig
             }
-        }
-    }
-}
-
-bintray {
-    user = System.getProperty('bintray.user')
-    key = System.getProperty('bintray.key')
-    publications = ['mavenPublication']
-    publish = true
-    override = true
-
-    pkg {
-        repo = 'dxram'
-        name = 'dxutils'
-        userOrg = 'hhu-bsinfo'
-        licenses = ['GPL-3.0']
-        websiteUrl = 'https://www.dxram.io'
-        vcsUrl = 'https://github.com/hhu-bsinfo/dxmem.git'
-        labels = ['utilities']
-        githubRepo = 'hhu-bsinfo/dxmem'
-        //githubReleaseNotesFile = 'README.md'
-        version {
-            name = project.version
-            released = new Date()
         }
     }
 }

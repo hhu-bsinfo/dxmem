@@ -1,4 +1,4 @@
-buildTypes {
+buildVariants {
     debug {
         buildConfig {
             typedField "DEBUG", Boolean, true

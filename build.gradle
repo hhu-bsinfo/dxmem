@@ -7,36 +7,37 @@ buildscript {
         }
 
         maven {
-            url "https://dl.bintray.com/hhu-bsinfo/dxram"
+            url "https://dl.bintray.com/hhu-bsinfo/dxmem"
         }
     }
 
     dependencies {
-        classpath "de.hhu.bsinfo:dxgradle:1.0.12"
+        classpath "de.hhu.bsinfo:dxbuild:0.2.0-SNAPSHOT"
     }
 }
 
 plugins {
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.4'
+    id "com.jfrog.artifactory" version "4.7.5"
 }
 
-apply plugin: 'dxgradle'
+apply plugin: 'dxbuild'
 group 'de.hhu.bsinfo'
-version '1.0.0'
+version '0.5.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 mainClassName = 'de.hhu.bsinfo.dxmem.DXMemMain'
 
-// There doesn't seem to be a way get the APP_HOME variable to the path of config files relative
-// to the application dir. Source:
-// https://stackoverflow.com/questions/25227198/how-to-pass-a-reference-to-distribution-home-directory-using-gradle-application
+applicationDefaultJvmArgs = [
+        '-Dlog4j.configurationFile=file:DXMEM_HOME/config/log4j2.xml'
+]
+
 project.startScripts.with {
     doLast {
-        unixScript.text = unixScript.text.replaceFirst('(?<=DEFAULT_JVM_OPTS=)((\'|\")(.*)(\'|"))(?=\n)',
-                '\'$3 "-Dlog4j.configurationFile=file:\\$APP_HOME/config/log4j2.xml"\'')
+        unixScript.text = unixScript.text.replace('DXMEM_HOME', '\$APP_HOME')
     }
 }
 
@@ -45,6 +46,10 @@ repositories {
 
     maven {
         url "https://dl.bintray.com/hhu-bsinfo/dxmem"
+    }
+
+    maven {
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
 }
 
@@ -68,14 +73,11 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
 
-    implementation 'de.hhu.bsinfo:dxmon:1.0.0'
-    implementation 'de.hhu.bsinfo:dxutils:1.0.0'
-    nativeImplementation 'de.hhu.bsinfo:dxutils:1.0.0'
+    api 'de.hhu.bsinfo:dxmon:0.2.0-SNAPSHOT'
+    api 'de.hhu.bsinfo:dxutils:0.5.0-SNAPSHOT'
 
-    implementation 'org.apache.logging.log4j:log4j-core:2.7'
-    implementation 'org.apache.logging.log4j:log4j-api:2.7'
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.assertj:assertj-core:3.9.0'
 }
 
 artifacts {
@@ -84,6 +86,8 @@ artifacts {
 }
 
 apply from: 'publish.gradle'
+apply from: 'bintray.gradle'
+apply from: 'artifactory.gradle'
 apply from: 'types.gradle'
 
 task wrapper(type: Wrapper) {
