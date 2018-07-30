@@ -3,6 +3,7 @@ package de.hhu.bsinfo.dxmem.benchmark.operation;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
+import de.hhu.bsinfo.dxmem.operations.AllocationException;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
 public class Create extends AbstractOperation {
@@ -27,6 +28,7 @@ public class Create extends AbstractOperation {
             size = RandomUtils.getRandomValue(m_minSize, m_maxSize);
         }
 
+        // throw allocation exceptions. the benchmark cannot continue once that happens
         long cid = p_memory.create().create(size);
 
         return cid != ChunkID.INVALID_ID ? ChunkState.OK : ChunkState.UNDEFINED;
