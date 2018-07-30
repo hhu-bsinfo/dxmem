@@ -32,6 +32,7 @@ import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookD;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookE;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookF;
 import de.hhu.bsinfo.dxmem.benchmark.workload.MemA;
+import de.hhu.bsinfo.dxmem.benchmark.workload.MemVar;
 import de.hhu.bsinfo.dxmem.benchmark.workload.Workload;
 import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbA;
 import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbB;
@@ -179,6 +180,7 @@ public class DXMemMain {
         addWorkload(new FacebookF());
 
         addWorkload(new MemA());
+        addWorkload(new MemVar());
 
         addWorkload(new YcsbA());
         addWorkload(new YcsbB());
