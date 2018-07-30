@@ -18,7 +18,9 @@ package de.hhu.bsinfo.dxmem;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,8 +70,16 @@ public class DXMemMain {
             System.out.println("Args: <benchmark name> ...");
             System.out.println("Select one of the following benchmarks:");
 
+            ArrayList<Workload> list = new ArrayList<>();
+
             for (Map.Entry<String, Workload> entry : ms_workloads.entrySet()) {
-                System.out.println("  " + entry.getKey() + ": " + entry.getValue().getDescription());
+                list.add(entry.getValue());
+            }
+
+            list.sort(Comparator.comparing(Workload::getName));
+
+            for (Workload workload : list) {
+                System.out.println("  " + workload.getName() + ": " + workload.getDescription());
             }
 
             System.exit(-1);

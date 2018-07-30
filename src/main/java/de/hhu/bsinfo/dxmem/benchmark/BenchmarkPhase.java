@@ -423,11 +423,7 @@ public class BenchmarkPhase {
                             System.exit(-1);
                         }
 
-                        if (state == ChunkState.OK) {
-                            m_operations[opSelected].incSuccessful();
-                        } else {
-                            m_operations[opSelected].incError();
-                        }
+                        m_operations[opSelected].incReturnCode(state);
 
                         m_opCountExecuted[opSelected]++;
                     }

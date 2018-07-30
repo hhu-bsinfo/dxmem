@@ -11,24 +11,29 @@ public abstract class AbstractOperation {
     private final String m_name;
     private final float m_probability;
     private final int m_batchCount;
+    private final boolean m_verifyData;
 
     private final TimePercentilePool m_time;
     private final AtomicLong m_opsRemaining;
-    private final AtomicLong m_opsSuccessful;
-    private final AtomicLong m_opsError;
+    private final AtomicLong[] m_opsReturnCodes;
 
     private DXMem m_memory;
     private long m_totalOps;
 
-    public AbstractOperation(final String p_name, final float p_probability, final int p_batchCount) {
+    public AbstractOperation(final String p_name, final float p_probability, final int p_batchCount,
+            final boolean p_verifyData) {
         m_name = p_name;
         m_probability = p_probability;
         m_batchCount = p_batchCount;
+        m_verifyData = p_verifyData;
 
         m_time = new TimePercentilePool(AbstractOperation.class, p_name);
         m_opsRemaining = new AtomicLong(0);
-        m_opsSuccessful = new AtomicLong(0);
-        m_opsError = new AtomicLong(0);
+        m_opsReturnCodes = new AtomicLong[ChunkState.values().length];
+
+        for (int i = 0; i < m_opsReturnCodes.length; i++) {
+            m_opsReturnCodes[i] = new AtomicLong(0);
+        }
     }
 
     public float getProbability() {
@@ -37,6 +42,10 @@ public abstract class AbstractOperation {
 
     public int getBatchCount() {
         return m_batchCount;
+    }
+
+    public boolean verifyData() {
+        return m_verifyData;
     }
 
     public String getName() {
@@ -52,8 +61,10 @@ public abstract class AbstractOperation {
         m_totalOps = p_totalOps;
 
         m_opsRemaining.set(p_totalOps);
-        m_opsSuccessful.set(0);
-        m_opsError.set(0);
+
+        for (AtomicLong atomic : m_opsReturnCodes) {
+            atomic.set(0);
+        }
     }
 
     public void finish() {
@@ -64,12 +75,8 @@ public abstract class AbstractOperation {
         return m_totalOps;
     }
 
-    public void incSuccessful() {
-        m_opsSuccessful.incrementAndGet();
-    }
-
-    public void incError() {
-        m_opsError.incrementAndGet();
+    public void incReturnCode(final ChunkState p_chunkState) {
+        m_opsReturnCodes[p_chunkState.ordinal()].incrementAndGet();
     }
 
     public boolean consumeOperation() {
@@ -94,19 +101,23 @@ public abstract class AbstractOperation {
         builder.append('\n');
 
         builder.append(getNameTag());
+        builder.append(",VerifyData,");
+        builder.append(m_verifyData);
+        builder.append('\n');
+
+        builder.append(getNameTag());
         builder.append(",TotalOperations,");
         builder.append(m_totalOps);
         builder.append('\n');
 
-        builder.append(getNameTag());
-        builder.append(",OperationsSuccessful,");
-        builder.append(m_opsSuccessful.get());
-        builder.append('\n');
-
-        builder.append(getNameTag());
-        builder.append(",OperationsError,");
-        builder.append(m_opsError.get());
-        builder.append('\n');
+        for (int i = 0; i < m_opsReturnCodes.length; i++) {
+            builder.append(getNameTag());
+            builder.append(",OperationReturnCode(");
+            builder.append(ChunkState.values()[i]);
+            builder.append("),");
+            builder.append(m_opsReturnCodes[i].get());
+            builder.append('\n');
+        }
 
         builder.append(getNameTag());
         builder.append(",TotalTime(ms),");
@@ -147,11 +158,11 @@ public abstract class AbstractOperation {
 
     public ChunkState execute() {
         long timeStart = System.nanoTime();
-        ChunkState state = execute(m_memory);
+        ChunkState state = execute(m_memory, m_verifyData);
         m_time.record(System.nanoTime() - timeStart);
 
         return state;
     }
 
-    protected abstract ChunkState execute(final DXMem p_memory);
+    protected abstract ChunkState execute(final DXMem p_memory, final boolean p_verifyData);
 }

@@ -6,25 +6,27 @@ import de.hhu.bsinfo.dxmem.benchmark.BenchmarkPhase;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Create;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Get;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Put;
-import de.hhu.bsinfo.dxmem.benchmark.operation.Remove;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
-public class MemA implements Workload {
-    @Override
-    public String getName() {
-        return "mem-a";
-    }
+public abstract class AbstractFacebook implements Workload {
+    private final int m_batchCount;
+    private final int m_objectSize;
+    private final float m_probGet;
+    private final float m_probPut;
 
-    @Override
-    public String getDescription() {
-        return "Generic memory workload with 1x 1 to 1024 byte objects (40% get, 40% put, 10% create, 10% remove)";
+    AbstractFacebook(final int p_batchCount, final int p_objectSize, final float p_probGet,
+            final float p_probPut) {
+        m_batchCount = p_batchCount;
+        m_objectSize = p_objectSize;
+        m_probGet = p_probGet;
+        m_probPut = p_probPut;
     }
 
     @Override
     public Benchmark createWorkload(final String[] p_args) {
         if (p_args.length < 6) {
-            System.out.println("Not sufficient parameters for workload ycsb-a");
-            System.out.println("Args: <heap size with postfix, e.g. 128-mb, 1-gb> <verify data (0/1)> " +
+            System.out.println("Not sufficient parameters for workload" + getName());
+            System.out.println("Args: <heap size with postfix, e.g. 128-mb, 1-gb> <verify data (0/1)>" +
                     "<num load threads> <load total objects> <num run threads> <run total operations>");
             return null;
         }
@@ -47,12 +49,10 @@ public class MemA implements Workload {
         Benchmark benchmark = new Benchmark(getName());
 
         benchmark.addPhase(new BenchmarkPhase("load", memory, p_loadThreads, p_loadTotalObjects, 0,
-                new Create(1.0f, 1, p_verifyData, 1, 1024)));
+                new Create(1.0f, m_batchCount, p_verifyData, m_objectSize, m_objectSize)));
         benchmark.addPhase(new BenchmarkPhase("run", memory, p_runThreads, p_runTotalOperations, 0,
-                new Get(0.4f, 1, p_verifyData, 0, p_loadTotalObjects - 1, 1024),
-                new Put(0.4f, 1, p_verifyData, 0, p_loadTotalObjects - 1, 1024),
-                new Create(0.1f, 1, p_verifyData, 1, 1024),
-                new Remove(0.1f, 1, p_verifyData, 0, p_loadTotalObjects - 1)));
+                new Get(m_probGet, m_batchCount, p_verifyData, 0, p_loadTotalObjects - 1, m_objectSize),
+                new Put(m_probPut, m_batchCount, p_verifyData, 0, p_loadTotalObjects - 1, m_objectSize)));
 
         return benchmark;
     }
