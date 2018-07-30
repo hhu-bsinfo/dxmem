@@ -1,5 +1,7 @@
 package de.hhu.bsinfo.dxmem.core;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,6 +12,8 @@ public class HeapTest {
 
     @Test
     public void test() {
+        Configurator.setRootLevel(Level.TRACE);
+
         Heap heap = new Heap(HEAP_SIZE_SMALL);
 
         CIDTableChunkEntry entry = new CIDTableChunkEntry();
