@@ -4,7 +4,6 @@ import java.util.Random;
 
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
-import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 // chunk with "variable size" used for memory benchmarking to avoid allocations if pooling is not possible
 // can be adopted for actual applications as well (depending on the use case)
@@ -53,18 +52,16 @@ public class ChunkBenchmark extends AbstractChunk {
 
     @Override
     public void importObject(final Importer p_importer) {
-        m_currentSize = p_importer.readCompactNumber(m_currentSize);
         p_importer.readBytes(m_data, 0, m_currentSize);
     }
 
     @Override
     public void exportObject(final Exporter p_exporter) {
-        p_exporter.writeCompactNumber(m_currentSize);
         p_exporter.writeBytes(m_data, 0, m_currentSize);
     }
 
     @Override
     public int sizeofObject() {
-        return ObjectSizeUtil.sizeofCompactedNumber(m_currentSize) + m_currentSize;
+        return m_currentSize;
     }
 }
