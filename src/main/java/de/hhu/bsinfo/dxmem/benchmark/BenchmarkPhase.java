@@ -3,6 +3,7 @@ package de.hhu.bsinfo.dxmem.benchmark;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
@@ -10,6 +11,7 @@ import de.hhu.bsinfo.dxmem.core.CIDTableStatus;
 import de.hhu.bsinfo.dxmem.core.HeapStatus;
 import de.hhu.bsinfo.dxmem.core.LIDStoreStatus;
 import de.hhu.bsinfo.dxmem.core.MemoryOverheadCalculator;
+import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxmonitor.progress.CpuProgress;
 import de.hhu.bsinfo.dxmonitor.state.MemState;
@@ -26,7 +28,6 @@ public class BenchmarkPhase {
     private final AbstractOperation[] m_operations;
 
     private Thread[] m_threads;
-    private AtomicInteger m_threadsRunning;
     private long m_totalTimeNs;
 
     public BenchmarkPhase(final String p_name, final DXMem p_memory, final int p_numThreads,
@@ -48,26 +49,27 @@ public class BenchmarkPhase {
         if (totalProb - 1.0f > 0.001f) {
             throw new IllegalStateException("Sum of probabilities of operations invalid: " + totalProb);
         }
-
-        for (AbstractOperation op : m_operations) {
-            op.init(m_memory, (long) (p_totalNumOperations * op.getProbability()));
-        }
-
-        m_threadsRunning = new AtomicInteger(0);
     }
 
     public String getName() {
         return m_name;
     }
 
-    public void execute() {
+    public void execute(final ChunkIDRanges p_cidRanges, final ReentrantLock p_cidRangesLock) {
+        // init ops
+        for (AbstractOperation op : m_operations) {
+            op.init(m_memory, p_cidRanges, p_cidRangesLock, (long) (m_totalNumOperations * op.getProbability()));
+        }
+
+        AtomicInteger threadsRunning = new AtomicInteger(0);
+
         m_threads = new Thread[m_numThreads];
 
         for (int i = 0; i < m_threads.length; i++) {
-            m_threads[i] = new Thread(i, m_operations, m_delayNsBetweenOps, m_threadsRunning);
+            m_threads[i] = new Thread(i, m_operations, m_delayNsBetweenOps, threadsRunning);
         }
 
-        m_threadsRunning.set(m_numThreads);
+        threadsRunning.set(m_numThreads);
 
         long startTime = System.nanoTime();
 
@@ -85,7 +87,7 @@ public class BenchmarkPhase {
 
         System.out.println("Benchmark running");
 
-        while (m_threadsRunning.get() > 0) {
+        while (threadsRunning.get() > 0) {
             long time = System.nanoTime();
 
             if (time - printTime >= printIntervalNs) {
@@ -208,6 +210,23 @@ public class BenchmarkPhase {
         builder.append(MemoryOverheadCalculator.calculate(heapStatus, cidTableStatus) * 100.f);
         builder.append('\n');
 
+        // sum up operation return codes of all ops
+        long[] opReturnCodes = new long[ChunkState.values().length];
+
+        for (AbstractOperation op : m_operations) {
+            for (int i = 0; i < ChunkState.values().length; i++) {
+                opReturnCodes[i] += op.getNumReturnCodes(ChunkState.values()[i]);
+            }
+        }
+
+        for (int i = 0; i < ChunkState.values().length; i++) {
+            builder.append("[OVERALL],OperationReturnCode(");
+            builder.append(ChunkState.values()[i]);
+            builder.append("),");
+            builder.append(opReturnCodes[i]);
+            builder.append('\n');
+        }
+
         builder.append("[HEAP],Total(mb),");
         builder.append(heapStatus.getTotalSize().getMBDouble());
         builder.append('\n');
@@ -278,6 +297,8 @@ public class BenchmarkPhase {
             builder.append('\n');
             builder.append(op.parameterToString());
         }
+
+        builder.append('\n');
 
         for (Thread t : m_threads) {
             builder.append('\n');

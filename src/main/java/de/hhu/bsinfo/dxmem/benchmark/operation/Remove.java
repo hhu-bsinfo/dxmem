@@ -4,19 +4,12 @@ import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
-import de.hhu.bsinfo.dxutils.RandomUtils;
 
 public class Remove extends AbstractOperation {
-    private final long m_cidRangeStart;
-    private final long m_cidRangeEnd;
     private final ChunkByteArray m_chunk;
 
-    public Remove(final float p_probability, final int p_batchCount, final boolean p_verifyData,
-            final long p_cidRangeStart, final long p_cidRangeEnd) {
+    public Remove(final float p_probability, final int p_batchCount, final boolean p_verifyData) {
         super("create", p_probability, p_batchCount, p_verifyData);
-
-        m_cidRangeStart = p_cidRangeStart;
-        m_cidRangeEnd = p_cidRangeEnd;
 
         // dummy
         m_chunk = new ChunkByteArray(ChunkID.INVALID_ID, 1);
@@ -24,11 +17,15 @@ public class Remove extends AbstractOperation {
 
     @Override
     public ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
-        long cid = RandomUtils.getRandomValue(m_cidRangeStart, m_cidRangeEnd);
+        long cid = executeGetRandomCid();
 
         m_chunk.setID(cid);
 
+        executeTimeStart();
         p_memory.remove().remove(m_chunk);
+        executeTimeEnd();
+
+        executeRemoveCid(cid);
 
         return m_chunk.getState();
     }

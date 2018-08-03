@@ -1,8 +1,10 @@
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentilePool;
@@ -18,7 +20,11 @@ public abstract class AbstractOperation {
     private final AtomicLong[] m_opsReturnCodes;
 
     private DXMem m_memory;
+    private ChunkIDRanges m_cids;
+    private ReentrantLock m_cidsLock;
     private long m_totalOps;
+
+    private long m_curStartTime;
 
     public AbstractOperation(final String p_name, final float p_probability, final int p_batchCount,
             final boolean p_verifyData) {
@@ -56,8 +62,11 @@ public abstract class AbstractOperation {
         return '[' + m_name + ']';
     }
 
-    public void init(final DXMem p_memory, final long p_totalOps) {
+    public void init(final DXMem p_memory, final ChunkIDRanges p_cids, final ReentrantLock p_cidsLock,
+            final long p_totalOps) {
         m_memory = p_memory;
+        m_cids = p_cids;
+        m_cidsLock = p_cidsLock;
         m_totalOps = p_totalOps;
 
         m_opsRemaining.set(p_totalOps);
@@ -73,6 +82,10 @@ public abstract class AbstractOperation {
 
     public long getTotalOperations() {
         return m_totalOps;
+    }
+
+    public long getNumReturnCodes(final ChunkState p_state) {
+        return m_opsReturnCodes[p_state.ordinal()].get();
     }
 
     public void incReturnCode(final ChunkState p_chunkState) {
@@ -157,12 +170,38 @@ public abstract class AbstractOperation {
     }
 
     public ChunkState execute() {
-        long timeStart = System.nanoTime();
-        ChunkState state = execute(m_memory, m_verifyData);
-        m_time.record(System.nanoTime() - timeStart);
-
-        return state;
+        return execute(m_memory, m_verifyData);
     }
 
     protected abstract ChunkState execute(final DXMem p_memory, final boolean p_verifyData);
+
+    protected void executeTimeStart() {
+        m_curStartTime = System.nanoTime();
+    }
+
+    protected void executeTimeEnd() {
+        m_time.record(System.nanoTime() - m_curStartTime);
+    }
+
+    protected void executeNewCid(final long p_cid) {
+        m_cidsLock.lock();
+        m_cids.add(p_cid);
+        m_cidsLock.unlock();
+    }
+
+    protected long executeGetRandomCid() {
+        long tmp;
+
+        m_cidsLock.lock();
+        tmp = m_cids.getRandomCidWithinRanges();
+        m_cidsLock.unlock();
+
+        return tmp;
+    }
+
+    protected void executeRemoveCid(final long p_cid) {
+        m_cidsLock.lock();
+        m_cids.remove(p_cid);
+        m_cidsLock.unlock();
+    }
 }

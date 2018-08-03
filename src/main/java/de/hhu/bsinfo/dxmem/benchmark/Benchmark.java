@@ -2,6 +2,9 @@ package de.hhu.bsinfo.dxmem.benchmark;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
+
+import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 
 public class Benchmark {
     private final String m_name;
@@ -19,9 +22,12 @@ public class Benchmark {
     public void execute() {
         System.out.println("Executing benchmark '" + m_name + "'");
 
+        ChunkIDRanges cidRanges = new ChunkIDRanges();
+        ReentrantLock cidRangesLock = new ReentrantLock(false);
+
         for (BenchmarkPhase phase : m_phases) {
             System.out.println("Executing benchmark phase '" + phase.getName() + "'...");
-            phase.execute();
+            phase.execute(cidRanges, cidRangesLock);
             System.out.println("Results of benchmark phase '" + phase.getName() + "'...");
             phase.printResults();
         }

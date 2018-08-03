@@ -49,10 +49,10 @@ public class MemA implements Workload {
         benchmark.addPhase(new BenchmarkPhase("load", memory, p_loadThreads, p_loadTotalObjects, 0,
                 new Create(1.0f, 1, p_verifyData, 1, 1024)));
         benchmark.addPhase(new BenchmarkPhase("run", memory, p_runThreads, p_runTotalOperations, 0,
-                new Get(0.4f, 1, p_verifyData, 0, p_loadTotalObjects - 1, 1024),
-                new Put(0.4f, 1, p_verifyData, 0, p_loadTotalObjects - 1, 1024),
+                new Get(0.4f, 1, p_verifyData, 1024),
+                new Put(0.4f, 1, p_verifyData, 1024),
                 new Create(0.1f, 1, p_verifyData, 1, 1024),
-                new Remove(0.1f, 1, p_verifyData, 0, p_loadTotalObjects - 1)));
+                new Remove(0.1f, 1, p_verifyData)));
 
         return benchmark;
     }

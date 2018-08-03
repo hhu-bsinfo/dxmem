@@ -61,10 +61,10 @@ public class MemVar implements Workload {
                 new Create(1.0f, p_batchCount, p_verifyData, p_objectSizeMin, p_objectSizeMax)));
 
         benchmark.addPhase(new BenchmarkPhase("run", memory, p_runThreads, p_runTotalOperations, 0,
-                new Get(p_probGet, p_batchCount, p_verifyData, 0, p_loadTotalObjects - 1, p_objectSizeMax),
-                new Put(p_probPut, p_batchCount, p_verifyData, 0, p_loadTotalObjects - 1, p_objectSizeMax),
+                new Get(p_probGet, p_batchCount, p_verifyData, p_objectSizeMax),
+                new Put(p_probPut, p_batchCount, p_verifyData, p_objectSizeMax),
                 new Create(p_probCreate, p_batchCount, p_verifyData, p_objectSizeMin, p_objectSizeMax),
-                new Remove(p_probRemove, p_batchCount, p_verifyData, 0, p_loadTotalObjects - 1)));
+                new Remove(p_probRemove, p_batchCount, p_verifyData)));
 
         return benchmark;
     }

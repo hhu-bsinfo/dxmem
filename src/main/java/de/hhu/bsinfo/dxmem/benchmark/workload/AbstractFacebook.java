@@ -51,8 +51,8 @@ public abstract class AbstractFacebook implements Workload {
         benchmark.addPhase(new BenchmarkPhase("load", memory, p_loadThreads, p_loadTotalObjects, 0,
                 new Create(1.0f, m_batchCount, p_verifyData, m_objectSize, m_objectSize)));
         benchmark.addPhase(new BenchmarkPhase("run", memory, p_runThreads, p_runTotalOperations, 0,
-                new Get(m_probGet, m_batchCount, p_verifyData, 0, p_loadTotalObjects - 1, m_objectSize),
-                new Put(m_probPut, m_batchCount, p_verifyData, 0, p_loadTotalObjects - 1, m_objectSize)));
+                new Get(m_probGet, m_batchCount, p_verifyData, m_objectSize),
+                new Put(m_probPut, m_batchCount, p_verifyData, m_objectSize)));
 
         return benchmark;
     }

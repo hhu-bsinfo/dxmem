@@ -1,12 +1,9 @@
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
-import java.util.Random;
-
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkBenchmark;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
-import de.hhu.bsinfo.dxmem.operations.AllocationException;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
 public class Create extends AbstractOperation {
@@ -36,7 +33,11 @@ public class Create extends AbstractOperation {
         }
 
         // throw allocation exceptions. the benchmark cannot continue once that happens
+        executeTimeStart();
         long cid = p_memory.create().create(size);
+        executeTimeEnd();
+
+        executeNewCid(cid);
 
         if (p_verifyData) {
             int tid = (int) Thread.currentThread().getId();
