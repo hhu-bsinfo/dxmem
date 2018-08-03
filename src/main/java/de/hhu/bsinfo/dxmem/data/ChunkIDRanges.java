@@ -164,6 +164,15 @@ public class ChunkIDRanges implements Importable, Exportable {
     }
 
     /**
+     * Add a new cid to the range
+     *
+     * @param p_cid Cid to add
+     */
+    public void add(final long p_cid) {
+        add(p_cid, p_cid);
+    }
+
+    /**
      * Add a range
      *
      * @param p_start
@@ -173,70 +182,141 @@ public class ChunkIDRanges implements Importable, Exportable {
      * @throws IllegalArgumentException
      *         If p_start > p_end
      */
-    public void addRange(final long p_start, final long p_end) {
-        if (!isLessThanOrEqualsUnsigned(p_start, p_end)) {
-            throw new IllegalArgumentException(p_start + " > " + p_end);
+    public void add(final long p_start, final long p_end) {
+        assert p_start <= p_end;
+
+        // empty range
+        if (m_ranges.isEmpty()) {
+            m_ranges.add(p_start);
+            m_ranges.add(p_end);
+            return;
         }
 
-        m_ranges.add(p_start);
-        m_ranges.add(p_end);
+        int posStart = -1;
+
+        // iterate existing range list and try to find position of the predecessor for the new entry
+        for (int i = m_ranges.getSize() - 2; i >= 0; i -= 2) {
+            if ( m_ranges.get(i) <= p_start) {
+                posStart = i;
+                break;
+            }
+        }
+
+        long[] curRange = new long[2];
+        long[] nextRange = new long[2];
+
+        // add to front
+        if (posStart == -1) {
+            curRange[0] = p_start;
+            curRange[1] = p_end;
+
+            posStart = 0;
+
+            nextRange[0] = m_ranges.get(posStart);
+            nextRange[1] = m_ranges.get(posStart + 1);
+
+        } else {
+            curRange[0] = m_ranges.get(posStart);
+            curRange[1] = m_ranges.get(posStart + 1);
+
+            nextRange[0] = p_start;
+            nextRange[1] = p_end;
+        }
+
+        int entryCount = m_ranges.getSize();
+        int nextPos = posStart + 2;
+
+        while (true) {
+            // compare current and next range
+
+            // isolated, e.g. [5,7][9,11] -> [5,7][9,11]
+
+            // full overlap (1), e.g. [5,7][5,7] -> [5,7]
+            // full overlap (2), e.g. [5,12][6,11] -> [5,12]
+            // partial overlap (1), e.g. [5,7][6,9] -> [5,9]
+            // partial overlap (2), e.g. [5,7][6,7] -> [5,7]
+            // adjacent, e.g. [5,7][8,11] -> [5,11]
+
+            // isolated/non isolated
+            if (curRange[1] + 1 < nextRange[0]) {
+                m_ranges.add(posStart++, curRange[0]);
+                m_ranges.add(posStart++, curRange[1]);
+
+                curRange[0] = nextRange[0];
+                curRange[1] = nextRange[1];
+
+                // no more next values, add remainder range to end
+                if (nextPos >= entryCount) {
+                    m_ranges.add(posStart++, curRange[0]);
+                    m_ranges.add(posStart++, curRange[1]);
+                    break;
+                } else {
+                    nextRange[0] = m_ranges.get(nextPos++);
+                    nextRange[1] = m_ranges.get(nextPos++);
+                }
+            } else {
+                // have to merge two ranges
+                long start = Math.min(curRange[0], Math.min(curRange[1], Math.min(nextRange[0], nextRange[1])));
+                long end = Math.max(curRange[0], Math.max(curRange[1], Math.max(nextRange[0], nextRange[1])));
+
+                m_ranges.add(posStart, start);
+                m_ranges.add(posStart + 1, end);
+
+                curRange[0] = start;
+                curRange[1] = end;
+
+                // no more next values
+                if (nextPos >= entryCount) {
+                    // avoid trim of current vals
+                    posStart += 2;
+                    break;
+                } else {
+                    nextRange[0] = m_ranges.get(nextPos++);
+                    nextRange[1] = m_ranges.get(nextPos++);
+                }
+            }
+        }
+
+        // removed unused values at the end
+        m_ranges.trim(posStart);
     }
 
     /**
-     * Add all the ranges of another ChunkIDRanges instance
+     * Add all ranges of another ChunkIDRanges instance
      *
      * @param p_other
      *         Other instance to add the ranges of
      */
-    public void addAll(final ChunkIDRanges p_other) {
-        m_ranges.addAll(p_other.m_ranges);
+    public void add(final ChunkIDRanges p_other) {
+        assert p_other.m_ranges.getSize() % 2 == 0;
+
+        for (int i = 0; i < p_other.m_ranges.getSize(); i += 2) {
+            add(p_other.m_ranges.get(i), p_other.m_ranges.get(i + 1));
+        }
     }
 
     /**
-     * Get the start of a range
+     * Remove a cid from the range list
      *
-     * @param p_rangeIndex
-     *         Index of the range
-     * @return Start value
+     * @param p_cid Cid to remove from ranges
      */
-    public long getRangeStart(final int p_rangeIndex) {
-        return m_ranges.get(p_rangeIndex * 2);
+    public void remove(final long p_cid) {
+        remove(p_cid, p_cid);
     }
 
     /**
-     * Get the end of a range
+     * Remove a range of cids from the ranges list
      *
-     * @param p_rangeIndex
-     *         Index of the range
-     * @return End value
+     * @param p_start Start cid of range to remove
+     * @param p_end End cid of range to remove
      */
-    public long getRangeEnd(final int p_rangeIndex) {
-        return m_ranges.get(p_rangeIndex * 2 + 1);
+    public void remove(final long p_start, final long p_end) {
+        assert p_start <= p_end;
+
+        // TODO
+        throw new IllegalStateException("Not implemented");
     }
 
-    /**
-     * Set the start of a specific range
-     *
-     * @param p_rangeIndex
-     *         Index of the range to modify
-     * @param p_val
-     *         New value for the start of the range
-     */
-    public void setRangeStart(final int p_rangeIndex, final long p_val) {
-        m_ranges.set(p_rangeIndex * 2, p_val);
-    }
-
-    /**
-     * Set the end of a specific range
-     *
-     * @param p_rangeIndex
-     *         Index of the range to modify
-     * @param p_val
-     *         New value for the end of the range
-     */
-    public void setRangeEnd(final int p_rangeIndex, final long p_val) {
-        m_ranges.set(p_rangeIndex * 2 + 1, p_val);
-    }
 
     /**
      * Check if a chunk ID is within the ranges
@@ -245,7 +325,7 @@ public class ChunkIDRanges implements Importable, Exportable {
      *         Chunk ID to test
      * @return True if chunk ID is within a range (including)
      */
-    public boolean isInRanges(final long p_chunkID) {
+    public boolean isInRange(final long p_chunkID) {
         for (int i = 0; i < m_ranges.getSize(); i += 2) {
             if (m_ranges.get(i) <= p_chunkID && p_chunkID <= m_ranges.get(i + 1)) {
                 return true;
@@ -256,11 +336,58 @@ public class ChunkIDRanges implements Importable, Exportable {
     }
 
     /**
+     * Check if a given range is within the ranges
+     *
+     * @param p_start Range start
+     * @param p_end Range end
+     * @return Number of items within the range specified
+     */
+    public long isInRange(final long p_start, final long p_end) {
+        assert p_start <= p_end;
+
+        if (m_ranges.isEmpty()) {
+            return 0;
+        }
+
+        // full overlap (1), e.g. [1,10] [2,5] -> 4
+        // full overlap (2), e.g. [1,4] [1,4] -> 4
+        // partial overlap (1), e.g. [1,7] [3,8] -> 5
+        // partial overlap (2), e.g. [5,10] [1,8] -> 4
+        // multi overlap, e.g. [1,5][7,10] [0,15] -> 10
+        // gap'd, e.g. [1,5][7,10][12,15] [6,11] -> 4
+
+        long overlapCount = 0;
+
+        for (int i = 0; i < m_ranges.getSize(); i += 2) {
+            long curStart = m_ranges.get(i);
+            long curEnd = m_ranges.get(i + 1);
+
+            // intersect cur range with range to check
+
+            // range to check full overlap
+            if (curStart <= p_start && p_end <= curEnd) {
+                return p_end - p_start + 1;
+            }
+
+            if (p_start <= curStart && curEnd <= p_end) {
+                overlapCount += curEnd - curStart + 1;
+            } else if (curStart <= p_start && p_start <= curEnd) {
+                // start overlapping with range
+                overlapCount += curEnd - p_start + 1;
+            } else if (curStart <= p_end && p_end <= curEnd) {
+                overlapCount += p_end - curStart + 1;
+            }
+        }
+
+        return overlapCount;
+    }
+
+    /**
      * Get a random chunk ID from a random range
      *
      * @return Random chunk ID of random range
      */
-    public long getRandomChunkIdOfRanges() {
+    public long getRandomCidWithinRanges() {
         int rangeIdx = getRandomRangeExclEnd(0, m_ranges.getSize() / 2);
 
         return getRandomChunkId(m_ranges.get(rangeIdx * 2), m_ranges.get(rangeIdx * 2 + 1));
@@ -271,14 +398,18 @@ public class ChunkIDRanges implements Importable, Exportable {
      *
      * @return Total number of chunk IDs covered
      */
-    public long getTotalChunkIDsOfRanges() {
+    public long getTotalCidsOfRanges() {
         long count = 0;
 
         for (int i = 0; i < m_ranges.getSize(); i += 2) {
             long rangeStart = m_ranges.get(i);
             long rangeEnd = m_ranges.get(i + 1);
 
-            count = rangeEnd - rangeStart + 1;
+            if (rangeEnd != rangeStart) {
+                count += rangeEnd - rangeStart + 1;
+            } else {
+                count++;
+            }
         }
 
         return count;
@@ -301,13 +432,13 @@ public class ChunkIDRanges implements Importable, Exportable {
 
     @Override
     public String toString() {
-        String str = "";
+        StringBuilder str = new StringBuilder();
 
         for (int i = 0; i < m_ranges.getSize(); i += 2) {
-            str += String.format("[0x%X, 0x%X]", m_ranges.get(i), m_ranges.get(i + 1));
+            str.append(String.format("[0x%X, 0x%X]", m_ranges.get(i), m_ranges.get(i + 1)));
         }
 
-        return str;
+        return str.toString();
     }
 
     /**
