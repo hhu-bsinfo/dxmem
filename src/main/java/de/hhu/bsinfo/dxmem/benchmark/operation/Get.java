@@ -2,6 +2,7 @@ package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkBenchmark;
+import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
 public class Get extends AbstractOperation {
@@ -20,6 +21,11 @@ public class Get extends AbstractOperation {
     @Override
     public ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
         long cid = executeGetRandomCid();
+
+        // no chunks available, yet?
+        if (cid == ChunkID.INVALID_ID) {
+            return ChunkState.DOES_NOT_EXIST;
+        }
 
         int tid = (int) Thread.currentThread().getId();
 

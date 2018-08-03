@@ -19,6 +19,11 @@ public class Remove extends AbstractOperation {
     public ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
         long cid = executeGetRandomCid();
 
+        // no chunks available, yet?
+        if (cid == ChunkID.INVALID_ID) {
+            return ChunkState.DOES_NOT_EXIST;
+        }
+
         m_chunk.setID(cid);
 
         executeTimeStart();

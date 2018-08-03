@@ -93,7 +93,17 @@ public abstract class AbstractOperation {
     }
 
     public boolean consumeOperation() {
-        return m_opsRemaining.get() > 0 && m_opsRemaining.decrementAndGet() >= 0;
+        long opsRemain;
+
+        do {
+            opsRemain = m_opsRemaining.get();
+
+            if (opsRemain == 0) {
+                return false;
+            }
+        } while (!m_opsRemaining.compareAndSet(opsRemain, opsRemain - 1));
+
+        return true;
     }
 
     public TimePercentilePool getTimePercentile() {

@@ -408,7 +408,7 @@ public class BenchmarkPhase {
 
         @Override
         public void run() {
-                 m_progressOperations.set(0);
+             m_progressOperations.set(0);
 
             while (true) {
                 if (m_delayNsBetweenOps > 0) {

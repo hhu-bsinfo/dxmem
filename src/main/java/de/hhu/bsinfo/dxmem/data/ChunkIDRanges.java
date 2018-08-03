@@ -388,6 +388,10 @@ public class ChunkIDRanges implements Importable, Exportable {
      * @return Random chunk ID of random range
      */
     public long getRandomCidWithinRanges() {
+        if (isEmpty()) {
+            return ChunkID.INVALID_ID;
+        }
+
         int rangeIdx = getRandomRangeExclEnd(0, m_ranges.getSize() / 2);
 
         return getRandomChunkId(m_ranges.get(rangeIdx * 2), m_ranges.get(rangeIdx * 2 + 1));
@@ -400,6 +404,10 @@ public class ChunkIDRanges implements Importable, Exportable {
      */
     public long getTotalCidsOfRanges() {
         long count = 0;
+
+        if (isEmpty()) {
+            return 0;
+        }
 
         for (int i = 0; i < m_ranges.getSize(); i += 2) {
             long rangeStart = m_ranges.get(i);

@@ -21,7 +21,7 @@ public class Create extends AbstractOperation {
 
         m_chunks = new ChunkBenchmark[1024];
     }
-
+    
     @Override
     public ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
         int size;
