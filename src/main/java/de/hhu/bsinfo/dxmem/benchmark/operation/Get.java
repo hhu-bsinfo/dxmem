@@ -34,7 +34,7 @@ public class Get extends AbstractOperation {
         executeTimeEnd();
 
         // verify data in chunk
-        if (p_verifyData) {
+        if (p_verifyData && m_chunks[tid].isStateOk()) {
             if (!m_chunks[tid].verifyContents()) {
                 return ChunkState.DATA_LOST;
             }
