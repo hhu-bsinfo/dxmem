@@ -7,6 +7,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
+import de.hhu.bsinfo.dxmem.core.Heap;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
@@ -356,6 +358,59 @@ public class DXMemCreateRemoveTest {
     public void createAndRemoveRepetetive4() {
         Configurator.setRootLevel(Level.DEBUG);
         createAndRemoveRepetitive(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1000000, 1);
+    }
+
+    @Test
+    public void createMultiThreaded1() {
+        Configurator.setRootLevel(Level.DEBUG);
+        createMultiThreaded(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1, 1, 10000000, 2);
+    }
+
+    @Test
+    public void createMultiThreaded2() {
+        Configurator.setRootLevel(Level.DEBUG);
+        createMultiThreaded(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1, 1, 10000000, 4);
+    }
+
+    private void createMultiThreaded(final long p_heapSize, final int p_chunkSizeMin, final int p_chunkSizeMax,
+            final int p_allocCount, final int p_threads) {
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
+
+        Thread[] threads = new Thread[p_threads];
+
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(() -> {
+                for (int j = 0; j < p_allocCount / p_threads; j++) {
+                    int size;
+
+                    if (p_chunkSizeMin != p_chunkSizeMax) {
+                        size = RandomUtils.getRandomValue(p_chunkSizeMin, p_chunkSizeMax);
+                    } else {
+                        size = p_chunkSizeMin;
+                    }
+
+                    long cid = memory.create().create(size);
+                    Assert.assertNotEquals(ChunkID.INVALID_ID, cid);
+                }
+            });
+        }
+
+        for (Thread t : threads) {
+            t.start();
+        }
+
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        LOGGER.info("Done");
+
+        Assert.assertTrue(memory.analyze().analyze());
+
+        memory.shutdown();
     }
 
     private static void createSizes(final long p_heapSize, final int... p_sizes) {
