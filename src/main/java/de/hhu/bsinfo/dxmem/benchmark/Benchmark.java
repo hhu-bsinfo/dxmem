@@ -3,6 +3,7 @@ package de.hhu.bsinfo.dxmem.benchmark;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 
@@ -23,7 +24,7 @@ public class Benchmark {
         System.out.println("Executing benchmark '" + m_name + "'");
 
         ChunkIDRanges cidRanges = new ChunkIDRanges();
-        ReentrantLock cidRangesLock = new ReentrantLock(false);
+        ReentrantReadWriteLock cidRangesLock = new ReentrantReadWriteLock(false);
 
         for (BenchmarkPhase phase : m_phases) {
             System.out.println("Executing benchmark phase '" + phase.getName() + "'...");

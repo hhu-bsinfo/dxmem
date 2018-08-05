@@ -2,6 +2,7 @@ package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
@@ -21,7 +22,7 @@ public abstract class AbstractOperation {
 
     private DXMem m_memory;
     private ChunkIDRanges m_cids;
-    private ReentrantLock m_cidsLock;
+    private ReentrantReadWriteLock m_cidsLock;
     private long m_totalOps;
 
     private long m_curStartTime;
@@ -62,7 +63,7 @@ public abstract class AbstractOperation {
         return '[' + m_name + ']';
     }
 
-    public void init(final DXMem p_memory, final ChunkIDRanges p_cids, final ReentrantLock p_cidsLock,
+    public void init(final DXMem p_memory, final ChunkIDRanges p_cids, final ReentrantReadWriteLock p_cidsLock,
             final long p_totalOps) {
         m_memory = p_memory;
         m_cids = p_cids;
@@ -199,24 +200,24 @@ public abstract class AbstractOperation {
     }
 
     protected void executeNewCid(final long p_cid) {
-        m_cidsLock.lock();
+        m_cidsLock.writeLock().lock();
         m_cids.add(p_cid);
-        m_cidsLock.unlock();
+        m_cidsLock.writeLock().unlock();
     }
 
     protected long executeGetRandomCid() {
         long tmp;
 
-        m_cidsLock.lock();
+        m_cidsLock.readLock().lock();
         tmp = m_cids.getRandomCidWithinRanges();
-        m_cidsLock.unlock();
+        m_cidsLock.readLock().unlock();
 
         return tmp;
     }
 
     protected void executeRemoveCid(final long p_cid) {
-        m_cidsLock.lock();
+        m_cidsLock.writeLock().lock();
         m_cids.remove(p_cid);
-        m_cidsLock.unlock();
+        m_cidsLock.writeLock().unlock();
     }
 }

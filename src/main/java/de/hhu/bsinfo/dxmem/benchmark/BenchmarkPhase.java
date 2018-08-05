@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
@@ -56,7 +57,7 @@ public class BenchmarkPhase {
         return m_name;
     }
 
-    public void execute(final ChunkIDRanges p_cidRanges, final ReentrantLock p_cidRangesLock) {
+    public void execute(final ChunkIDRanges p_cidRanges, final ReentrantReadWriteLock p_cidRangesLock) {
         // init ops
         for (AbstractOperation op : m_operations) {
             op.init(m_memory, p_cidRanges, p_cidRangesLock, (long) (m_totalNumOperations * op.getProbability()));
