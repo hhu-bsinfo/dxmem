@@ -18,7 +18,9 @@ package de.hhu.bsinfo.dxmem.core;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,7 +62,7 @@ public final class CIDTable {
     private long m_addressTableDirectory;
 
     // lock to protect CID table on table creation
-    private final Lock m_tableManagementLock = new ReentrantLock(false);
+    private final ReentrantLock m_tableManagementLock = new ReentrantLock(false);
 
     CIDTable(final short p_ownNodeId, final Heap p_heap, final CIDTranslationCache p_cidTranslationCache) {
         m_ownNodeId = p_ownNodeId;
@@ -133,6 +135,8 @@ public final class CIDTable {
         } while (level >= 0);
     }
 
+
+
     public void insert(final long p_chunkID, final CIDTableChunkEntry p_entry) {
         long index;
         long entry;
@@ -178,11 +182,15 @@ public final class CIDTable {
 
                         writeTableEntry(addressTable, index, tmpEntry.getValue());
 
+                        m_tableManagementLock.unlock();
+
                         // move to next (and newly) created table
                         addressTable = tmpEntry.getAddress();
-                    }
+                    } else {
+                        m_tableManagementLock.unlock();
 
-                    m_tableManagementLock.unlock();
+                        addressTable = CIDTableTableEntry.getAddressOfRawTableEntry(entry);
+                    }
                 } else {
                     // move on to next table
                     // don't use a temporary CIDTableChunkEntry object here to avoid overhead
