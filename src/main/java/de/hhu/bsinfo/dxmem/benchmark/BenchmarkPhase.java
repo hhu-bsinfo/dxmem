@@ -29,6 +29,7 @@ public class BenchmarkPhase {
 
     private Thread[] m_threads;
     private long m_totalTimeNs;
+    private double m_aggregatedOpsPerSec;
 
     public BenchmarkPhase(final String p_name, final DXMem p_memory, final int p_numThreads,
             final long p_totalNumOperations, final long p_delayNsBetweenOps, final AbstractOperation... p_operations) {
@@ -182,6 +183,10 @@ public class BenchmarkPhase {
             }
         }
 
+        for (Thread t : m_threads) {
+            m_aggregatedOpsPerSec += t.getAggregatedThroughputOpsSec();
+        }
+
         m_totalTimeNs = System.nanoTime() - startTime;
 
         System.out.println("\nBenchmark finished, post-processing results...");
@@ -204,6 +209,10 @@ public class BenchmarkPhase {
 
         builder.append("[OVERALL],RunTime(ms),");
         builder.append(m_totalTimeNs / 1000.0 / 1000.0);
+        builder.append('\n');
+
+        builder.append("[OVERALL],AggregatedThroughput(ops/sec),");
+        builder.append(m_aggregatedOpsPerSec);
         builder.append('\n');
 
         builder.append("[OVERALL],MemoryMetadataOverhead(%),");
@@ -291,8 +300,6 @@ public class BenchmarkPhase {
         builder.append(lidStoreStatus.getTotalLIDsInStore());
         builder.append('\n');
 
-        // TODO memory overhead
-
         for (AbstractOperation op : m_operations) {
             builder.append('\n');
             builder.append(op.parameterToString());
@@ -338,6 +345,18 @@ public class BenchmarkPhase {
             return m_progressOperations.get();
         }
 
+        public double getAggregatedThroughputOpsSec() {
+            double tp = 0.0;
+
+            for (TimePercentile t : m_threadLocalTimePercentiles) {
+                if (t.getCounter() > 0) {
+                    tp += t.getCounter() / t.getTotalValue(Time.Prefix.SEC);
+                }
+            }
+
+            return tp;
+        }
+
         String parameterToString() {
             StringBuilder builder = new StringBuilder();
 
@@ -355,6 +374,14 @@ public class BenchmarkPhase {
                 builder.append(m_operations[i].getName());
                 builder.append("],OperationCount,");
                 builder.append(m_threadLocalTimePercentiles[i].getCounter());
+                builder.append('\n');
+                builder.append("[Thread-");
+                builder.append(m_id);
+                builder.append("][");
+                builder.append(m_operations[i].getName());
+                builder.append("],Throughput(ops/sec),");
+                builder.append(m_threadLocalTimePercentiles[i].getCounter() /
+                        m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.SEC));
                 builder.append('\n');
                 builder.append("[Thread-");
                 builder.append(m_id);
