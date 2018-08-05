@@ -16,6 +16,8 @@
 
 package de.hhu.bsinfo.dxmem.data;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import de.hhu.bsinfo.dxutils.ArrayListLong;
 import de.hhu.bsinfo.dxutils.serialization.Exportable;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
@@ -480,7 +482,7 @@ public class ChunkIDRanges implements Importable, Exportable {
             return p_start;
         }
 
-        return (int) (Math.random() * (p_end - p_start + 1) + p_start);
+        return (int) (ThreadLocalRandom.current().nextDouble() * (p_end - p_start + 1) + p_start);
     }
 
     /**
@@ -493,7 +495,7 @@ public class ChunkIDRanges implements Importable, Exportable {
      * @return Random range
      */
     private static int getRandomRangeExclEnd(final int p_start, final int p_end) {
-        return (int) (Math.random() * (p_end - p_start) + p_start);
+        return (int) (ThreadLocalRandom.current().nextDouble() * (p_end - p_start) + p_start);
     }
 
     /**
@@ -510,7 +512,7 @@ public class ChunkIDRanges implements Importable, Exportable {
             return p_start;
         }
 
-        long tmp = (long) (Math.random() * (p_end - p_start + 1));
+        long tmp = (long) (ThreadLocalRandom.current().nextDouble() * (p_end - p_start + 1));
         return tmp + p_start;
     }
 

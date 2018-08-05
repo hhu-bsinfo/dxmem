@@ -1,7 +1,6 @@
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.hhu.bsinfo.dxmem.DXMem;

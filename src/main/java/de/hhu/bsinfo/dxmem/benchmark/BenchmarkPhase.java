@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.dxmem.benchmark;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
@@ -442,7 +443,7 @@ public class BenchmarkPhase {
                     LockSupport.parkNanos(m_delayNsBetweenOps);
                 }
 
-                float opProbability = (float) Math.random();
+                float opProbability = ThreadLocalRandom.current().nextFloat();
                 int opSelected = -1;
 
                 // select op
