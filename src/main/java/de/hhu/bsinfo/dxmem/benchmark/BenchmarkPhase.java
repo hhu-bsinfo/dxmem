@@ -119,10 +119,9 @@ public class BenchmarkPhase {
                 StringBuilder builder = new StringBuilder();
 
                 builder.append(
-                        String.format("[PROGRESS: %s] %d sec [OPS: Avg=%d, Perc=%.2f, Total=%d/%d]",
-                                m_name, totalTime, opsExecuted - prevOpsExecuted,
-                                ((double) opsExecuted / m_totalNumOperations) * 100, opsExecuted,
-                                m_totalNumOperations));
+                        String.format("[PROGRESS: %s] %d sec [OPS: Perc=%.2f, Total=%d/%d]",
+                                m_name, totalTime, ((double) opsExecuted / m_totalNumOperations) * 100,
+                                opsExecuted, m_totalNumOperations));
 
                 builder.append(
                         String.format("[MEMOVERHEAD: Perc=%.2f]",
