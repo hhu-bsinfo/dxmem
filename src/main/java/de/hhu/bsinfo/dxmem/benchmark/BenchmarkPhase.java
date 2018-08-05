@@ -211,8 +211,8 @@ public class BenchmarkPhase {
         builder.append(m_totalTimeNs / 1000.0 / 1000.0);
         builder.append('\n');
 
-        builder.append("[OVERALL],AggregatedThroughput(ops/sec),");
-        builder.append(m_aggregatedOpsPerSec);
+        builder.append("[OVERALL],AggregatedThroughput(mops/sec),");
+        builder.append(m_aggregatedOpsPerSec / 1000000);
         builder.append('\n');
 
         builder.append("[OVERALL],MemoryMetadataOverhead(%),");
@@ -379,9 +379,9 @@ public class BenchmarkPhase {
                 builder.append(m_id);
                 builder.append("][");
                 builder.append(m_operations[i].getName());
-                builder.append("],Throughput(ops/sec),");
+                builder.append("],Throughput(mops/sec),");
                 builder.append(m_threadLocalTimePercentiles[i].getCounter() /
-                        m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.SEC));
+                        m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.SEC) / 1000000);
                 builder.append('\n');
                 builder.append("[Thread-");
                 builder.append(m_id);

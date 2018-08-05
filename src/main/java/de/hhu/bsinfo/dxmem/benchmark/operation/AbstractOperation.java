@@ -148,8 +148,8 @@ public abstract class AbstractOperation {
         builder.append('\n');
 
         builder.append(getNameTag());
-        builder.append(",ThroughputAvgPerThread(ops/sec),");
-        builder.append(m_totalOps / m_time.getTotalValue(Time.Prefix.SEC));
+        builder.append(",ThroughputAvgPerThread(mops/sec),");
+        builder.append(m_totalOps / m_time.getTotalValue(Time.Prefix.SEC) / 1000000);
         builder.append('\n');
 
         builder.append(getNameTag());
