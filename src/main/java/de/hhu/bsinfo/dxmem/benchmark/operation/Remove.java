@@ -9,7 +9,7 @@ public class Remove extends AbstractOperation {
     private final ChunkByteArray m_chunk;
 
     public Remove(final float p_probability, final int p_batchCount, final boolean p_verifyData) {
-        super("create", p_probability, p_batchCount, p_verifyData);
+        super("remove", p_probability, p_batchCount, p_verifyData);
 
         // dummy
         m_chunk = new ChunkByteArray(ChunkID.INVALID_ID, 1);
