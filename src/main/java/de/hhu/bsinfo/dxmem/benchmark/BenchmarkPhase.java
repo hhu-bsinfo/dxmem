@@ -83,7 +83,6 @@ public class BenchmarkPhase {
         final long printIntervalNs = 1000 * 1000 * 1000;
         long totalTime = 0;
         long printTime = System.nanoTime();
-        long prevOpsExecuted = 0;
 
         CpuProgress cpuProgress = new CpuProgress();
         MemState memoryState = new MemState();
@@ -166,7 +165,6 @@ public class BenchmarkPhase {
                 System.out.println(builder);
 
                 printTime = time;
-                prevOpsExecuted = opsExecuted;
             }
 
             try {
