@@ -302,8 +302,11 @@ public class BenchmarkPhase {
         builder.append('\n');
 
         for (AbstractOperation op : m_operations) {
-            builder.append('\n');
-            builder.append(op.parameterToString());
+            // print executed ops, only
+            if (op.getTotalOperations() > 0) {
+                builder.append('\n');
+                builder.append(op.parameterToString());
+            }
         }
 
         builder.append('\n');
@@ -362,72 +365,75 @@ public class BenchmarkPhase {
             StringBuilder builder = new StringBuilder();
 
             for (int i = 0; i < m_operations.length; i++) {
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],TotalTime(ms),");
-                builder.append(m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.MILLI));
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],OperationCount,");
-                builder.append(m_threadLocalTimePercentiles[i].getCounter());
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],Throughput(mops/sec),");
-                builder.append(m_threadLocalTimePercentiles[i].getCounter() /
-                        m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.SEC) / 1000000);
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],LatencyAvg(us),");
-                builder.append(m_threadLocalTimePercentiles[i].getAvg(Time.Prefix.MICRO));
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],LatMin(us),");
-                builder.append(m_threadLocalTimePercentiles[i].getMin(Time.Prefix.MICRO));
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],LatMax(us),");
-                builder.append(m_threadLocalTimePercentiles[i].getMax(Time.Prefix.MICRO));
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],Lat95(us),");
-                builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.95f, Time.Prefix.MICRO));
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],Lat99(us),");
-                builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.99f, Time.Prefix.MICRO));
-                builder.append('\n');
-                builder.append("[Thread-");
-                builder.append(m_id);
-                builder.append("][");
-                builder.append(m_operations[i].getName());
-                builder.append("],Lat999(us),");
-                builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.999f, Time.Prefix.MICRO));
-
-                if (i + 1 < m_operations.length) {
+                // print executed ops, only
+                if (m_operations[i].getTotalOperations() > 0) {
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],TotalTime(ms),");
+                    builder.append(m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.MILLI));
                     builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],OperationCount,");
+                    builder.append(m_threadLocalTimePercentiles[i].getCounter());
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],Throughput(mops/sec),");
+                    builder.append(m_threadLocalTimePercentiles[i].getCounter() /
+                            m_threadLocalTimePercentiles[i].getTotalValue(Time.Prefix.SEC) / 1000000);
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],LatencyAvg(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getAvg(Time.Prefix.MICRO));
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],LatMin(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getMin(Time.Prefix.MICRO));
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],LatMax(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getMax(Time.Prefix.MICRO));
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],Lat95(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.95f, Time.Prefix.MICRO));
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],Lat99(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.99f, Time.Prefix.MICRO));
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],Lat999(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.999f, Time.Prefix.MICRO));
+
+                    if (i + 1 < m_operations.length) {
+                        builder.append('\n');
+                    }
                 }
             }
 
