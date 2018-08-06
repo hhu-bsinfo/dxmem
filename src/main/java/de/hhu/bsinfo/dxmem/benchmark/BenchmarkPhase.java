@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.dxmem.benchmark;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -327,6 +328,7 @@ public class BenchmarkPhase {
         private final TimePercentile[] m_threadLocalTimePercentiles;
 
         private final AtomicLong m_progressOperations;
+        private final OperationSelector m_operationSelector;
 
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
                 final AtomicInteger p_threadsRunning) {
@@ -341,6 +343,7 @@ public class BenchmarkPhase {
             m_threadLocalTimePercentiles = new TimePercentile[m_operations.length];
 
             m_progressOperations = new AtomicLong(0);
+            m_operationSelector = new OperationSelector(p_operations);
         }
 
         public long getProgressOperations() {
@@ -440,27 +443,14 @@ public class BenchmarkPhase {
 
         @Override
         public void run() {
-             m_progressOperations.set(0);
+            m_progressOperations.set(0);
 
             while (true) {
                 if (m_delayNsBetweenOps > 0) {
                     LockSupport.parkNanos(m_delayNsBetweenOps);
                 }
 
-                float opProbability = ThreadLocalRandom.current().nextFloat();
-                int opSelected = -1;
-
-                // select op
-                for (int i = 0; i < m_operations.length; i++) {
-                    if (opProbability < m_operations[i].getProbability()) {
-                        if (m_operations[i].consumeOperation()) {
-                            opSelected = i;
-                            break;
-                        }
-                    } else {
-                        opProbability -= m_operations[i].getProbability();
-                    }
-                }
+                int opSelected = m_operationSelector.selectIndex();
 
                 if (opSelected != -1) {
                     // execute in batches
@@ -495,6 +485,61 @@ public class BenchmarkPhase {
             }
 
             m_threadsRunning.decrementAndGet();
+        }
+
+        private static class OperationSelector {
+            private final AbstractOperation[] m_operations;
+            private final boolean[] m_opsActive;
+
+            public OperationSelector(final AbstractOperation[] p_operations) {
+                m_operations = p_operations;
+                m_opsActive = new boolean[p_operations.length];
+
+                for (int i = 0; i < m_opsActive.length; i++) {
+                    if (m_operations[i].getProbability() > 0.0f) {
+                        m_opsActive[i] = true;
+                    } else {
+                        m_opsActive[i] = false;
+                    }
+                }
+            }
+
+            public int selectIndex() {
+                while (true) {
+                    if (allConsumed()) {
+                        return -1;
+                    }
+
+                    float opProbability = ThreadLocalRandom.current().nextFloat();
+
+                    for (int i = 0; i < m_operations.length; i++) {
+                        if (opProbability < m_operations[i].getProbability()) {
+                            if (!m_opsActive[i]) {
+                                break;
+                            }
+
+                            if (m_operations[i].consumeOperation()) {
+                                return i;
+                            } else {
+                                m_opsActive[i] = false;
+                                break;
+                            }
+                        } else {
+                            opProbability -= m_operations[i].getProbability();
+                        }
+                    }
+                }
+            }
+
+            private boolean allConsumed() {
+                for (boolean b : m_opsActive) {
+                    if (b) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
         }
     }
 }
