@@ -26,8 +26,8 @@ public class MemVar implements Workload {
         if (p_args.length < 14) {
             System.out.println("Not sufficient parameters for workload ycsb-a");
             System.out.println("Args: <heap size with postfix, e.g. 128-mb, 1-gb> <verify data (0/1)> <dump memory " +
-                    "at end of benchmark> <obj size min> <object size max> <batch count> <num load threads> <load " +
-                    "total objects> <num run threads> <run total operations> <probability create> <prob. get> " + "" +
+                    "at end of benchmark (0/1)> <obj size min> <object size max> <batch count> <num load threads> " +
+                    "<load total objects> <num run threads> <run total operations> <probability create> <prob. get> " +
                     "<prob. put> <prob. remove>");
             return null;
         }

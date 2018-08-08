@@ -33,6 +33,8 @@ public class Benchmark {
             phase.printResults();
         }
 
+
+
         System.out.println("Finished executing benchmark '" + m_name + "'");
     }
 }
