@@ -48,6 +48,15 @@ public class VirtualMemoryBlock {
     }
 
     /**
+     * Check if the VMB is allocated
+     *
+     * @return True if allocated, false otherwise
+     */
+    public boolean isAllocated() {
+        return m_memoryBase != -1;
+    }
+
+    /**
      * Free/Cleanup the VMB.
      * Make sure to call this before object destruction.
      */

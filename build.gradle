@@ -41,6 +41,27 @@ project.startScripts.with {
     }
 }
 
+// add another start script for the analyzer
+task updateAnalyzerStartScript(type: CreateStartScripts) {
+    mainClassName = "de.hhu.bsinfo.dxmem.MemDumpAnalyzer"
+    classpath = startScripts.classpath
+    outputDir = startScripts.outputDir
+    applicationName = 'dxmem-analyzer'
+    defaultJvmOpts = ['-Dlog4j.configurationFile=file:DXMEM_HOME/config/log4j2.xml']
+
+    updateAnalyzerStartScript {
+        doLast {
+            unixScript.text = unixScript.text.replace('DXMEM_HOME', '\$APP_HOME')
+        }
+    }
+}
+
+applicationDistribution.into("bin") {
+    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+    from(updateAnalyzerStartScript)
+    fileMode = 0755
+}
+
 repositories {
     mavenCentral()
 

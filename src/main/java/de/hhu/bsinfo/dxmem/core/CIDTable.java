@@ -17,10 +17,7 @@
 package de.hhu.bsinfo.dxmem.core;
 
 import java.util.ArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +25,11 @@ import org.apache.logging.log4j.Logger;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxutils.ArrayListLong;
+import de.hhu.bsinfo.dxutils.NodeID;
+import de.hhu.bsinfo.dxutils.serialization.Exportable;
+import de.hhu.bsinfo.dxutils.serialization.Exporter;
+import de.hhu.bsinfo.dxutils.serialization.Importable;
+import de.hhu.bsinfo.dxutils.serialization.Importer;
 
 /**
  * Paging-like Tables for the ChunkID-VA mapping
@@ -36,7 +38,7 @@ import de.hhu.bsinfo.dxutils.ArrayListLong;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 11.11.2015
  * @author Florian Hucke, florian.hucke@hhu.de, 06.02.2018
  */
-public final class CIDTable {
+public final class CIDTable implements Importable, Exportable {
     private static final Logger LOGGER = LogManager.getFormatterLogger(CIDTable.class.getSimpleName());
 
     static final byte ENTRY_SIZE = 8;
@@ -53,13 +55,13 @@ public final class CIDTable {
     private static final int LID_TABLE_SIZE = ENTRY_SIZE * ENTRIES_PER_LID_LEVEL;
     private static final long LID_LEVEL_BITMASK = (int) Math.pow(2.0, BITS_PER_LID_LEVEL) - 1;
 
-    private final short m_ownNodeId;
-    private final Heap m_heap;
-    private final CIDTranslationCache m_cidTranslationCache;
-
+    private short m_ownNodeId;
+    private long m_addressTableDirectory;
     private CIDTableStatus m_status = new CIDTableStatus();
 
-    private long m_addressTableDirectory;
+    private CIDTranslationCache m_cidTranslationCache;
+
+    Heap m_heap;
 
     // lock to protect CID table on table creation
     private final ReentrantLock m_tableManagementLock = new ReentrantLock(false);
@@ -75,6 +77,11 @@ public final class CIDTable {
         m_addressTableDirectory = entry.getAddress();
 
         LOGGER.info("CIDTable: init success (page directory at: 0x%X)", m_addressTableDirectory);
+    }
+
+    // for reading dump from file
+    CIDTable() {
+        LOGGER.info("Created 'invalid' CIDTable for loading dump from file");
     }
 
     public CIDTableStatus getStatus() {
@@ -291,6 +298,47 @@ public final class CIDTable {
         }
 
         return ChunkIDRanges.wrap(ret);
+    }
+
+    @Override
+    public String toString() {
+        return "CIDTable: m_ownNodeId " + NodeID.toHexString(m_ownNodeId) + ", m_addressTableDirectory " +
+                Address.toHexString(m_addressTableDirectory) + ", " + m_status;
+    }
+
+    @Override
+    public void exportObject(final Exporter p_exporter) {
+        p_exporter.writeShort(m_ownNodeId);
+        p_exporter.writeLong(m_addressTableDirectory);
+        p_exporter.exportObject(m_status);
+
+        // separate CIDTable from Heap with padding
+        p_exporter.writeLong(0xAAAAAAAAAAAAAAAAL);
+
+        p_exporter.exportObject(m_heap);
+    }
+
+    @Override
+    public void importObject(final Importer p_importer) {
+        m_ownNodeId = p_importer.readShort(m_ownNodeId);
+        m_addressTableDirectory = p_importer.readLong(m_addressTableDirectory);
+        p_importer.importObject(m_status);
+
+        // skip padding
+        p_importer.readLong(0);
+
+        if (m_heap != null) {
+            m_heap.destroy();
+        }
+
+        m_heap = new Heap();
+
+        p_importer.importObject(m_heap);
+    }
+
+    @Override
+    public int sizeofObject() {
+        return Short.BYTES + Long.BYTES + m_status.sizeofObject() + Long.BYTES + m_heap.sizeofObject();
     }
 
     /**

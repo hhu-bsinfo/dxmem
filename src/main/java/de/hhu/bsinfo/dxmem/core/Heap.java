@@ -16,10 +16,8 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -30,7 +28,6 @@ import de.hhu.bsinfo.dxutils.serialization.Exportable;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importable;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
-import de.hhu.bsinfo.dxutils.serialization.RandomAccessFileImExporter;
 
 /**
  * Very efficient memory allocator for many small objects
@@ -67,6 +64,13 @@ public final class Heap implements Importable, Exportable {
     private final Lock m_lock = new ReentrantLock(false);
 
     /**
+     * Constructor for importing from file
+     */
+    Heap() {
+        LOGGER.info("Created 'invalid' Heap for loading dump from file");
+    }
+
+    /**
      * Creates an instance of the heap
      *
      * @param p_size
@@ -79,9 +83,7 @@ public final class Heap implements Importable, Exportable {
 
         m_status.m_totalSizeBytes = p_size;
 
-        // #if LOGGER >= INFO
         LOGGER.info("Creating Heap, size %d bytes", p_size);
-        // #endif /* LOGGER >= INFO */
 
         m_memory.allocate(p_size);
 
@@ -136,36 +138,6 @@ public final class Heap implements Importable, Exportable {
     }
 
     /**
-     * Create the heap from a heap dump file
-     *
-     * @param p_memDumpFile
-     *         Path to heap dump file to load into memory
-     */
-    Heap(final String p_memDumpFile) {
-        File file = new File(p_memDumpFile);
-
-        if (!file.exists()) {
-            throw new MemoryRuntimeException("Cannot create heap from mem dump " + p_memDumpFile +
-                    ": file does not exist");
-        }
-
-        LOGGER.info("Creating Heap from file '%s', size %d bytes", file.getAbsolutePath(), file.length());
-
-        m_memory.allocate(file.length());
-
-        RandomAccessFileImExporter importer;
-
-        try {
-            importer = new RandomAccessFileImExporter(file);
-        } catch (final FileNotFoundException e) {
-            // cannot happen
-            throw new MemoryRuntimeException("Illegal state", e);
-        }
-
-        importer.importObject(this);
-    }
-
-    /**
      * Free all memory of the heap
      */
     public void destroy() {
@@ -179,46 +151,6 @@ public final class Heap implements Importable, Exportable {
      */
     public HeapStatus getStatus() {
         return m_status;
-    }
-
-    /**
-     * Full heap memory dump
-     *
-     * @param p_file
-     *         Destination file path to dump the heap contents to
-     */
-    public void dump(final String p_file) {
-        assert p_file != null;
-
-        File file = new File(p_file);
-
-        LOGGER.info("Dumping heap memory to file: %s", p_file);
-
-        if (file.exists()) {
-            if (!file.delete()) {
-                throw new MemoryRuntimeException("Deleting existing file for memory dump failed");
-            }
-        } else {
-            try {
-                if (!file.createNewFile()) {
-                    throw new MemoryRuntimeException("Creating file for memory dump failed");
-                }
-            } catch (final IOException e) {
-                throw new MemoryRuntimeException("Creating file for memory dump failed", e);
-            }
-        }
-
-        RandomAccessFileImExporter exporter;
-
-        try {
-            exporter = new RandomAccessFileImExporter(file);
-        } catch (final FileNotFoundException e) {
-            // not possible
-            throw new MemoryRuntimeException("Illegal state", e);
-        }
-
-        exporter.exportObject(this);
-        exporter.close();
     }
 
     /**
@@ -856,7 +788,9 @@ public final class Heap implements Importable, Exportable {
 
     @Override
     public String toString() {
-        return "Memory: " + "m_baseFreeBlockList " + m_baseFreeBlockList + ", status: " + m_status;
+        return "Heap: " + m_status + ", m_baseFreeBlockList " + Address.toHexString(m_baseFreeBlockList) +
+                ", m_freeBlocksListSize " + m_freeBlocksListSize + ", m_freeBlockListSizes " +
+                Arrays.toString(m_freeBlockListSizes) + ", m_freeBlocksListCount " + m_freeBlocksListCount;
     }
 
     @Override
@@ -869,7 +803,7 @@ public final class Heap implements Importable, Exportable {
         p_exporter.writeInt(m_freeBlocksListCount);
 
         // separate metadata from VMB with padding
-        p_exporter.writeLong(0xBEEFBEEFBEEFBEEFL);
+        p_exporter.writeLong(0xBBBBBBBBBBBBBBBBL);
 
         // write "chunks" of the raw memory to speed up the process
         byte[] buffer = new byte[1024 * 32];
@@ -902,7 +836,9 @@ public final class Heap implements Importable, Exportable {
         p_importer.readLong(0);
 
         // free previously allocated VMB
-        m_memory.free();
+        if (m_memory.isAllocated()) {
+            m_memory.free();
+        }
 
         // allocate VMB
         m_memory.allocate(m_status.getTotalSizeBytes());

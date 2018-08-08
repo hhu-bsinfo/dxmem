@@ -17,6 +17,7 @@
 package de.hhu.bsinfo.dxmem.operations;
 
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.core.MemoryDumper;
 
 public class Dump {
     private final Context m_context;
@@ -28,7 +29,8 @@ public class Dump {
     public void dump(final String p_file) {
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        m_context.getHeap().dump(p_file);
+        MemoryDumper dumper = new MemoryDumper(m_context.getCIDTable());
+        dumper.dump(p_file);
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
     }
