@@ -304,8 +304,55 @@ public class ChunkIDRanges implements Importable, Exportable {
      * @param p_cid
      *         Cid to remove from ranges
      */
-    public void remove(final long p_cid) {
-        remove(p_cid, p_cid);
+    public boolean remove(final long p_cid) {
+        // [1,1] - 1 - []
+        // [1,10] - 1 -> [2,10]
+        // [1,10] - 10 -> [1,9]
+        // [1,10] - 5 -> [1,4][6,10]
+
+        if (m_ranges.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < m_ranges.getSize(); i += 2) {
+            long start = m_ranges.get(i);
+            long end = m_ranges.get(i + 1);
+
+            if (start <= p_cid && p_cid <= end) {
+                // delete single size range
+                if (start == end) {
+                    // [1,1] - 1 - []
+                    m_ranges.remove(i);
+                    m_ranges.remove(i + 1);
+                    return true;
+                } else {
+                    // [1,10] - 1 -> [2,10]
+                    if (p_cid == start) {
+                        m_ranges.set(i, start + 1);
+                        return true;
+                    }
+
+                    // [1,10] - 10 -> [1,9]
+                    if (p_cid == end) {
+                        m_ranges.set(i + 1, end - 1);
+                        return true;
+                    }
+
+                    // [1,10] - 5 -> [1,4][6,10]
+                    long start2 = p_cid + 1;
+                    long end2 = end;
+                    end = p_cid - 1;
+
+                    // insert new range and shift all following ranges
+                    m_ranges.set(i + 1, end);
+                    m_ranges.insert(i + 2, start2, end2);
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -315,12 +362,20 @@ public class ChunkIDRanges implements Importable, Exportable {
      *         Start cid of range to remove
      * @param p_end
      *         End cid of range to remove
+     * @return Number of elements removed
      */
-    public void remove(final long p_start, final long p_end) {
+    public long remove(final long p_start, final long p_end) {
         assert p_start <= p_end;
 
-        // TODO
-        throw new IllegalStateException("Not implemented");
+        long count = 0;
+
+        for (long l = p_start; l <= p_end; l++) {
+            if (remove(l)) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     /**
