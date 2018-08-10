@@ -32,23 +32,23 @@ public class RawWrite {
         m_context.getHeap().copyNative(p_address, p_addressOffset, p_addressSource, p_offset, p_length);
     }
 
-    public void write(final long p_address, final int p_addressOffset, final byte p_value) {
+    public void writeByte(final long p_address, final int p_addressOffset, final byte p_value) {
         m_context.getHeap().writeByte(p_address, p_addressOffset, p_value);
     }
 
-    public void write(final long p_address, final int p_addressOffset, final short p_value) {
+    public void writeShort(final long p_address, final int p_addressOffset, final short p_value) {
         m_context.getHeap().writeShort(p_address, p_addressOffset, p_value);
     }
 
-    public void write(final long p_address, final int p_addressOffset, final char p_value) {
+    public void writeChar(final long p_address, final int p_addressOffset, final char p_value) {
         m_context.getHeap().writeChar(p_address, p_addressOffset, p_value);
     }
 
-    public void write(final long p_address, final int p_addressOffset, final int p_value) {
+    public void writeInt(final long p_address, final int p_addressOffset, final int p_value) {
         m_context.getHeap().writeInt(p_address, p_addressOffset, p_value);
     }
 
-    public void write(final long p_address, final int p_addressOffset, final long p_value) {
+    public void writeLong(final long p_address, final int p_addressOffset, final long p_value) {
         m_context.getHeap().writeLong(p_address, p_addressOffset, p_value);
     }
 
