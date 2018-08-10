@@ -130,7 +130,7 @@ public class OutOfMemoryTest {
         LOGGER.info("Multi creating %d chunks with size %d...", p_count, p_size);
 
         try {
-             memory.createMulti().create(cids, 0, p_count, p_size, false);
+            memory.create().create(cids, 0, p_count, p_size, false);
         } catch (final AllocationException e) {
             LOGGER.info("Caught allocation exception", e);
 

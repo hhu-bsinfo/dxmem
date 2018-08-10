@@ -575,7 +575,7 @@ public class CreateRemoveTest {
 
         long[] cids = new long[sizes.length];
 
-        Assert.assertEquals(cids.length, memory.createMulti().create(cids, 0, p_consecutiveIds, sizes));
+        Assert.assertEquals(cids.length, memory.create().create(cids, 0, p_consecutiveIds, sizes));
 
         for (int i = 0; i < cids.length; i++) {
             Assert.assertNotEquals(ChunkID.INVALID_ID, cids[i]);
@@ -613,7 +613,7 @@ public class CreateRemoveTest {
 
         long[] cids = new long[p_count];
 
-        Assert.assertEquals(cids.length, memory.createMulti().create(cids, 0, p_count, p_size, p_consecutiveIds));
+        Assert.assertEquals(cids.length, memory.create().create(cids, 0, p_count, p_size, p_consecutiveIds));
 
         for (int i = 0; i < cids.length; i++) {
             Assert.assertNotEquals(ChunkID.INVALID_ID, cids[i]);

@@ -20,7 +20,6 @@ import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.operations.Analyze;
 import de.hhu.bsinfo.dxmem.operations.CIDStatus;
 import de.hhu.bsinfo.dxmem.operations.Create;
-import de.hhu.bsinfo.dxmem.operations.CreateMulti;
 import de.hhu.bsinfo.dxmem.operations.CreateReserved;
 import de.hhu.bsinfo.dxmem.operations.Dump;
 import de.hhu.bsinfo.dxmem.operations.Get;
@@ -38,7 +37,6 @@ public class DXMem {
 
     private Create m_create;
     private CreateReserved m_createReserved;
-    private CreateMulti m_createMulti;
     private Get m_get;
     private Put m_put;
     private Remove m_remove;
@@ -88,10 +86,6 @@ public class DXMem {
 
     public CreateReserved createReserved() {
         return m_createReserved;
-    }
-
-    public CreateMulti createMulti() {
-        return m_createMulti;
     }
 
     public Get get() {
@@ -145,7 +139,6 @@ public class DXMem {
     private void initOperations() {
         m_create = new Create(m_context);
         m_createReserved = new CreateReserved(m_context);
-        m_createMulti = new CreateMulti(m_context);
         m_get = new Get(m_context);
         m_put = new Put(m_context);
         m_remove = new Remove(m_context);
