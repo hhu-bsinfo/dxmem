@@ -166,6 +166,28 @@ public class ChunkIDRanges implements Importable, Exportable {
     }
 
     /**
+     * Get the start of a range
+     *
+     * @param p_rangeIndex
+     *         Index of the range
+     * @return Start value
+     */
+    public long getRangeStart(final int p_rangeIndex) {
+        return m_ranges.get(p_rangeIndex * 2);
+    }
+
+    /**
+     * Get the end of a range
+     *
+     * @param p_rangeIndex
+     *         Index of the range
+     * @return End value
+     */
+    public long getRangeEnd(final int p_rangeIndex) {
+        return m_ranges.get(p_rangeIndex * 2 + 1);
+    }
+
+    /**
      * Add a new cid to the range
      *
      * @param p_cid
