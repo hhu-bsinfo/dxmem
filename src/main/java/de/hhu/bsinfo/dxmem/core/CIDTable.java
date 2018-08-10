@@ -591,6 +591,10 @@ public final class CIDTable implements Importable, Exportable {
 
     private long getTableEntryWithChunkAddressRecursive(final CIDTableChunkEntry p_entry, final long p_cid,
             final long p_addressTable, final int p_level) {
+        if (p_addressTable == Address.INVALID) {
+            return ChunkID.INVALID_ID;
+        }
+
         if (p_level == LID_TABLE_LEVELS) {
             // nid tables
             for (int i = 0; i < ENTRIES_PER_NID_LEVEL; i++) {
