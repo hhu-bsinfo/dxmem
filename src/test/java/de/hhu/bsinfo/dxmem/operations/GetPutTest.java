@@ -1,14 +1,17 @@
-package de.hhu.bsinfo.dxmem;
+package de.hhu.bsinfo.dxmem.operations;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
+import de.hhu.bsinfo.dxmem.TestChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
-public class DXMemGetPutTest {
+public class GetPutTest {
     @Test
     public void getSimple() {
         Configurator.setRootLevel(Level.TRACE);

@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.dxmem;
+package de.hhu.bsinfo.dxmem.operations;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -7,14 +7,15 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
-import de.hhu.bsinfo.dxmem.core.Heap;
+import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
+import de.hhu.bsinfo.dxmem.TestChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
-public class DXMemCreateRemoveTest {
-    private static final Logger LOGGER = LogManager.getFormatterLogger(DXMemCreateRemoveTest.class.getSimpleName());
+public class CreateRemoveTest {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(CreateRemoveTest.class.getSimpleName());
 
     @Test
     public void empty() {

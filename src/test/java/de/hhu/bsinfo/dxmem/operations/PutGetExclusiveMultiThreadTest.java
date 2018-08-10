@@ -1,12 +1,14 @@
-package de.hhu.bsinfo.dxmem;
+package de.hhu.bsinfo.dxmem.operations;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 
-public class DXMemPutGetExclusiveMultiThreadTest {
+public class PutGetExclusiveMultiThreadTest {
     private static final int CHUNK_SIZE = 1;
 
     @Test

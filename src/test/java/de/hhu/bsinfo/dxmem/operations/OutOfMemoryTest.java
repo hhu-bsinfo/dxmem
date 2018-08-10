@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.dxmem;
+package de.hhu.bsinfo.dxmem.operations;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -7,11 +7,12 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
-import de.hhu.bsinfo.dxmem.operations.AllocationException;
 
-public class DXMemOutOfMemoryTest {
-    private static final Logger LOGGER = LogManager.getFormatterLogger(DXMemOutOfMemoryTest.class.getSimpleName());
+public class OutOfMemoryTest {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(OutOfMemoryTest.class.getSimpleName());
 
     @Test
     public void objectSize1() {
