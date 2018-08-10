@@ -381,4 +381,60 @@ public class ChunkIDRangesTest {
         ChunkIDRanges range = new ChunkIDRanges(1, 10);
         Assert.assertEquals(10, range.isInRange(0, 15));
     }
+
+    @Test
+    public void remove() {
+        ChunkIDRanges range = new ChunkIDRanges();
+        Assert.assertFalse(range.remove(0));
+    }
+
+    @Test
+    public void remove2() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 0);
+        Assert.assertFalse(range.remove(1));
+        Assert.assertEquals(1, range.size());
+        Assert.assertTrue(range.remove(0));
+        Assert.assertEquals(0, range.size());
+    }
+
+    @Test
+    public void remove3() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+
+        Assert.assertTrue(range.remove(0));
+        Assert.assertEquals(1, range.size());
+        Assert.assertEquals(10, range.isInRange(1, 10));
+    }
+
+    @Test
+    public void remove4() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+
+        Assert.assertTrue(range.remove(10));
+        Assert.assertEquals(1, range.size());
+        Assert.assertEquals(10, range.isInRange(0, 9));
+    }
+
+    @Test
+    public void remove5() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+
+        Assert.assertTrue(range.remove(5));
+        Assert.assertEquals(2, range.size());
+        Assert.assertFalse(range.isInRange(5));
+        Assert.assertEquals(5, range.isInRange(0, 4));
+        Assert.assertEquals(5, range.isInRange(6, 10));
+    }
+
+    @Test
+    public void remove6() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+        range.add(12, 15);
+
+        Assert.assertTrue(range.remove(5));
+        Assert.assertEquals(3, range.size());
+        Assert.assertFalse(range.isInRange(5));
+        Assert.assertEquals(5, range.isInRange(0, 4));
+        Assert.assertEquals(5, range.isInRange(6, 10));
+    }
 }
