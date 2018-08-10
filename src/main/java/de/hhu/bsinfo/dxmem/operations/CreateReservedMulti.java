@@ -79,6 +79,10 @@ public class CreateReservedMulti {
         // can't use thread local pool here
         CIDTableChunkEntry[] entries = new CIDTableChunkEntry[p_sizesLength];
 
+        for (int i = 0; i < entries.length; i++) {
+            entries[i] = new CIDTableChunkEntry();
+        }
+
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
         m_context.getHeap().malloc(entries, p_sizes, p_sizesOffset, p_sizesLength);
@@ -115,6 +119,11 @@ public class CreateReservedMulti {
 
         // can't use thread local pool here
         CIDTableChunkEntry[] entries = new CIDTableChunkEntry[p_ds.length];
+
+        for (int i = 0; i < entries.length; i++) {
+            entries[i] = new CIDTableChunkEntry();
+        }
+
         int[] sizes = new int[p_ds.length];
 
         for (int i = 0; i < sizes.length; i++) {

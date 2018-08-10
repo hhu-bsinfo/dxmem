@@ -60,9 +60,8 @@ public class CreateReserved {
      *         Reserved CID to allocate memory for
      * @param p_size
      *         Size of the chunk to allocate
-     * @return Raw memory address of the chunk
      */
-    public long createReserved(final long p_cid, final int p_size) {
+    public void createReserved(final long p_cid, final int p_size) {
         assert p_cid != ChunkID.INVALID_ID;
         assert p_size > 0;
 
@@ -77,7 +76,5 @@ public class CreateReserved {
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         SOP_CREATE_RESERVE.inc();
-
-        return tableEntry.getAddress();
     }
 }

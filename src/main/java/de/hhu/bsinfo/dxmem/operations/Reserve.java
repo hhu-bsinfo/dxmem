@@ -32,9 +32,11 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  */
 public class Reserve {
     private static final Value SOP_RESERVE = new Value(DXMem.class, "Reserve");
+    private static final Value SOP_RESERVE_MULTI = new Value(DXMem.class, "ReserveMulti");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_RESERVE);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_RESERVE_MULTI);
     }
 
     private final Context m_context;
@@ -65,5 +67,29 @@ public class Reserve {
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         return cid;
+    }
+
+    public void reserve(final long[] p_array, final int p_offset, final int p_count) {
+        SOP_RESERVE.add(p_count);
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+
+        m_context.getLIDStore().get(p_array, p_offset, p_count);
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+    }
+
+    public long[] reserve(final int p_count) {
+        long[] array = new long[p_count];
+
+        SOP_RESERVE.add(p_count);
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+
+        m_context.getLIDStore().get(array, 0, array.length);
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+
+        return array;
     }
 }

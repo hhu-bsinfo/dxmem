@@ -17,7 +17,6 @@
 package de.hhu.bsinfo.dxmem;
 
 import de.hhu.bsinfo.dxmem.core.Context;
-import de.hhu.bsinfo.dxmem.core.MemoryLoader;
 import de.hhu.bsinfo.dxmem.operations.Analyze;
 import de.hhu.bsinfo.dxmem.operations.CIDStatus;
 import de.hhu.bsinfo.dxmem.operations.Create;
@@ -32,6 +31,7 @@ import de.hhu.bsinfo.dxmem.operations.RawRead;
 import de.hhu.bsinfo.dxmem.operations.RawWrite;
 import de.hhu.bsinfo.dxmem.operations.Recovery;
 import de.hhu.bsinfo.dxmem.operations.Remove;
+import de.hhu.bsinfo.dxmem.operations.Reserve;
 import de.hhu.bsinfo.dxmem.operations.Stats;
 
 public class DXMem {
@@ -44,6 +44,7 @@ public class DXMem {
     private Get m_get;
     private Put m_put;
     private Remove m_remove;
+    private Reserve m_reserve;
 
     private Pinning m_pinning;
     private RawRead m_rawRead;
@@ -111,6 +112,10 @@ public class DXMem {
         return m_remove;
     }
 
+    public Reserve reserve() {
+        return m_reserve;
+    }
+
     public Pinning pinning() {
         return m_pinning;
     }
@@ -151,6 +156,7 @@ public class DXMem {
         m_get = new Get(m_context);
         m_put = new Put(m_context);
         m_remove = new Remove(m_context);
+        m_reserve = new Reserve(m_context);
 
         m_pinning = new Pinning(m_context);
         m_rawRead = new RawRead(m_context);
