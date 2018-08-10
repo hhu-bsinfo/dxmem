@@ -7,8 +7,8 @@ import java.nio.ByteBuffer;
 
 import de.hhu.bsinfo.dxmem.cli.CliContext;
 import de.hhu.bsinfo.dxmem.cli.types.TypeConverterChunkId;
+import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
-import de.hhu.bsinfo.dxmem.data.ChunkState;
 
 @CommandLine.Command(
         name = "get",
@@ -57,27 +57,25 @@ public class CmdGet implements Runnable {
             return;
         }
 
-        ChunkState[] state = new ChunkState[1];
+        ChunkByteArray chunk = CliContext.getInstance().getMemory().get().get(m_cid);
 
-        byte[] data = CliContext.getInstance().getMemory().get().get(state, 0, m_cid);
-
-        if (state[0] != ChunkState.OK) {
-            System.out.printf("ERROR: Getting chunk %s: %s\n", ChunkID.toHexString(m_cid), state[0]);
+        if (!chunk.isStateOk()) {
+            System.out.printf("ERROR: Getting chunk %s: %s\n", ChunkID.toHexString(m_cid), chunk.getState());
             return;
         }
 
         if (m_length == -1) {
-            m_length = data.length;
+            m_length = chunk.getSize();
         }
 
         StringBuilder builder = new StringBuilder();
-        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(chunk.getData());
         byteBuffer.position(m_offset);
 
         switch (m_type) {
             case "str":
                 try {
-                    builder = new StringBuilder(new String(data, m_offset, m_length, "US-ASCII"));
+                    builder = new StringBuilder(new String(chunk.getData(), m_offset, m_length, "US-ASCII"));
                 } catch (final UnsupportedEncodingException e) {
                     System.out.printf("Error encoding string: %s\n", e.getMessage());
                     return;
@@ -131,6 +129,6 @@ public class CmdGet implements Runnable {
         }
 
         System.out.printf("Chunk data of %s (size %d): \n%s\n", ChunkID.toHexString(m_cid),
-                data.length, builder.toString());
+                chunk.getSize(), builder.toString());
     }
 }

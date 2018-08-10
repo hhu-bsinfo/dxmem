@@ -22,6 +22,7 @@ import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapDataStructureImExporter;
 import de.hhu.bsinfo.dxmem.core.LockUtils;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
+import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
@@ -150,23 +151,21 @@ public final class Get {
         return true;
     }
 
-    public byte[] get(final long p_cid) {
-        ChunkState[] state = new ChunkState[1];
-        return get(state, 0, p_cid, ChunkLockOperation.NONE, -1);
-    }
-
-    public byte[] get(final ChunkState[] p_chunkStates, final int p_chunkStateIndex, final long p_cid) {
-        return get(p_chunkStates, p_chunkStateIndex, p_cid, ChunkLockOperation.NONE, -1);
+    public ChunkByteArray get(final long p_cid) {
+        return get(p_cid, ChunkLockOperation.NONE, -1);
     }
 
     // used in incoming gets when the type is unknown and we just want to grab the binary data to forward to the
     // requester
-    public byte[] get(final ChunkState[] p_chunkStates, final int p_chunkStateIndex, final long p_cid,
-            final ChunkLockOperation p_lockOperation, final int p_lockTimeoutMs) {
+    public ChunkByteArray get(final long p_cid, final ChunkLockOperation p_lockOperation,
+            final int p_lockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {
             SOP_GET_INVALID_ID.inc();
-            p_chunkStates[p_chunkStateIndex] = ChunkState.INVALID_ID;
-            return null;
+
+            ChunkByteArray ret = new ChunkByteArray(0);
+            ret.setID(p_cid);
+            ret.setState(ChunkState.INVALID_ID);
+            return ret;
         }
 
         CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
@@ -179,8 +178,11 @@ public final class Get {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             SOP_GET_NOT_EXISTS.inc();
-            p_chunkStates[p_chunkStateIndex] = ChunkState.DOES_NOT_EXIST;
-            return null;
+
+            ChunkByteArray ret = new ChunkByteArray(0);
+            ret.setID(p_cid);
+            ret.setState(ChunkState.DOES_NOT_EXIST);
+            return ret;
         }
 
         HeapDataStructureImExporter imExporter = m_context.getDataStructureImExporterPool().get();
@@ -202,12 +204,16 @@ public final class Get {
 
             if (lockStatus == LockUtils.LockStatus.INVALID) {
                 // entry was deleted in the meanwhile
-                p_chunkStates[p_chunkStateIndex] = ChunkState.DOES_NOT_EXIST;
-                return null;
+                ChunkByteArray ret = new ChunkByteArray(0);
+                ret.setID(p_cid);
+                ret.setState(ChunkState.DOES_NOT_EXIST);
+                return ret;
             } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
                 // try lock did not succeed
-                p_chunkStates[p_chunkStateIndex] = ChunkState.LOCK_TIMEOUT;
-                return null;
+                ChunkByteArray ret = new ChunkByteArray(0);
+                ret.setID(p_cid);
+                ret.setState(ChunkState.LOCK_TIMEOUT);
+                return ret;
             } else {
                 throw new IllegalStateException();
             }
@@ -230,21 +236,23 @@ public final class Get {
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
-        p_chunkStates[p_chunkStateIndex] = ChunkState.OK;
+        ChunkByteArray ret = new ChunkByteArray(data);
+        ret.setID(p_cid);
+        ret.setState(ChunkState.OK);
 
         SOP_GET.inc();
 
-        return data;
+        return ret;
     }
 
     // used for replicating chunks. returns 0 if data does not fit into buffer (and on other errors)
     // returns size on success
-    public int get(final ChunkState[] p_chunkState, final long p_cid, final byte[] p_buffer, final int p_offset,
-            final int p_size, final ChunkLockOperation p_lockOperation, final int p_lockTimeoutMs) {
+    public int get(final long p_cid, final byte[] p_buffer, final int p_offset, final int p_size,
+            final ChunkLockOperation p_lockOperation, final int p_lockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {
             SOP_GET_INVALID_ID.inc();
-            p_chunkState[0] = ChunkState.INVALID_ID;
-            return 0;
+
+            return -ChunkState.INVALID_ID.ordinal();
         }
 
         CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
@@ -257,8 +265,8 @@ public final class Get {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             SOP_GET_NOT_EXISTS.inc();
-            p_chunkState[0] = ChunkState.DOES_NOT_EXIST;
-            return 0;
+
+            return -ChunkState.DOES_NOT_EXIST.ordinal();
         }
 
         int chunkSize = m_context.getHeap().getSize(tableEntry);
@@ -267,8 +275,7 @@ public final class Get {
         if (chunkSize > p_size) {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            p_chunkState[0] = ChunkState.UNDEFINED;
-            return 0;
+            return -ChunkState.UNDEFINED.ordinal();
         }
 
         HeapDataStructureImExporter imExporter = m_context.getDataStructureImExporterPool().get();
@@ -290,12 +297,10 @@ public final class Get {
 
             if (lockStatus == LockUtils.LockStatus.INVALID) {
                 // entry was deleted in the meanwhile
-                p_chunkState[0] = ChunkState.DOES_NOT_EXIST;
-                return 0;
+                return -ChunkState.DOES_NOT_EXIST.ordinal();
             } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
                 // try lock did not succeed
-                p_chunkState[0] = ChunkState.LOCK_TIMEOUT;
-                return 0;
+                return -ChunkState.LOCK_TIMEOUT.ordinal();
             } else {
                 throw new IllegalStateException();
             }
@@ -318,8 +323,6 @@ public final class Get {
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         SOP_GET.inc();
-
-        p_chunkState[0] = ChunkState.OK;
 
         return chunkSize;
     }

@@ -103,6 +103,15 @@ public final class ChunkByteArray extends AbstractChunk {
         return m_data;
     }
 
+    /**
+     * Get the size of the data
+     *
+     * @return Data size in bytes
+     */
+    public int getSize() {
+        return m_data.length;
+    }
+
     @Override
     public String toString() {
         return "ChunkByteBuffer[" + ChunkID.toHexString(getID()) + ", " + getState() + ", " + m_data.length + ']';

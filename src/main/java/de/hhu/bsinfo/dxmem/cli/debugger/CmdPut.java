@@ -8,7 +8,6 @@ import de.hhu.bsinfo.dxmem.cli.CliContext;
 import de.hhu.bsinfo.dxmem.cli.types.TypeConverterChunkId;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
-import de.hhu.bsinfo.dxmem.data.ChunkState;
 
 @CommandLine.Command(
         name = "put",
@@ -47,27 +46,25 @@ public class CmdPut implements Runnable {
             return;
         }
 
-        ChunkState[] state = new ChunkState[1];
+        ChunkByteArray chunk = CliContext.getInstance().getMemory().get().get(m_cid);
 
-        byte[] data = CliContext.getInstance().getMemory().get().get(state, 0, m_cid);
-
-        if (state[0] != ChunkState.OK) {
-            System.out.printf("ERROR: Getting chunk for put %s: %s\n", ChunkID.toHexString(m_cid), state[0]);
+        if (!chunk.isStateOk()) {
+            System.out.printf("ERROR: Getting chunk for put %s: %s\n", ChunkID.toHexString(m_cid), chunk.getState());
             return;
         }
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(chunk.getData());
         byteBuffer.position(m_offset);
 
         switch (m_type) {
             case "str":
                 try {
                     int size = byteBuffer.capacity() - byteBuffer.position();
-                    if (data.length < size) {
-                        size = data.length;
+                    if (chunk.getSize() < size) {
+                        size = chunk.getSize();
                     }
 
-                    byteBuffer.put(data, 0, size);
+                    byteBuffer.put(chunk.getData(), 0, size);
                 } catch (final Exception ignored) {
                     // that's fine, trunc data
                 }
@@ -127,9 +124,6 @@ public class CmdPut implements Runnable {
                 System.out.printf("Unsupported data type %s\n", m_type);
                 return;
         }
-
-        ChunkByteArray chunk = new ChunkByteArray(data);
-        chunk.setID(m_cid);
 
         CliContext.getInstance().getMemory().put().put(chunk);
 
