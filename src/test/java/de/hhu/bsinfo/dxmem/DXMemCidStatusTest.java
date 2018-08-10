@@ -80,6 +80,32 @@ public class DXMemCidStatusTest {
         memory.shutdown();
     }
 
+    @Test
+    public void chunkRanges() {
+        Configurator.setRootLevel(Level.TRACE);
+
+        DXMem memory = new DXMem((short) 0, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+
+        Assert.assertEquals(new ChunkIDRanges(), memory.cidStatus().getCIDRangesOfChunks());
+
+        create(memory, 100);
+
+        ChunkIDRanges ranges = new ChunkIDRanges(0, 99);
+        Assert.assertEquals(ranges, memory.cidStatus().getCIDRangesOfChunks());
+
+        memory.remove().remove(0);
+        ranges.remove(0);
+
+        Assert.assertEquals(ranges, memory.cidStatus().getCIDRangesOfChunks());
+
+        memory.remove().remove(5);
+        ranges.remove(5);
+
+        Assert.assertEquals(ranges, memory.cidStatus().getCIDRangesOfChunks());
+
+        memory.shutdown();
+    }
+
     private void create(final DXMem p_memory, final int p_count) {
         ChunkByteArray ds = new ChunkByteArray(DXMemoryTestConstants.CHUNK_SIZE_1);
 
