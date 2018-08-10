@@ -16,193 +16,32 @@
 
 package de.hhu.bsinfo.dxmem;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import picocli.CommandLine;
 
-import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
-import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookA;
-import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookB;
-import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookC;
-import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookD;
-import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookE;
-import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookF;
-import de.hhu.bsinfo.dxmem.benchmark.workload.MemA;
-import de.hhu.bsinfo.dxmem.benchmark.workload.MemVar;
-import de.hhu.bsinfo.dxmem.benchmark.workload.Workload;
-import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbA;
-import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbB;
-import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbC;
-import de.hhu.bsinfo.dxmem.generated.BuildConfig;
-import de.hhu.bsinfo.dxmonitor.info.InstanceInfo;
+import java.util.Locale;
+
+import de.hhu.bsinfo.dxmem.cli.ToolRoot;
 
 /**
- * DXMem benchmark and test application. Offers a selection of various (local only) benchmarks to evaluate
- * throughput and latency of the operations offered by DXNet.
+ * DXMem benchmark, debugging and development tools.
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.07.2018
  */
-public class DXMemMain {
-    private static final Map<String, Workload> ms_workloads = new HashMap<>();
+public final class DXMemMain {
+
+    private DXMemMain() {
+
+    }
 
     /**
      * Application entry point
      *
-     * @param p_args Cmd args
+     * @param p_args
+     *         Cmd args
      */
     public static void main(final String[] p_args) {
         Locale.setDefault(new Locale("en", "US"));
-        printJVMArgs();
-        printCmdArgs(p_args);
-        printBuildInfo();
-
-        initWorkloads();
-
-        // Parse command line arguments
-        if (p_args.length < 1) {
-            System.out.println("No benchmark selected.");
-            System.out.println("Args: <benchmark name> ...");
-            System.out.println("Select one of the following benchmarks:");
-
-            ArrayList<Workload> list = new ArrayList<>();
-
-            for (Map.Entry<String, Workload> entry : ms_workloads.entrySet()) {
-                list.add(entry.getValue());
-            }
-
-            list.sort(Comparator.comparing(Workload::getName));
-
-            for (Workload workload : list) {
-                System.out.println("  " + workload.getName() + ": " + workload.getDescription());
-            }
-
-            System.exit(-1);
-        }
-
-        Workload workload = ms_workloads.get(p_args[0]);
-
-        if (workload == null) {
-            System.out.println("Invalid workload '" + p_args[0] + "' specified. Available workloads:");
-
-            for (Map.Entry<String, Workload> entry : ms_workloads.entrySet()) {
-                System.out.println("  " + entry.getKey() + ": " + entry.getValue().getDescription());
-            }
-
-            System.exit(-1);
-        }
-
-        Benchmark benchmark = workload.createWorkload(Arrays.copyOfRange(p_args, 1, p_args.length));
-
-        if (benchmark == null) {
-            System.exit(-1);
-        }
-
-        printInstanceInfo();
-
-        benchmark.execute();
-
+        CommandLine.run(new ToolRoot(), p_args);
         System.exit(0);
-    }
-
-    /**
-     * Print all cmd args specified on startup
-     *
-     * @param p_args
-     *         Main arguments
-     */
-    private static void printCmdArgs(final String[] p_args) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Cmd arguments: ");
-
-        for (String arg : p_args) {
-            builder.append(arg);
-            builder.append(' ');
-        }
-
-        System.out.println(builder);
-        System.out.println();
-    }
-
-    /**
-     * Print all JVM args specified on startup
-     */
-    private static void printJVMArgs() {
-        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-        List<String> args = runtimeMxBean.getInputArguments();
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("JVM arguments: ");
-
-        for (String arg : args) {
-            builder.append(arg);
-            builder.append(' ');
-        }
-
-        System.out.println(builder);
-        System.out.println();
-    }
-
-    /**
-     * Print information about the current build
-     */
-    private static void printBuildInfo() {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(">>> DXMem build <<<\n");
-        builder.append("Build type: ");
-        builder.append(BuildConfig.BUILD_TYPE);
-        builder.append('\n');
-        builder.append("Git commit: ");
-        builder.append(BuildConfig.GIT_COMMIT);
-        builder.append('\n');
-        builder.append("BuildDate: ");
-        builder.append(BuildConfig.BUILD_DATE);
-        builder.append('\n');
-        builder.append("BuildUser: ");
-        builder.append(BuildConfig.BUILD_USER);
-        builder.append('\n');
-
-        System.out.println(builder);
-    }
-
-    /**
-     * Print hardware/software info about the current instance
-     */
-    private static void printInstanceInfo() {
-        System.out.println(">>> Instance <<<\n" + InstanceInfo.compile() + '\n');
-    }
-
-    /**
-     * Add all selectable workloads to the list
-     */
-    private static void initWorkloads() {
-        addWorkload(new FacebookA());
-        addWorkload(new FacebookB());
-        addWorkload(new FacebookC());
-        addWorkload(new FacebookD());
-        addWorkload(new FacebookE());
-        addWorkload(new FacebookF());
-
-        addWorkload(new MemA());
-        addWorkload(new MemVar());
-
-        addWorkload(new YcsbA());
-        addWorkload(new YcsbB());
-        addWorkload(new YcsbC());
-    }
-
-    /**
-     * Add a single workload to the workload list
-     *
-     * @param p_workload Workload to add
-     */
-    private static void addWorkload(final Workload p_workload) {
-        ms_workloads.put(p_workload.getName(), p_workload);
     }
 }

@@ -7,10 +7,14 @@ import java.io.IOException;
 import de.hhu.bsinfo.dxutils.serialization.RandomAccessFileImExporter;
 
 public class MemoryDumper {
+    private final Heap m_heap;
     private final CIDTable m_table;
+    private final LIDStore m_lidStore;
 
-    public MemoryDumper(final CIDTable p_table) {
+    public MemoryDumper(final Heap p_heap, final CIDTable p_table, final LIDStore p_lidStore) {
+        m_heap = p_heap;
         m_table = p_table;
+        m_lidStore = p_lidStore;
     }
 
     public void dump(final String p_outputFile) {
@@ -41,7 +45,10 @@ public class MemoryDumper {
             throw new MemoryRuntimeException("Illegal state", e);
         }
 
+        exporter.exportObject(m_heap);
         exporter.exportObject(m_table);
+        exporter.exportObject(m_lidStore);
+
         exporter.close();
     }
 }

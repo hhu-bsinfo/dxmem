@@ -1,11 +1,9 @@
 package de.hhu.bsinfo.dxmem.benchmark;
 
-import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.hhu.bsinfo.dxmem.DXMem;
@@ -88,7 +86,7 @@ public class BenchmarkPhase {
         CpuProgress cpuProgress = new CpuProgress();
         MemState memoryState = new MemState();
 
-        System.out.println("Benchmark running");
+        System.out.println("ToolBenchmark running");
 
         while (threadsRunning.get() > 0) {
             long time = System.nanoTime();
@@ -131,24 +129,24 @@ public class BenchmarkPhase {
 
                 builder.append(
                         String.format("[HEAP: TotalMB=%f, FreeMB=%f, UsedMB=%f, AllocPayloadMB=%f, AllocBlocks=%d, " +
-                                "FreeBlocks=%d, FreeSmallBlocks=%d]",
-                                        heapStatus.getTotalSize().getMBDouble(),
-                                        heapStatus.getFreeSize().getMBDouble(),
-                                        heapStatus.getUsedSize().getMBDouble(),
-                                        heapStatus.getAllocatedPayload().getMBDouble(),
-                                        heapStatus.getAllocatedBlocks(),
-                                        heapStatus.getFreeBlocks(),
-                                        heapStatus.getFreeSmall64ByteBlocks()));
+                                        "FreeBlocks=%d, FreeSmallBlocks=%d]",
+                                heapStatus.getTotalSize().getMBDouble(),
+                                heapStatus.getFreeSize().getMBDouble(),
+                                heapStatus.getUsedSize().getMBDouble(),
+                                heapStatus.getAllocatedPayload().getMBDouble(),
+                                heapStatus.getAllocatedBlocks(),
+                                heapStatus.getFreeBlocks(),
+                                heapStatus.getFreeSmall64ByteBlocks()));
 
                 builder.append(
                         String.format("[CIDT: TableCount=%d, Level3=%d, Level2=%d, Level1=%d, Level0=%d, " +
-                                "TableMemoryMB=%f]",
-                                        cidTableStatus.getTotalTableCount(),
-                                        cidTableStatus.getTableCountOfLevel(3),
-                                        cidTableStatus.getTableCountOfLevel(2),
-                                        cidTableStatus.getTableCountOfLevel(1),
-                                        cidTableStatus.getTableCountOfLevel(0),
-                                        cidTableStatus.getTotalPayloadMemoryTables().getMBDouble()));
+                                        "TableMemoryMB=%f]",
+                                cidTableStatus.getTotalTableCount(),
+                                cidTableStatus.getTableCountOfLevel(3),
+                                cidTableStatus.getTableCountOfLevel(2),
+                                cidTableStatus.getTableCountOfLevel(1),
+                                cidTableStatus.getTableCountOfLevel(0),
+                                cidTableStatus.getTotalPayloadMemoryTables().getMBDouble()));
 
                 builder.append(
                         String.format("[LIDS: Counter=%d, TotalFree=%d, FreeStore=%d]",
@@ -189,7 +187,7 @@ public class BenchmarkPhase {
 
         m_totalTimeNs = System.nanoTime() - startTime;
 
-        System.out.println("\nBenchmark finished, post-processing results...");
+        System.out.println("\nToolBenchmark finished, post-processing results...");
 
         for (AbstractOperation op : m_operations) {
             op.finish();
@@ -332,7 +330,7 @@ public class BenchmarkPhase {
 
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
                 final AtomicInteger p_threadsRunning) {
-            super("Benchmark-" + p_id);
+            super("ToolBenchmark-" + p_id);
 
             m_id = p_id;
             m_operations = p_operations;

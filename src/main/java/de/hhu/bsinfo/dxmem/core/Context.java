@@ -26,6 +26,24 @@ public class Context {
     private final HeapDataStructureImExporterPool m_dataStructureImExporterPool;
     private final Defragmenter m_defragmenter;
 
+    public Context(final String p_memdumpFile) {
+        MemoryLoader loader = new MemoryLoader();
+        loader.load(p_memdumpFile);
+
+        m_heap = loader.getHeap();
+        m_cidTable = loader.getCIDTable();
+        m_lidStore = loader.getLIDStore();
+
+        m_nodeId = m_cidTable.getOwnNodeId();
+        m_cidTranslationCache = m_cidTable.m_cidTranslationCache;
+        m_cidTableEntryPool = new CIDTableEntryPool();
+
+        m_dataStructureImExporterPool = new HeapDataStructureImExporterPool(m_heap);
+
+        // TODO non implemented defragmenter disabled for now (hardcoded)
+        m_defragmenter = new Defragmenter(false);
+    }
+
     public Context(final short p_ownNodeId, final long p_sizeBytes) {
         m_nodeId = p_ownNodeId;
         m_cidTranslationCache = new CIDTranslationCache();

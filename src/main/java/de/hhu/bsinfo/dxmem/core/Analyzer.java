@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 
 /**
- * Analyzer which scans and verifies the heap and CID table structures to detect errors
+ * ToolAnalyzer which scans and verifies the heap and CID table structures to detect errors
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */

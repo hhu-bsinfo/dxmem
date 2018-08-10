@@ -8,9 +8,12 @@ import de.hhu.bsinfo.dxutils.serialization.RandomAccessFileImExporter;
 public class MemoryLoader {
     private Heap m_heap;
     private CIDTable m_table;
+    private LIDStore m_lidStore;
 
     public MemoryLoader() {
-
+        m_heap = new Heap();
+        m_table = new CIDTable();
+        m_lidStore = new LIDStore();
     }
 
     public void load(final String p_file) {
@@ -33,7 +36,10 @@ public class MemoryLoader {
             throw new MemoryRuntimeException("Illegal state", e);
         }
 
+        importer.importObject(m_heap);
         importer.importObject(m_table);
+        importer.importObject(m_lidStore);
+
         importer.close();
 
         m_heap = m_table.m_heap;
@@ -45,5 +51,9 @@ public class MemoryLoader {
 
     public CIDTable getCIDTable() {
         return m_table;
+    }
+
+    public LIDStore getLIDStore() {
+        return m_lidStore;
     }
 }

@@ -59,8 +59,7 @@ public final class CIDTable implements Importable, Exportable {
     private long m_addressTableDirectory;
     private CIDTableStatus m_status = new CIDTableStatus();
 
-    private CIDTranslationCache m_cidTranslationCache;
-
+    CIDTranslationCache m_cidTranslationCache;
     Heap m_heap;
 
     // lock to protect CID table on table creation
@@ -82,6 +81,10 @@ public final class CIDTable implements Importable, Exportable {
     // for reading dump from file
     CIDTable() {
         LOGGER.info("Created 'invalid' CIDTable for loading dump from file");
+    }
+
+    public short getOwnNodeId() {
+        return m_ownNodeId;
     }
 
     public CIDTableStatus getStatus() {
@@ -141,8 +144,6 @@ public final class CIDTable implements Importable, Exportable {
             level--;
         } while (level >= 0);
     }
-
-
 
     public void insert(final long p_chunkID, final CIDTableChunkEntry p_entry) {
         long index;
@@ -311,11 +312,6 @@ public final class CIDTable implements Importable, Exportable {
         p_exporter.writeShort(m_ownNodeId);
         p_exporter.writeLong(m_addressTableDirectory);
         p_exporter.exportObject(m_status);
-
-        // separate CIDTable from Heap with padding
-        p_exporter.writeLong(0xAAAAAAAAAAAAAAAAL);
-
-        p_exporter.exportObject(m_heap);
     }
 
     @Override
@@ -323,22 +319,11 @@ public final class CIDTable implements Importable, Exportable {
         m_ownNodeId = p_importer.readShort(m_ownNodeId);
         m_addressTableDirectory = p_importer.readLong(m_addressTableDirectory);
         p_importer.importObject(m_status);
-
-        // skip padding
-        p_importer.readLong(0);
-
-        if (m_heap != null) {
-            m_heap.destroy();
-        }
-
-        m_heap = new Heap();
-
-        p_importer.importObject(m_heap);
     }
 
     @Override
     public int sizeofObject() {
-        return Short.BYTES + Long.BYTES + m_status.sizeofObject() + Long.BYTES + m_heap.sizeofObject();
+        return Short.BYTES + Long.BYTES + m_status.sizeofObject() + Long.BYTES;
     }
 
     /**
@@ -358,11 +343,11 @@ public final class CIDTable implements Importable, Exportable {
         for (int i = 0; i < ENTRIES_PER_LID_LEVEL; i++) {
             entry = readTableEntry(p_table, i);
 
-            if (p_level > 0) {
-                getAllRanges(p_ret, p_unfinishedCID + (i << BITS_PER_LID_LEVEL * p_level),
-                        CIDTableTableEntry.getAddressOfRawTableEntry(entry), p_level - 1);
-            } else {
-                if (entry != CIDTableZombieEntry.RAW_VALUE && entry != CIDTableChunkEntry.RAW_VALUE_FREE) {
+            if (entry != CIDTableChunkEntry.RAW_VALUE_FREE && entry != CIDTableZombieEntry.RAW_VALUE) {
+                if (p_level > 0) {
+                    getAllRanges(p_ret, p_unfinishedCID + (i << BITS_PER_LID_LEVEL * p_level),
+                            CIDTableTableEntry.getAddressOfRawTableEntry(entry), p_level - 1);
+                } else {
                     long curCID = p_unfinishedCID + i;
 
                     if (p_ret.getSize() < 2) {

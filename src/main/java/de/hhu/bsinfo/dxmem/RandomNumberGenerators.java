@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.SplittableRandom;
 
-import de.hhu.bsinfo.dxmem.generated.BuildConfig;
 import de.hhu.bsinfo.dxmonitor.info.InstanceInfo;
 import de.hhu.bsinfo.dxutils.stats.TimePercentilePool;
 
@@ -156,8 +155,6 @@ public class RandomNumberGenerators {
         }
     }
 
-
-
     /**
      * Print all cmd args specified on startup
      *
@@ -202,19 +199,19 @@ public class RandomNumberGenerators {
     private static void printBuildInfo() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append(">>> RandomNumberGenerator benchmark build <<<\n");
-        builder.append("Build type: ");
-        builder.append(BuildConfig.BUILD_TYPE);
-        builder.append('\n');
-        builder.append("Git commit: ");
-        builder.append(BuildConfig.GIT_COMMIT);
-        builder.append('\n');
-        builder.append("BuildDate: ");
-        builder.append(BuildConfig.BUILD_DATE);
-        builder.append('\n');
-        builder.append("BuildUser: ");
-        builder.append(BuildConfig.BUILD_USER);
-        builder.append('\n');
+//        builder.append(">>> RandomNumberGenerator benchmark build <<<\n");
+        //        builder.append("Build type: ");
+        //        builder.append(BuildConfig.BUILD_TYPE);
+        //        builder.append('\n');
+        //        builder.append("Git commit: ");
+        //        builder.append(BuildConfig.GIT_COMMIT);
+        //        builder.append('\n');
+        //        builder.append("BuildDate: ");
+        //        builder.append(BuildConfig.BUILD_DATE);
+        //        builder.append('\n');
+        //        builder.append("BuildUser: ");
+        //        builder.append(BuildConfig.BUILD_USER);
+        //        builder.append('\n');
 
         System.out.println(builder);
     }

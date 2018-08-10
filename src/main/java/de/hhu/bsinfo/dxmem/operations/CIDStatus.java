@@ -32,16 +32,37 @@ public class CIDStatus {
         return entry.isValid();
     }
 
-    /**
-     * Returns the ChunkID ranges of all locally stored Chunks
-     *
-     * @return the ChunkID ranges
-     */
-    public ChunkIDRanges getCIDRangesOfAllLocalChunks() {
-        return m_context.getCIDTable().getCIDRangesOfAllChunks(m_context.getNodeId());
+    public ChunkIDRanges getCIDRangesOfLocalChunks() {
+        return getCIDRangesOfChunks(m_context.getNodeId());
+    }
+
+    public ChunkIDRanges getCIDRangesOfChunks() {
+        m_context.getDefragmenter().acquireApplicationThreadLock();
+
+        ChunkIDRanges ranges = m_context.getCIDTable().getCIDRangesOfAllChunks();
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+
+        return ranges;
+    }
+
+    public ChunkIDRanges getCIDRangesOfChunks(final short p_nodeId) {
+        m_context.getDefragmenter().acquireApplicationThreadLock();
+
+        ChunkIDRanges ranges = m_context.getCIDTable().getCIDRangesOfAllChunks(p_nodeId);
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+
+        return ranges;
     }
 
     public ChunkIDRanges getAllMigratedChunkIDRanges() {
-        return m_context.getCIDTable().getCIDRangesOfAllChunks();
+        m_context.getDefragmenter().acquireApplicationThreadLock();
+
+        ChunkIDRanges ranges = m_context.getCIDTable().getCIDRangesOfAllMigratedChunks();
+
+        m_context.getDefragmenter().releaseApplicationThreadLock();
+
+        return ranges;
     }
 }

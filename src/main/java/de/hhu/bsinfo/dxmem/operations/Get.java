@@ -50,7 +50,7 @@ public final class Get {
      * Constructor
      *
      * @param p_context
-     *         Context with core components
+     *         CliContext with core components
      */
     public Get(final Context p_context) {
         m_context = p_context;

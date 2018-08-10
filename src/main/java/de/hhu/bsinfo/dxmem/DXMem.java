@@ -17,6 +17,7 @@
 package de.hhu.bsinfo.dxmem;
 
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.core.MemoryLoader;
 import de.hhu.bsinfo.dxmem.operations.Analyze;
 import de.hhu.bsinfo.dxmem.operations.CIDStatus;
 import de.hhu.bsinfo.dxmem.operations.Create;
@@ -34,9 +35,6 @@ import de.hhu.bsinfo.dxmem.operations.Remove;
 import de.hhu.bsinfo.dxmem.operations.Stats;
 
 public class DXMem {
-    private final short m_nodeId;
-    private final long m_heapSize;
-
     private Context m_context;
 
     private Create m_create;
@@ -59,11 +57,16 @@ public class DXMem {
     private Analyze m_analyze;
     private Dump m_dump;
 
-    public DXMem(final short p_nodeId, final long p_heapSize) {
-        m_nodeId = p_nodeId;
-        m_heapSize = p_heapSize;
+    public DXMem(final String p_memdumpFile) {
+        m_context = new Context(p_memdumpFile);
 
-        init(m_nodeId, m_heapSize);
+        initOperations();
+    }
+
+    public DXMem(final short p_nodeId, final long p_heapSize) {
+        m_context = new Context(p_nodeId, p_heapSize);
+
+        initOperations();
     }
 
     public void shutdown() {
@@ -72,8 +75,12 @@ public class DXMem {
     }
 
     public void reset() {
+        short nodeId = m_context.getNodeId();
+        long heapSize = m_context.getHeap().getStatus().getTotalSizeBytes();
+
         shutdown();
-        init(m_nodeId, m_heapSize);
+        m_context = new Context(nodeId, heapSize);
+        initOperations();
     }
 
     public Create create() {
@@ -136,9 +143,7 @@ public class DXMem {
         return m_dump;
     }
 
-    private void init(final short p_nodeId, final long p_heapSize) {
-        m_context = new Context(p_nodeId, p_heapSize);
-
+    private void initOperations() {
         m_create = new Create(m_context);
         m_createReserved = new CreateReserved(m_context);
         m_createMulti = new CreateMulti(m_context);

@@ -1,18 +1,13 @@
 package de.hhu.bsinfo.dxmem.benchmark.workload;
 
+import picocli.CommandLine;
+
+@CommandLine.Command(
+        name = "ycsb-a",
+        description = "YCSB workload with 10x 100 byte objects (0.5 get, 0.5 put)"
+)
 public class YcsbA extends AbstractYcsb {
     public YcsbA() {
-        super(10, 100, 0.5f, 0.5f);
+        super("ycsb-a", 10, 100, 0.5f, 0.5f);
     }
-
-    @Override
-    public String getName() {
-        return "ycsb-a";
-    }
-
-    @Override
-    public String getDescription() {
-        return "YCSB workload a with 10x 100 byte objects (50% get, 50% put)";
-    }
-
 }

@@ -43,7 +43,7 @@ public final class Create {
      * Constructor
      *
      * @param p_context
-     *         Context with core components
+     *         CliContext with core components
      */
     public Create(final Context p_context) {
         m_context = p_context;

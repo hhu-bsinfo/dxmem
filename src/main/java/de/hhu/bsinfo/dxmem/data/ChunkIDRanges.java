@@ -168,7 +168,8 @@ public class ChunkIDRanges implements Importable, Exportable {
     /**
      * Add a new cid to the range
      *
-     * @param p_cid Cid to add
+     * @param p_cid
+     *         Cid to add
      */
     public void add(final long p_cid) {
         add(p_cid, p_cid);
@@ -198,7 +199,7 @@ public class ChunkIDRanges implements Importable, Exportable {
 
         // iterate existing range list and try to find position of the predecessor for the new entry
         for (int i = m_ranges.getSize() - 2; i >= 0; i -= 2) {
-            if ( m_ranges.get(i) <= p_start) {
+            if (m_ranges.get(i) <= p_start) {
                 posStart = i;
                 break;
             }
@@ -300,7 +301,8 @@ public class ChunkIDRanges implements Importable, Exportable {
     /**
      * Remove a cid from the range list
      *
-     * @param p_cid Cid to remove from ranges
+     * @param p_cid
+     *         Cid to remove from ranges
      */
     public void remove(final long p_cid) {
         remove(p_cid, p_cid);
@@ -309,8 +311,10 @@ public class ChunkIDRanges implements Importable, Exportable {
     /**
      * Remove a range of cids from the ranges list
      *
-     * @param p_start Start cid of range to remove
-     * @param p_end End cid of range to remove
+     * @param p_start
+     *         Start cid of range to remove
+     * @param p_end
+     *         End cid of range to remove
      */
     public void remove(final long p_start, final long p_end) {
         assert p_start <= p_end;
@@ -318,7 +322,6 @@ public class ChunkIDRanges implements Importable, Exportable {
         // TODO
         throw new IllegalStateException("Not implemented");
     }
-
 
     /**
      * Check if a chunk ID is within the ranges
@@ -340,8 +343,10 @@ public class ChunkIDRanges implements Importable, Exportable {
     /**
      * Check if a given range is within the ranges
      *
-     * @param p_start Range start
-     * @param p_end Range end
+     * @param p_start
+     *         Range start
+     * @param p_end
+     *         Range end
      * @return Number of items within the range specified
      */
     public long isInRange(final long p_start, final long p_end) {
@@ -442,13 +447,22 @@ public class ChunkIDRanges implements Importable, Exportable {
 
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
+        if (!isEmpty()) {
+            StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < m_ranges.getSize(); i += 2) {
-            str.append(String.format("[0x%X, 0x%X]", m_ranges.get(i), m_ranges.get(i + 1)));
+            for (int i = 0; i < m_ranges.getSize(); i += 2) {
+                builder.append(String.format("[0x%X, 0x%X]", m_ranges.get(i), m_ranges.get(i + 1)));
+            }
+
+            return builder.toString();
+        } else {
+            return "[]";
         }
+    }
 
-        return str.toString();
+    @Override
+    public boolean equals(final Object p_object) {
+        return p_object instanceof ChunkIDRanges && ((ChunkIDRanges) p_object).m_ranges.equals(m_ranges);
     }
 
     /**

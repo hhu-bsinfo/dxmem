@@ -21,6 +21,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxutils.serialization.Exportable;
+import de.hhu.bsinfo.dxutils.serialization.Exporter;
+import de.hhu.bsinfo.dxutils.serialization.Importable;
+import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 /**
  * Stores free LocalIDs
@@ -28,13 +33,19 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
  * @author Florian Klein
  * 30.04.2014
  */
-public final class LIDStore {
+public final class LIDStore implements Importable, Exportable {
     private static final int STORE_CAPACITY = 100000;
 
-    private final SpareLIDStore m_spareLIDStore;
-    private final AtomicLong m_localIDCounter;
+    private SpareLIDStore m_spareLIDStore;
+    private AtomicLong m_localIDCounter;
 
     // Constructors
+
+    // for importing from memory dump
+    LIDStore() {
+        m_spareLIDStore = new SpareLIDStore();
+        m_localIDCounter = new AtomicLong(0);
+    }
 
     /**
      * Creates an instance of LIDStore
@@ -147,14 +158,31 @@ public final class LIDStore {
         return m_spareLIDStore.put(p_lid);
     }
 
+    @Override
+    public void exportObject(final Exporter p_exporter) {
+        p_exporter.writeLong(m_localIDCounter.get());
+        p_exporter.exportObject(m_spareLIDStore);
+    }
+
+    @Override
+    public void importObject(final Importer p_importer) {
+        m_localIDCounter.set(p_importer.readLong(m_localIDCounter.get()));
+        p_importer.importObject(m_spareLIDStore);
+    }
+
+    @Override
+    public int sizeofObject() {
+        return Long.BYTES + m_spareLIDStore.sizeofObject();
+    }
+
     // note: using a lock here because this simplifies synchronization and we can't let
     // multiple threads re-fill the spare lid store when it's empty but there are still
     // zombie entries in the cid table
-    public static final class SpareLIDStore {
-        private final short m_ownNodeId;
-        private final CIDTable m_cidTable;
+    public static final class SpareLIDStore implements Importable, Exportable {
+        private short m_ownNodeId;
+        private CIDTable m_cidTable;
 
-        private final long[] m_ringBufferSpareLocalIDs;
+        private long[] m_ringBufferSpareLocalIDs;
         private int m_getPosition;
         private int m_putPosition;
         // available free lid elements stored in ring buffer
@@ -165,9 +193,14 @@ public final class LIDStore {
         // but not valid -> zombies
         private volatile long m_overallCount;
 
-        private final Lock m_ringBufferLock;
+        private final Lock m_ringBufferLock = new ReentrantLock(false);
 
-        public SpareLIDStore(final short p_ownNodeId, final CIDTable p_cidTable, final int p_capacity) {
+        // for importing from memory dump
+        SpareLIDStore() {
+
+        }
+
+        SpareLIDStore(final short p_ownNodeId, final CIDTable p_cidTable, final int p_capacity) {
             m_ownNodeId = p_ownNodeId;
             m_cidTable = p_cidTable;
             m_ringBufferSpareLocalIDs = new long[p_capacity];
@@ -176,8 +209,6 @@ public final class LIDStore {
             m_count = 0;
 
             m_overallCount = 0;
-
-            m_ringBufferLock = new ReentrantLock(false);
         }
 
         // returns -1 if store is empty and no zombies are available anymore
@@ -266,6 +297,29 @@ public final class LIDStore {
         private boolean refillStore() {
             return m_cidTable.getAndEliminateZombies(m_ownNodeId, m_ringBufferSpareLocalIDs, m_putPosition,
                     m_ringBufferSpareLocalIDs.length - m_count) > 0;
+        }
+
+        @Override
+        public void exportObject(final Exporter p_exporter) {
+            p_exporter.writeLongArray(m_ringBufferSpareLocalIDs);
+            p_exporter.writeInt(m_getPosition);
+            p_exporter.writeInt(m_putPosition);
+            p_exporter.writeInt(m_count);
+            p_exporter.writeLong(m_overallCount);
+        }
+
+        @Override
+        public void importObject(final Importer p_importer) {
+            m_ringBufferSpareLocalIDs = p_importer.readLongArray(m_ringBufferSpareLocalIDs);
+            m_getPosition = p_importer.readInt(m_getPosition);
+            m_putPosition = p_importer.readInt(m_putPosition);
+            m_count = p_importer.readInt(m_count);
+            m_overallCount = p_importer.readLong(m_overallCount);
+        }
+
+        @Override
+        public int sizeofObject() {
+            return ObjectSizeUtil.sizeofLongArray(m_ringBufferSpareLocalIDs) + Integer.BYTES * 3 + Long.BYTES;
         }
     }
 }

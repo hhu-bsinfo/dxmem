@@ -50,7 +50,7 @@ public class Put {
      * Constructor
      *
      * @param p_context
-     *         Context with core components
+     *         CliContext with core components
      */
     public Put(final Context p_context) {
         m_context = p_context;

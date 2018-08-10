@@ -1,17 +1,13 @@
 package de.hhu.bsinfo.dxmem.benchmark.workload;
 
+import picocli.CommandLine;
+
+@CommandLine.Command(
+        name = "facebook-e",
+        description = "Facebook graph workload with 1x 64 byte objects (0.5 get, 0.5 put)"
+)
 public class FacebookE extends AbstractFacebook {
     public FacebookE() {
-        super(1, 64, 0.5f, 0.5f);
-    }
-
-    @Override
-    public String getName() {
-        return "facebook-e";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Facebook graph workload with 1x 64 byte objects (50% get, 50% put)";
+        super("facebook-e", 1, 64, 0.5f, 0.5f);
     }
 }

@@ -43,7 +43,7 @@ public class Reserve {
      * Constructor
      *
      * @param p_context
-     *         Context with core components
+     *         CliContext with core components
      */
     public Reserve(final Context p_context) {
         m_context = p_context;

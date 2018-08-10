@@ -29,7 +29,7 @@ public class Dump {
     public void dump(final String p_file) {
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        MemoryDumper dumper = new MemoryDumper(m_context.getCIDTable());
+        MemoryDumper dumper = new MemoryDumper(m_context.getHeap(), m_context.getCIDTable(), m_context.getLIDStore());
         dumper.dump(p_file);
 
         m_context.getDefragmenter().releaseApplicationThreadLock();

@@ -25,7 +25,7 @@ public class Recovery {
      * Constructor
      *
      * @param p_context
-     *         Context with core components
+     *         CliContext with core components
      */
     public Recovery(final Context p_context) {
         m_context = p_context;
