@@ -30,11 +30,9 @@ public class Pinning {
         m_context = p_context;
     }
 
-    public long pin(final ChunkState p_state, final long p_cid, final int p_acquireLockTimeoutMs) {
+    public PinnedMemory pin(final long p_cid, final int p_acquireLockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {
-            // TODO how to return chunk state to give more insight on what happened here
-            //p_state = ChunkState.INVALID_ID;
-            return Address.INVALID;
+            return new PinnedMemory(ChunkState.INVALID_ID);
         }
 
         CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
@@ -46,7 +44,7 @@ public class Pinning {
         if (!tableEntry.isValid()) {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            return Address.INVALID;
+            return new PinnedMemory(ChunkState.DOES_NOT_EXIST);
         }
 
         LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry,
@@ -54,10 +52,9 @@ public class Pinning {
 
         // acquire write lock to ensure the chunk is not deleted while trying to pin it
         if (lockStatus != LockUtils.LockStatus.OK) {
-            // TODO return chunk state to give more insight on what happened here
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            return Address.INVALID;
+            return new PinnedMemory(ChunkState.DOES_NOT_EXIST);
         }
 
         tableEntry.setPinned(true);
@@ -68,7 +65,7 @@ public class Pinning {
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
-        return tableEntry.getAddress();
+        return new PinnedMemory(tableEntry.getAddress());
     }
 
     // depending on how many chunks are currently stored, this call is very slow because it has to perform
@@ -152,5 +149,32 @@ public class Pinning {
         LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
+    }
+
+    public static final class PinnedMemory {
+        private final ChunkState m_state;
+        private final long m_address;
+
+        private PinnedMemory(final ChunkState p_state) {
+            m_state = p_state;
+            m_address = Address.INVALID;
+        }
+
+        private PinnedMemory(final long p_address) {
+            m_state = ChunkState.OK;
+            m_address = p_address;
+        }
+
+        public ChunkState getState() {
+            return m_state;
+        }
+
+        public long getAddress() {
+            return m_address;
+        }
+
+        public boolean isStateOk() {
+            return m_state == ChunkState.OK;
+        }
     }
 }
