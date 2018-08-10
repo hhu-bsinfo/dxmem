@@ -58,16 +58,6 @@ public final class CIDTranslationCache {
         m_cache[(int) Thread.currentThread().getId()].putTableLevel0(p_chunkID, p_addressTable);
     }
 
-    /**
-     * Invalidate a cache entry
-     *
-     * @param p_chunkID
-     *         Chunk id of the table level 0 to invalidate
-     */
-    void invalidateEntry(final long p_chunkID) {
-        m_cache[(int) Thread.currentThread().getId()].invalidateEntry(p_chunkID);
-    }
-
     // thread local cache
     private static final class Cache {
         private long[] m_chunkIDs;
@@ -122,24 +112,6 @@ public final class CIDTranslationCache {
             m_chunkIDs[m_cachePos] = p_chunkID >> CIDTable.BITS_PER_LID_LEVEL;
             m_tableLevel0Addr[m_cachePos] = p_addressTable;
             m_cachePos = (m_cachePos + 1) % m_chunkIDs.length;
-        }
-
-        /**
-         * Invalidate a cache entry
-         *
-         * @param p_chunkID
-         *         Chunk id of the table level 0 to invalidate
-         */
-        void invalidateEntry(final long p_chunkID) {
-            long tableLevel0IDRange = p_chunkID >> CIDTable.BITS_PER_LID_LEVEL;
-
-            for (int i = 0; i < m_chunkIDs.length; i++) {
-                if (m_chunkIDs[i] == tableLevel0IDRange) {
-                    m_tableLevel0Addr[i] = ChunkID.INVALID_ID;
-                    m_chunkIDs[i] = ChunkID.INVALID_ID;
-                    break;
-                }
-            }
         }
     }
 }
