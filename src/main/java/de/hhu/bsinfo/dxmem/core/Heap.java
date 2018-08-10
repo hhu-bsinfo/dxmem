@@ -1199,21 +1199,6 @@ public final class Heap implements Importable, Exportable {
      *         written back to the table. This must be handled by the caller
      * @param p_sizes
      *         Payload sizes to allocate separate memory blocks for
-     * @return True if multi allocating all blocks was successful, false on allocation failure (not sufficient memory
-     * or could not find a single huge block to execute multi allocation)
-     */
-    private boolean multiReserveBlocks(final CIDTableChunkEntry[] p_entry, final int... p_sizes) {
-        return multiReserveBlocks(p_entry, p_sizes, 0, p_sizes.length);
-    }
-
-    /**
-     * Reserve multiple blocks with a single call reducing metadata processing overhead
-     *
-     * @param p_entry
-     *         Table entry object to write address and size of allocation to. Note: The entry value is not
-     *         written back to the table. This must be handled by the caller
-     * @param p_sizes
-     *         Payload sizes to allocate separate memory blocks for
      * @param p_sizesOffset
      *         Offset to start in sizes array
      * @param p_sizesLength
