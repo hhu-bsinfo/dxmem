@@ -358,7 +358,7 @@ public class CreateRemoveTest {
     @Test
     public void createAndRemoveRepetetive4() {
         Configurator.setRootLevel(Level.DEBUG);
-        createAndRemoveRepetitive(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1000000, 1);
+        createAndRemoveRepetitive(DXMemoryTestConstants.HEAP_SIZE_LARGE, 100000 + 1000, 1);
     }
 
     @Test
