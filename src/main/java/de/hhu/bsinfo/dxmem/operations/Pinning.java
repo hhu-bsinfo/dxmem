@@ -30,6 +30,10 @@ public class Pinning {
         m_context = p_context;
     }
 
+    public PinnedMemory pin(final long p_cid) {
+        return pin(p_cid, -1);
+    }
+
     public PinnedMemory pin(final long p_cid, final int p_acquireLockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {
             return new PinnedMemory(ChunkState.INVALID_ID);
@@ -95,7 +99,6 @@ public class Pinning {
 
         // acquire write lock to ensure the chunk is not deleted while trying to pin it
         if (lockStatus != LockUtils.LockStatus.OK) {
-            // TODO return chunk state to give more insight on what happened here
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             throw new IllegalStateException("Pinned chunk with CID " + ChunkID.toHexString(cid) +
@@ -135,7 +138,6 @@ public class Pinning {
 
         // acquire write lock to ensure the chunk is not deleted while trying to pin it
         if (lockStatus != LockUtils.LockStatus.OK) {
-            // TODO return chunk state to give insight on what happened here
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             throw new IllegalStateException("Pinned chunk " + ChunkID.toHexString(p_cidOfPinnedChunk) +
