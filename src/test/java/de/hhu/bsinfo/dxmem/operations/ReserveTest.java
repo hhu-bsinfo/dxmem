@@ -50,7 +50,7 @@ public class ReserveTest {
             sizes[i] = 16;
         }
 
-        memory.createReservedMulti().createReserved(cids, null, sizes, 0, sizes.length);
+        memory.createReserved().createReserved(cids, null, sizes, 0, sizes.length);
 
         ChunkByteArray chunk = new ChunkByteArray(16);
 
@@ -79,7 +79,7 @@ public class ReserveTest {
             chunks[i].setID(cids[i]);
         }
 
-        memory.createReservedMulti().createReserved(chunks, null);
+        memory.createReserved().createReserved(chunks, null);
 
         for (int i = 0; i < cids.length; i++) {
             chunks[i].setID(cids[i]);
@@ -110,7 +110,7 @@ public class ReserveTest {
             sizes[i] = 16;
         }
 
-        memory.createReservedMulti().createReserved(cids, null, sizes, 0, sizes.length);
+        memory.createReserved().createReserved(cids, null, sizes, 0, sizes.length);
 
         ChunkByteArray chunk = new ChunkByteArray(16);
 

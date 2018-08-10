@@ -31,7 +31,6 @@ public final class ChunkByteArray extends AbstractChunk {
 
     /**
      * Constructor
-     *
      * Sets the chunk id to invalid.
      *
      * @param p_bufferSize
