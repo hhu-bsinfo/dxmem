@@ -27,6 +27,8 @@ public class PinningTest {
         memory.pinning().unpin(pinnedMemory.getAddress());
 
         Assert.assertTrue(memory.analyze().analyze());
+
+        memory.shutdown();
     }
 
     @Test
@@ -46,5 +48,7 @@ public class PinningTest {
         memory.pinning().unpinCID(cid);
 
         Assert.assertTrue(memory.analyze().analyze());
+
+        memory.shutdown();
     }
 }
