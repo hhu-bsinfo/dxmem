@@ -16,6 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.data;
 
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 import de.hhu.bsinfo.dxutils.ArrayListLong;
@@ -29,7 +30,7 @@ import de.hhu.bsinfo.dxutils.serialization.Importer;
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 16.03.2017
  */
-public class ChunkIDRanges implements Importable, Exportable {
+public class ChunkIDRanges implements Importable, Exportable, Iterable<Long> {
     private ArrayListLong m_ranges;
 
     /**
@@ -505,6 +506,41 @@ public class ChunkIDRanges implements Importable, Exportable {
         }
 
         return count;
+    }
+
+    @Override
+    public Iterator<Long> iterator() {
+        return new Iterator<Long>() {
+            private int m_posArray = 0;
+            private long m_posRange = 0;
+
+            @Override
+            public boolean hasNext() {
+                return m_posArray < m_ranges.getSize();
+            }
+
+            @Override
+            public Long next() {
+                long rangeStart = m_ranges.get(m_posArray);
+                long rangeEnd = m_ranges.get(m_posArray + 1);
+
+                long elem = rangeStart + m_posRange;
+
+                m_posRange++;
+
+                if (rangeStart + m_posRange > rangeEnd) {
+                    m_posArray += 2;
+                    m_posRange = 0;
+                }
+
+                return elem;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("no changes allowed");
+            }
+        };
     }
 
     @Override

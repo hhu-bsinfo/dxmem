@@ -437,4 +437,55 @@ public class ChunkIDRangesTest {
         Assert.assertEquals(5, range.isInRange(0, 4));
         Assert.assertEquals(5, range.isInRange(6, 10));
     }
+
+    @Test
+    public void iterable() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+
+        long counter = 0;
+
+        for (Long id : range) {
+            Assert.assertEquals(counter, id.longValue());
+            counter++;
+        }
+    }
+
+    @Test
+    public void iterable2() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+        range.add(13, 20);
+
+        long counter = 0;
+
+        for (Long id : range) {
+            Assert.assertEquals(counter, id.longValue());
+            counter++;
+
+            if (counter == 11) {
+                counter = 13;
+            }
+        }
+    }
+
+    @Test
+    public void iterable3() {
+        ChunkIDRanges range = new ChunkIDRanges(0, 10);
+        range.add(13, 20);
+        range.add(100, 100);
+
+        long counter = 0;
+
+        for (Long id : range) {
+            Assert.assertEquals(counter, id.longValue());
+            counter++;
+
+            if (counter == 11) {
+                counter = 13;
+            }
+
+            if (counter == 21) {
+                counter = 100;
+            }
+        }
+    }
 }
