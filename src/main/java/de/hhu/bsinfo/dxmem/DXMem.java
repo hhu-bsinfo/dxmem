@@ -31,6 +31,7 @@ import de.hhu.bsinfo.dxmem.operations.RawWrite;
 import de.hhu.bsinfo.dxmem.operations.Recovery;
 import de.hhu.bsinfo.dxmem.operations.Remove;
 import de.hhu.bsinfo.dxmem.operations.Reserve;
+import de.hhu.bsinfo.dxmem.operations.Size;
 import de.hhu.bsinfo.dxmem.operations.Stats;
 
 public class DXMem {
@@ -43,6 +44,7 @@ public class DXMem {
     private Remove m_remove;
     private Reserve m_reserve;
     private Exists m_exists;
+    private Size m_size;
 
     private Pinning m_pinning;
     private RawRead m_rawRead;
@@ -110,6 +112,10 @@ public class DXMem {
         return m_exists;
     }
 
+    public Size size() {
+        return m_size;
+    }
+
     public Pinning pinning() {
         return m_pinning;
     }
@@ -150,6 +156,7 @@ public class DXMem {
         m_remove = new Remove(m_context);
         m_reserve = new Reserve(m_context);
         m_exists = new Exists(m_context);
+        m_size = new Size(m_context);
 
         m_pinning = new Pinning(m_context);
         m_rawRead = new RawRead(m_context);
