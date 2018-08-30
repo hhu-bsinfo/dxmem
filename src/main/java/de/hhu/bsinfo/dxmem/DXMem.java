@@ -22,6 +22,7 @@ import de.hhu.bsinfo.dxmem.operations.CIDStatus;
 import de.hhu.bsinfo.dxmem.operations.Create;
 import de.hhu.bsinfo.dxmem.operations.CreateReserved;
 import de.hhu.bsinfo.dxmem.operations.Dump;
+import de.hhu.bsinfo.dxmem.operations.Exists;
 import de.hhu.bsinfo.dxmem.operations.Get;
 import de.hhu.bsinfo.dxmem.operations.Pinning;
 import de.hhu.bsinfo.dxmem.operations.Put;
@@ -41,6 +42,7 @@ public class DXMem {
     private Put m_put;
     private Remove m_remove;
     private Reserve m_reserve;
+    private Exists m_exists;
 
     private Pinning m_pinning;
     private RawRead m_rawRead;
@@ -104,6 +106,10 @@ public class DXMem {
         return m_reserve;
     }
 
+    public Exists exists() {
+        return m_exists;
+    }
+
     public Pinning pinning() {
         return m_pinning;
     }
@@ -143,6 +149,7 @@ public class DXMem {
         m_put = new Put(m_context);
         m_remove = new Remove(m_context);
         m_reserve = new Reserve(m_context);
+        m_exists = new Exists(m_context);
 
         m_pinning = new Pinning(m_context);
         m_rawRead = new RawRead(m_context);

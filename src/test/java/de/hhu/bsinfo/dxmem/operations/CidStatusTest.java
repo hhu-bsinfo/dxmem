@@ -39,31 +39,6 @@ public class CidStatusTest {
     }
 
     @Test
-    public void exists() {
-        Configurator.setRootLevel(Level.TRACE);
-
-        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
-
-        ChunkByteArray ds = new ChunkByteArray(DXMemoryTestConstants.CHUNK_SIZE_1);
-        memory.create().create(ds);
-
-        Assert.assertTrue(memory.analyze().analyze());
-
-        Assert.assertTrue(ds.isStateOk());
-        Assert.assertTrue(ds.isIDValid());
-
-        Assert.assertTrue(memory.cidStatus().exists(ds.getID()));
-        Assert.assertFalse(memory.cidStatus().exists(1));
-
-        memory.remove().remove(ds);
-        Assert.assertTrue(ds.isStateOk());
-
-        Assert.assertFalse(memory.cidStatus().exists(ds.getID()));
-
-        memory.shutdown();
-    }
-
-    @Test
     public void chunkRangesSimple() {
         Configurator.setRootLevel(Level.TRACE);
 

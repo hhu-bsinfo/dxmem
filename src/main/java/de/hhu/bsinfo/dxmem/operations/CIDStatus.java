@@ -1,6 +1,5 @@
 package de.hhu.bsinfo.dxmem.operations;
 
-import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 
@@ -18,18 +17,6 @@ public class CIDStatus {
      */
     public long getHighestUsedLocalID() {
         return m_context.getLIDStore().getCurrentHighestLID();
-    }
-
-    public boolean exists(final long p_cid) {
-        CIDTableChunkEntry entry = m_context.getCIDTableEntryPool().get();
-
-        m_context.getDefragmenter().acquireApplicationThreadLock();
-
-        m_context.getCIDTable().translate(p_cid, entry);
-
-        m_context.getDefragmenter().releaseApplicationThreadLock();
-
-        return entry.isValid();
     }
 
     public ChunkIDRanges getCIDRangesOfLocalChunks() {
