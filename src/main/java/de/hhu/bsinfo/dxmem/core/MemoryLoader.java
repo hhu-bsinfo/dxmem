@@ -21,17 +21,31 @@ import java.io.FileNotFoundException;
 
 import de.hhu.bsinfo.dxutils.serialization.RandomAccessFileImExporter;
 
+/**
+ * Helper class to load a memory dump from a file
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class MemoryLoader {
     private Heap m_heap;
     private CIDTable m_table;
     private LIDStore m_lidStore;
 
+    /**
+     * Constructor
+     */
     public MemoryLoader() {
         m_heap = new Heap();
         m_table = new CIDTable();
         m_lidStore = new LIDStore();
     }
 
+    /**
+     * Load memory dump from a file
+     *
+     * @param p_file
+     *         Path to file to load from
+     */
     public void load(final String p_file) {
         assert p_file != null;
 
@@ -61,14 +75,29 @@ public class MemoryLoader {
         m_heap = m_table.m_heap;
     }
 
+    /**
+     * Get the loaded heap instance
+     *
+     * @return Heap
+     */
     public Heap getHeap() {
         return m_heap;
     }
 
+    /**
+     * Get the loaded CIDTable instance
+     *
+     * @return CIDTable
+     */
     public CIDTable getCIDTable() {
         return m_table;
     }
 
+    /**
+     * Get the loaded LIDStore instance
+     *
+     * @return LIDStore
+     */
     public LIDStore getLIDStore() {
         return m_lidStore;
     }

@@ -16,7 +16,14 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
-// | address 43 bit |
+/**
+ * Helper class for handling table entries (table levels 3-1) in the CIDTable. This class caches the entry read from
+ * memory, only. Any changes applied are NOT automatically written back to memory.
+ * Structure:
+ * | address 43 bit |
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class CIDTableTableEntry {
     static final long RAW_VALUE_FREE = 0;
 
@@ -30,56 +37,117 @@ public class CIDTableTableEntry {
     private long m_pointer;
     private long m_address;
 
+    /**
+     * Constructor
+     */
     CIDTableTableEntry() {
 
     }
 
+    /**
+     * Constructor
+     *
+     * @param p_pointer
+     *         Pointer (address) to table entry
+     * @param p_value
+     *         Value of table entry
+     */
     CIDTableTableEntry(final long p_pointer, final long p_value) {
         set(p_pointer, p_value);
     }
 
+    /**
+     * Clear the object
+     */
     public void clear() {
         m_pointer = Address.INVALID;
         m_address = Address.INVALID;
     }
 
+    /**
+     * Set the object. Extracts fields from raw entry
+     *
+     * @param p_pointer
+     *         Pointer (address) of table entry
+     * @param p_value
+     *         Value of table entry
+     */
     public void set(final long p_pointer, final long p_value) {
         m_pointer = p_pointer;
         m_address = p_value >> OFFSET_ADDRESS & MASK_ADDRESS;
     }
 
+    /**
+     * Get the pointer
+     *
+     * @return Pointer
+     */
     public long getPointer() {
         return m_pointer;
     }
 
+    /**
+     * Set the pointer
+     *
+     * @param p_pointer
+     *         Pointer to entry
+     */
     public void setPointer(final long p_pointer) {
         m_pointer = p_pointer;
     }
 
+    /**
+     * Get the value. Assembles all fields to fit into a single long
+     *
+     * @return Value
+     */
     public long getValue() {
         return m_address << OFFSET_ADDRESS & MASK_ADDRESS;
     }
 
+    /**
+     * Check if the address is valid
+     *
+     * @return True if valid, false otherwise
+     */
     public boolean isAddressValid() {
         return m_address != Address.INVALID;
     }
 
+    /**
+     * Get the address to the table
+     *
+     * @return Address to the table
+     */
     public long getAddress() {
         return m_address;
     }
 
+    /**
+     * Set the address to the table
+     *
+     * @param p_value
+     *         Address to set
+     */
     public void setAddress(final long p_value) {
         assert p_value >= 0 && p_value <= MASK_ADDRESS;
 
         m_address = p_value;
     }
 
+    /**
+     * Get the address part of a table entry from a table
+     *
+     * @param p_rawValue
+     *         Raw table entry value from a table
+     * @return Address part (to table)
+     */
     public static long getAddressOfRawTableEntry(final long p_rawValue) {
         return p_rawValue >> OFFSET_ADDRESS & MASK_ADDRESS;
     }
 
     @Override
     public String toString() {
-        return "m_pointer " + Address.toHexString(m_pointer) +  ", m_address " + Address.toHexString(m_address);
+        return "m_pointer " + Address.toHexString(m_pointer) + ", m_address " + Address.toHexString(m_address);
     }
 }

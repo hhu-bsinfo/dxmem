@@ -22,17 +22,38 @@ import java.io.IOException;
 
 import de.hhu.bsinfo.dxutils.serialization.RandomAccessFileImExporter;
 
+/**
+ * Helper class to dump the heap memory to a file
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class MemoryDumper {
     private final Heap m_heap;
     private final CIDTable m_table;
     private final LIDStore m_lidStore;
 
+    /**
+     * Constructor
+     *
+     * @param p_heap
+     *         Heap instance to dump
+     * @param p_table
+     *         CIDTable instance to dump
+     * @param p_lidStore
+     *         LIDStore to dump
+     */
     public MemoryDumper(final Heap p_heap, final CIDTable p_table, final LIDStore p_lidStore) {
         m_heap = p_heap;
         m_table = p_table;
         m_lidStore = p_lidStore;
     }
 
+    /**
+     * Dump everything to a file
+     *
+     * @param p_outputFile
+     *         Path to output file to dump to
+     */
     public void dump(final String p_outputFile) {
         assert p_outputFile != null;
 

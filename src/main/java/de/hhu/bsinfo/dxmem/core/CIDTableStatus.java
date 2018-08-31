@@ -22,6 +22,11 @@ import de.hhu.bsinfo.dxutils.serialization.Importable;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
+/**
+ * Class to track status of CIDTable
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class CIDTableStatus implements Importable, Exportable {
     int m_totalTableCount;
     int[] m_tableCountLevel = new int[CIDTable.LID_TABLE_LEVELS];
@@ -39,7 +44,8 @@ public class CIDTableStatus implements Importable, Exportable {
     /**
      * Get the number of tables allocated for a specific level
      *
-     * @param p_level Table level to get number of allocated tables
+     * @param p_level
+     *         Table level to get number of allocated tables
      * @return Number of allocated tables for the specified level
      */
     public int getTableCountOfLevel(final int p_level) {
@@ -66,9 +72,9 @@ public class CIDTableStatus implements Importable, Exportable {
      *
      * @return Amount of memory used by the tables (as StorageUnit)
      */
-   public StorageUnit getTotalPayloadMemoryTables() {
+    public StorageUnit getTotalPayloadMemoryTables() {
         return new StorageUnit(m_totalPayloadMemoryTables, "b");
-   }
+    }
 
     @Override
     public String toString() {

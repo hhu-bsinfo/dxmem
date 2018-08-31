@@ -21,19 +21,39 @@ import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importable;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 
+/**
+ * Status object for LIDStore
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class LIDStoreStatus implements Importable, Exportable {
     long m_currentLIDCounter;
     long m_totalFreeLIDs;
     int m_lidsInStore;
 
+    /**
+     * Get the current state of the LID counter
+     *
+     * @return Current LID counter state
+     */
     public long getCurrentLIDCounter() {
         return m_currentLIDCounter;
     }
 
+    /**
+     * Get total number of free LIDs (in store and zombies)
+     *
+     * @return Total number of free LIDs
+     */
     public long getTotalFreeLIDs() {
         return m_totalFreeLIDs;
     }
 
+    /**
+     * Get the total number of LIDs in store
+     *
+     * @return Total number of LIDs in store
+     */
     public int getTotalLIDsInStore() {
         return m_lidsInStore;
     }

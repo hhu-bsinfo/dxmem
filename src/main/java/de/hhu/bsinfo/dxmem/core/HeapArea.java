@@ -16,19 +16,42 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+/**
+ * Data class defining a heap area enclosing data/chunk
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class HeapArea {
     private long m_startAddress;
     private long m_endAddress;
 
+    /**
+     * Constructor
+     *
+     * @param p_startAddress
+     *         Start address of heap area (including)
+     * @param p_endAddress
+     *         End address of heap area (excluding)
+     */
     HeapArea(final long p_startAddress, final long p_endAddress) {
         m_startAddress = p_startAddress;
         m_endAddress = p_endAddress;
     }
 
+    /**
+     * Get the start address (including)
+     *
+     * @return Start address
+     */
     public long getStartAddress() {
         return m_startAddress;
     }
 
+    /**
+     * Get the end address (excluding)
+     *
+     * @return End address
+     */
     public long getEndAddress() {
         return m_endAddress;
     }

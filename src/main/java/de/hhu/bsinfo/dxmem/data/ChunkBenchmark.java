@@ -21,16 +21,34 @@ import java.util.Random;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 
-// chunk with "variable size" used for memory benchmarking to avoid allocations if pooling is not possible
-// can be adopted for actual applications as well (depending on the use case)
+/**
+ * Chunk with "variable size" used for memory benchmarking to avoid allocations if pooling is not possible
+ * can be adopted for actual applications as well (depending on the use case)
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class ChunkBenchmark extends AbstractChunk {
     private final byte[] m_data;
     private int m_currentSize;
 
+    /**
+     * Constructor
+     *
+     * @param p_maxBufferSize
+     *         Max size for buffer
+     */
     public ChunkBenchmark(final int p_maxBufferSize) {
         this(ChunkID.INVALID_ID, p_maxBufferSize);
     }
 
+    /**
+     * Constructor
+     *
+     * @param p_id
+     *         CID to assign
+     * @param p_maxBufferSize
+     *         Max size for buffer
+     */
     public ChunkBenchmark(final long p_id, final int p_maxBufferSize) {
         super(p_id);
 
@@ -38,6 +56,12 @@ public class ChunkBenchmark extends AbstractChunk {
         m_currentSize = p_maxBufferSize;
     }
 
+    /**
+     * Set the current size for the chunk (must be equals or less the max buffer size defined)
+     *
+     * @param p_size
+     *         "Size" of chunk
+     */
     public void setCurrentSize(final int p_size) {
         if (p_size > m_data.length) {
             throw new IllegalStateException("Invalid size " + p_size + " exceeding max size " + m_data.length);
@@ -46,6 +70,9 @@ public class ChunkBenchmark extends AbstractChunk {
         m_currentSize = p_size;
     }
 
+    /**
+     * Fill the chunk with random contents
+     */
     public void fillContents() {
         Random rand = new Random(getID());
 
@@ -54,6 +81,11 @@ public class ChunkBenchmark extends AbstractChunk {
         }
     }
 
+    /**
+     * Verify the random contents
+     *
+     * @return True if ok, false if contents don't match expected
+     */
     public boolean verifyContents() {
         Random rand = new Random(getID());
 

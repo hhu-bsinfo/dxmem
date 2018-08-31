@@ -16,15 +16,31 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+/**
+ * Thread local pool for im-/exporters
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public final class HeapDataStructureImExporterPool {
     private final Heap m_heap;
     private final HeapDataStructureImExporter[] m_pool;
 
+    /**
+     * Constructor
+     *
+     * @param p_heap
+     *         Heap instance
+     */
     public HeapDataStructureImExporterPool(final Heap p_heap) {
         m_heap = p_heap;
         m_pool = new HeapDataStructureImExporter[1024];
     }
 
+    /**
+     * Get an im-/exporter
+     *
+     * @return Im-/Exporter instance
+     */
     public HeapDataStructureImExporter get() {
         HeapDataStructureImExporter tmp = m_pool[(int) Thread.currentThread().getId()];
 

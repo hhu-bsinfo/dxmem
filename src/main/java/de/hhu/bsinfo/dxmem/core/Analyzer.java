@@ -44,6 +44,14 @@ public class Analyzer {
     private ArrayList<HeapArea> m_heapFree;
     private ArrayList<HeapArea> m_heapFragmented;
 
+    /**
+     * Constructor
+     *
+     * @param p_heap
+     *         Heap instance to analyze
+     * @param p_cidTable
+     *         CIDTable instance to analyze
+     */
     public Analyzer(final Heap p_heap, final CIDTable p_cidTable) {
         m_heap = p_heap;
         m_cidTable = p_cidTable;
@@ -58,6 +66,11 @@ public class Analyzer {
         m_heapFragmented = new ArrayList<>();
     }
 
+    /**
+     * Analyze the heap and cid table
+     *
+     * @return True if successful, false on errors
+     */
     public boolean analyze() {
         // TODO analyze heap with cid table in multiple steps
         // 1. cid table scan: gather all entries from the cid table using a scan
@@ -79,18 +92,38 @@ public class Analyzer {
         return cidTableScan() && cidTableVerify() && heapScan1() && heapScan2() && heapVerify();
     }
 
+    /**
+     * Get the collected CIDTable table entries of the analysis
+     *
+     * @return Collected CIDTable table entries
+     */
     public ArrayList<CIDTableTableEntry> getCIDTableTableEntries() {
         return m_cidTableTableEntries;
     }
 
+    /**
+     * Get the collected CIDTable chunk entries of the analysis
+     *
+     * @return Collected CIDTable chunk entries
+     */
     public ArrayList<CIDTableChunkEntry> getCIDTableChunkEntries() {
         return m_cidTableChunkEntries;
     }
 
+    /**
+     * Get the collected CIDTable zombie entries of the analysis
+     *
+     * @return Collected CIDTable zombie entries
+     */
     public ArrayList<CIDTableZombieEntry> getCIDTableZombieEntries() {
         return m_cidTableZombieEntries;
     }
 
+    /**
+     * Scan the CIDTable
+     *
+     * @return True on success, false on error
+     */
     private boolean cidTableScan() {
         LOGGER.debug("Scanning CID table...");
 
@@ -122,6 +155,11 @@ public class Analyzer {
         return true;
     }
 
+    /**
+     * Verify the CIDTable
+     *
+     * @return True on success, false on error
+     */
     private boolean cidTableVerify() {
         LOGGER.debug("Verifying table entries (%d)...", m_cidTableTableEntries.size());
 
@@ -181,6 +219,11 @@ public class Analyzer {
         return true;
     }
 
+    /**
+     * Execute first phase of heap scan
+     *
+     * @return True on success, false on error
+     */
     private boolean heapScan1() {
         LOGGER.debug("Heap scan tables...");
 
@@ -215,6 +258,11 @@ public class Analyzer {
         return true;
     }
 
+    /**
+     * Execute second phase of heap scan
+     *
+     * @return True on success, false on error
+     */
     private boolean heapScan2() {
         LOGGER.debug("Heap scan free block lists...");
 
@@ -233,6 +281,11 @@ public class Analyzer {
         return true;
     }
 
+    /**
+     * Verify the heap
+     *
+     * @return True on success, false on error
+     */
     private boolean heapVerify() {
         LOGGER.debug("Heap verify, sorting addresses...");
 

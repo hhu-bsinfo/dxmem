@@ -34,10 +34,22 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     private long m_addressPayload;
     private int m_currentOffset;
 
+    /**
+     * Constructor
+     *
+     * @param p_heap
+     *         Heap instance
+     */
     HeapDataStructureImExporter(final Heap p_heap) {
         m_heap = p_heap;
     }
 
+    /**
+     * Set the address to start de-/serialization at
+     *
+     * @param p_payloadAddress
+     *         Start address of payload of chunk
+     */
     public void setHeapAddress(final long p_payloadAddress) {
         m_addressPayload = p_payloadAddress;
         m_currentOffset = 0;

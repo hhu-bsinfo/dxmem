@@ -16,8 +16,15 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+/**
+ * Utility class for locking chunks in CIDTable
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public final class LockUtils {
-
+    /**
+     * Return value/status for lock operation
+     */
     public enum LockStatus {
         OK,
         INVALID,
@@ -31,9 +38,19 @@ public final class LockUtils {
 
     }
 
-    // this call might also re-read the entry if acquiring the lock did not succeed on the first try
-    // if the lock was acquired successfully, the (re-read) entry is guaranteed to be valid
-    // retry timeout -1 = infinite, 0 = one shot, > 0 timeout in ms
+    /**
+     * Acquire a read lock to a chunk
+     * This call might also re-read the entry if acquiring the lock did not succeed on the first try
+     * if the lock was acquired successfully, the (re-read) entry is guaranteed to be valid
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to lock
+     * @param p_retryTimeoutMs
+     *         -1 = infinite, 0 = one shot, > 0 timeout in ms
+     * @return Lock status
+     */
     public static LockStatus acquireReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
             final int p_retryTimeoutMs) {
         long startTime = 0;
@@ -74,6 +91,14 @@ public final class LockUtils {
         }
     }
 
+    /**
+     * Release an acquired read lock
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to unlock
+     */
     public static void releaseReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
         while (true) {
             // always get the current state first before CAS
@@ -96,9 +121,19 @@ public final class LockUtils {
         }
     }
 
-    // this call might also re-read the entry if acquiring the lock did not succeed on the first try
-    // if the lock was acquired successfully, the (re-read) entry is guaranteed to be valid
-    // retry timeout -1 = infinite, 0 = one shot, > 0 timeout in ms
+    /**
+     * Acquire a write lock to a chunk
+     * This call might also re-read the entry if acquiring the lock did not succeed on the first try
+     * if the lock was acquired successfully, the (re-read) entry is guaranteed to be valid
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to lock
+     * @param p_retryTimeoutMs
+     *         -1 = infinite, 0 = one shot, > 0 timeout in ms
+     * @return Lock status
+     */
     public static LockStatus acquireWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
             final int p_retryTimeoutMs) {
         long startTime = 0;
@@ -167,6 +202,14 @@ public final class LockUtils {
         }
     }
 
+    /**
+     * Release an acquired write lock
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to unlock
+     */
     public static void releaseWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
         while (true) {
             // always get the current state first before CAS

@@ -322,7 +322,14 @@ public final class Heap implements Importable, Exportable {
         m_lock.unlock();
     }
 
-    // writes new address to table entry
+    /**
+     * Resize an existing chunk
+     *
+     * @param p_tableEntry
+     *         Table entry of existing chunk to resize
+     * @param p_newSize
+     *         New size
+     */
     public void resize(final CIDTableChunkEntry p_tableEntry, final int p_newSize) {
         // TODO implement resize
         // shrinking is simple
@@ -1468,13 +1475,15 @@ public final class Heap implements Importable, Exportable {
         }
 
         if (p_address + p_offset > m_status.m_totalSizeBytes) {
-            throw new MemoryRuntimeException("Address + offset exceeds memory bounds (" + m_status.m_totalSizeBytes + ": " +
-                    Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
+            throw new MemoryRuntimeException(
+                    "Address + offset exceeds memory bounds (" + m_status.m_totalSizeBytes + ": " +
+                            Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
         }
 
         if (p_address + p_offset + p_length > m_status.m_totalSizeBytes) {
-            throw new MemoryRuntimeException("Address + offset + length exceeds memory bounds (" + m_status.m_totalSizeBytes +
-                    ": " + Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
+            throw new MemoryRuntimeException(
+                    "Address + offset + length exceeds memory bounds (" + m_status.m_totalSizeBytes +
+                            ": " + Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
         }
 
         return true;

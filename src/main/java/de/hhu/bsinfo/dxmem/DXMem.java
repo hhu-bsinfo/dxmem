@@ -34,6 +34,11 @@ import de.hhu.bsinfo.dxmem.operations.Reserve;
 import de.hhu.bsinfo.dxmem.operations.Size;
 import de.hhu.bsinfo.dxmem.operations.Stats;
 
+/**
+ * DXMem "main" class. Access to all operations offered by the the memory management
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class DXMem {
     private Context m_context;
 
@@ -58,23 +63,45 @@ public class DXMem {
     private Analyze m_analyze;
     private Dump m_dump;
 
+    /**
+     * Constructor
+     * Load a memory dump from a file and initialize DXMem with it.
+     *
+     * @param p_memdumpFile
+     *         Path to memory dump file
+     */
     public DXMem(final String p_memdumpFile) {
         m_context = new Context(p_memdumpFile);
 
         initOperations();
     }
 
+    /**
+     * Constructor
+     * Create a new empty heap and initialize DXMem.
+     *
+     * @param p_nodeId
+     *         Node id of current instance
+     * @param p_heapSize
+     *         Size of heap to create (in bytes)
+     */
     public DXMem(final short p_nodeId, final long p_heapSize) {
         m_context = new Context(p_nodeId, p_heapSize);
 
         initOperations();
     }
 
+    /**
+     * Shutdown and cleanup
+     */
     public void shutdown() {
         m_context.destroy();
         m_context = null;
     }
 
+    /**
+     * Reset DXMem (shutdown + init)
+     */
     public void reset() {
         short nodeId = m_context.getNodeId();
         long heapSize = m_context.getHeap().getStatus().getTotalSizeBytes();
@@ -84,70 +111,153 @@ public class DXMem {
         initOperations();
     }
 
+    /**
+     * Get the create operation
+     *
+     * @return Operation
+     */
     public Create create() {
         return m_create;
     }
 
+    /**
+     * Get the createReserved operation
+     *
+     * @return Operation
+     */
     public CreateReserved createReserved() {
         return m_createReserved;
     }
 
+    /**
+     * Get the get operation
+     *
+     * @return Operation
+     */
     public Get get() {
         return m_get;
     }
 
+    /**
+     * Get the put operation
+     *
+     * @return Operation
+     */
     public Put put() {
         return m_put;
     }
 
+    /**
+     * Get the remove operation
+     *
+     * @return Operation
+     */
     public Remove remove() {
         return m_remove;
     }
 
+    /**
+     * Get the reserve operation
+     *
+     * @return Operation
+     */
     public Reserve reserve() {
         return m_reserve;
     }
 
+    /**
+     * Get the exists operation
+     *
+     * @return Operation
+     */
     public Exists exists() {
         return m_exists;
     }
 
+    /**
+     * Get the size operation
+     *
+     * @return Operation
+     */
     public Size size() {
         return m_size;
     }
 
+    /**
+     * Get the pinning operation
+     *
+     * @return Operation
+     */
     public Pinning pinning() {
         return m_pinning;
     }
 
+    /**
+     * Get the rawRead operation
+     *
+     * @return Operation
+     */
     public RawRead rawRead() {
         return m_rawRead;
     }
 
+    /**
+     * Get the rawWrite operation
+     *
+     * @return Operation
+     */
     public RawWrite rawWrite() {
         return m_rawWrite;
     }
 
+    /**
+     * Get the cidStatus operation
+     *
+     * @return Operation
+     */
     public CIDStatus cidStatus() {
         return m_cidStatus;
     }
 
+    /**
+     * Get the stats operation
+     *
+     * @return Operation
+     */
     public Stats stats() {
         return m_stats;
     }
 
+    /**
+     * Get the recovery operation
+     *
+     * @return Operation
+     */
     public Recovery recovery() {
         return m_recovery;
     }
 
+    /**
+     * Get the analyze operation
+     *
+     * @return Operation
+     */
     public Analyze analyze() {
         return m_analyze;
     }
 
+    /**
+     * Get the dump operation
+     *
+     * @return Operation
+     */
     public Dump dump() {
         return m_dump;
     }
 
+    /**
+     * Initialize all operations
+     */
     private void initOperations() {
         m_create = new Create(m_context);
         m_createReserved = new CreateReserved(m_context);

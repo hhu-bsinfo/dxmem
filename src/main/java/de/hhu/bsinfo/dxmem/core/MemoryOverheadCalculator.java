@@ -18,6 +18,11 @@ package de.hhu.bsinfo.dxmem.core;
 
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
+/**
+ * Tool to calculate memory overhead when storing data in DXMem
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class MemoryOverheadCalculator {
     private final int m_chunkPayloadSize;
     private final long m_totalChunkCount;
@@ -29,6 +34,14 @@ public class MemoryOverheadCalculator {
     private final StorageUnit m_overheadMem;
     private final float m_overhead;
 
+    /**
+     * Constructor
+     *
+     * @param p_chunkPayloadSize
+     *         Payload size of chunk
+     * @param p_totalChunkCount
+     *         Total number of chunks
+     */
     public MemoryOverheadCalculator(final int p_chunkPayloadSize, final long p_totalChunkCount) {
         m_chunkPayloadSize = p_chunkPayloadSize;
         m_totalChunkCount = p_totalChunkCount;
@@ -56,6 +69,12 @@ public class MemoryOverheadCalculator {
         m_overhead = ((float) m_overheadMem.getBytes() / m_totalMem.getBytes()) * 100.0f;
     }
 
+    /**
+     * Main entry point
+     *
+     * @param p_args
+     *         Cmd args
+     */
     public static void main(final String[] p_args) {
         if (p_args.length < 2) {
             System.out.println("Calculate the required space and overhead of the memory manager");
@@ -68,6 +87,15 @@ public class MemoryOverheadCalculator {
         System.out.println(calc);
     }
 
+    /**
+     * Calculate the overhead based on HeapStatus and CIDTableStatus
+     *
+     * @param p_heapStatus
+     *         HeapStatus instance
+     * @param p_cidTableStatus
+     *         CIDTableStatus instance
+     * @return Memory metadata overhead (0.0 - 1.0)
+     */
     public static double calculate(final HeapStatus p_heapStatus, final CIDTableStatus p_cidTableStatus) {
         long dataPayloadBytes = p_heapStatus.getAllocatedPayloadBytes() -
                 p_cidTableStatus.getTotalPayloadMemoryTablesBytes();
@@ -77,38 +105,83 @@ public class MemoryOverheadCalculator {
         return (double) metadataOverheadBytes / p_heapStatus.getUsedSizeBytes();
     }
 
+    /**
+     * Get the chunk payload size
+     *
+     * @return Chunk payload size
+     */
     public int getChunkPayloadSize() {
         return m_chunkPayloadSize;
     }
 
+    /**
+     * Get the total chunk count
+     *
+     * @return Total chunk count
+     */
     public long getTotalChunkCount() {
         return m_totalChunkCount;
     }
 
+    /**
+     * Get the total chunk payload memory used
+     *
+     * @return Total chunk payload memory
+     */
     public StorageUnit getTotalPayloadMem() {
         return m_totalPayloadMem;
     }
 
+    /**
+     * Get the total memory used for chunks
+     *
+     * @return Memory used for chunks
+     */
     public StorageUnit getChunkSizeMemory() {
         return m_chunkSizeMemory;
     }
 
+    /**
+     * Get the memory used for NID tables
+     *
+     * @return Memory used for NID tables
+     */
     public StorageUnit getNIDTableSize() {
         return m_nidTableSize;
     }
 
+    /**
+     * Get the memory used for LID tables
+     *
+     * @return Memory used for LID tables (per level)
+     */
     public StorageUnit[] getLIDTableSizes() {
         return m_lidTableSizes;
     }
 
+    /**
+     * Get the total amount of memory used
+     *
+     * @return Total amount of memory used
+     */
     public StorageUnit getTotalMem() {
         return m_totalMem;
     }
 
+    /**
+     * Get the total amount of overhead
+     *
+     * @return Total amount of overhead
+     */
     public StorageUnit getOverheadMem() {
         return m_overheadMem;
     }
 
+    /**
+     * Get the memory metadata overhead
+     *
+     * @return Memory metadata overhead (0.0 - 1.0)
+     */
     public float getOverhead() {
         return m_overhead;
     }
@@ -157,20 +230,50 @@ public class MemoryOverheadCalculator {
         return builder.toString();
     }
 
+    /**
+     * Calculate the size of a NID table
+     *
+     * @return Size of NID table
+     */
     private static long calcSizeNIDTable() {
         return (long) CIDTable.ENTRIES_PER_NID_LEVEL * CIDTable.ENTRY_SIZE;
     }
 
+    /**
+     * Calculate the size of a LID table
+     *
+     * @param p_tableLevel
+     *         Table level
+     * @param p_totalNumChunks
+     *         Total number of chunks
+     * @return Size of LID table
+     */
     private static long calcSizeLIDTable(final int p_tableLevel, final long p_totalNumChunks) {
         // round up to full lid tables
         return (long) Math.ceil(p_totalNumChunks / Math.pow(2, 12 * (p_tableLevel + 1))) *
                 CIDTable.ENTRIES_PER_LID_LEVEL * CIDTable.ENTRY_SIZE;
     }
 
+    /**
+     * Calculate the total chunk size
+     *
+     * @param p_chunkPayloadSize
+     *         Payload size of chunk
+     * @param p_totalChunkCount
+     *         Total number of chunks
+     * @return Total memory used for chunks
+     */
     private static long calcTotalChunkSizeMemory(final int p_chunkPayloadSize, final long p_totalChunkCount) {
         return calcTotalChunkSizeMemory(p_chunkPayloadSize) * p_totalChunkCount;
     }
 
+    /**
+     * Calculate the total size for a single chunk
+     *
+     * @param p_chunkPayloadSize
+     *         Chunk payload size
+     * @return Total size used in memory for chunk
+     */
     private static long calcTotalChunkSizeMemory(final int p_chunkPayloadSize) {
         return Heap.SIZE_MARKER_BYTE + CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(p_chunkPayloadSize) +
                 p_chunkPayloadSize;

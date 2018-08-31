@@ -19,11 +19,16 @@ package de.hhu.bsinfo.dxmem.core;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 
 /**
- * Cache for translated addresses
+ * Cache for translated addresses (CID -> address)
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public final class CIDTranslationCache {
     private Cache[] m_cache;
 
+    /**
+     * Constructor
+     */
     public CIDTranslationCache() {
         // NOTE: 10 seems to be a good value because it doesn't add too much overhead when creating huge ranges of chunks
         // but still allows 10 * 4096 translations to be cached for fast lookup and gets/puts
@@ -58,7 +63,9 @@ public final class CIDTranslationCache {
         m_cache[(int) Thread.currentThread().getId()].putTableLevel0(p_chunkID, p_addressTable);
     }
 
-    // thread local cache
+    /**
+     * Thread local cache
+     */
     private static final class Cache {
         private long[] m_chunkIDs;
         private long[] m_tableLevel0Addr;

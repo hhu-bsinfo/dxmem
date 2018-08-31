@@ -65,6 +65,17 @@ public final class CIDTable implements Importable, Exportable {
     // lock to protect CID table on table creation
     private final ReentrantLock m_tableManagementLock = new ReentrantLock(false);
 
+    /**
+     * Constructor
+     * Create a new (empty) CIDTable
+     *
+     * @param p_ownNodeId
+     *         Node id of current instance
+     * @param p_heap
+     *         Heap instance
+     * @param p_cidTranslationCache
+     *         CIDTranslationCache instance
+     */
     CIDTable(final short p_ownNodeId, final Heap p_heap, final CIDTranslationCache p_cidTranslationCache) {
         m_ownNodeId = p_ownNodeId;
         m_heap = p_heap;
@@ -78,20 +89,40 @@ public final class CIDTable implements Importable, Exportable {
         LOGGER.info("CIDTable: init success (page directory at: 0x%X)", m_addressTableDirectory);
     }
 
-    // for reading dump from file
+    /**
+     * Constructor
+     * Create CIDTable to load from a memory dump file
+     */
     CIDTable() {
         LOGGER.info("Created 'invalid' CIDTable for loading dump from file");
     }
 
+    /**
+     * Get the node id of the current instance
+     *
+     * @return Node id of current instance
+     */
     public short getOwnNodeId() {
         return m_ownNodeId;
     }
 
+    /**
+     * Get the current status of the CIDTable
+     *
+     * @return Current status of CIDTable
+     */
     public CIDTableStatus getStatus() {
         return m_status;
     }
 
-    // translate for existing (or non existing) entry without locking
+    /**
+     * Translate an existing (or non existing) entry without locking the entry
+     *
+     * @param p_chunkID
+     *         Chunk id to translate
+     * @param p_entry
+     *         Reference to CIDTableChunkEntry object to write results to
+     */
     public void translate(final long p_chunkID, final CIDTableChunkEntry p_entry) {
         long index;
         long entry;
@@ -145,6 +176,14 @@ public final class CIDTable implements Importable, Exportable {
         } while (level >= 0);
     }
 
+    /**
+     * Insert a new (or overwrite existing) entry
+     *
+     * @param p_chunkID
+     *         Chunk id to insert at
+     * @param p_entry
+     *         Entry to insert
+     */
     public void insert(final long p_chunkID, final CIDTableChunkEntry p_entry) {
         long index;
         long entry;
@@ -224,31 +263,62 @@ public final class CIDTable implements Importable, Exportable {
         } while (level >= 0);
     }
 
-    // re-read the entry. necessary if atomic updates failed
+    /**
+     * Re-read the entry. Necessary if atomic updates failed
+     *
+     * @param p_entry
+     *         Entry to re-read
+     */
     public void entryReread(final CIDTableChunkEntry p_entry) {
         p_entry.set(p_entry.getPointer(), m_heap.readLong(p_entry.getPointer(), 0));
     }
 
-    // non atomic update to be used if entry is write locked anyway
+    /**
+     * Non atomic update to be used if entry is write locked anyway
+     *
+     * @param p_entry
+     *         Entry to update
+     */
     public void entryUpdate(final CIDTableChunkEntry p_entry) {
         m_heap.writeLong(p_entry.getPointer(), 0, p_entry.getValue());
     }
 
-    // non atomic update for a delete operation
+    /**
+     * Flag an entry as free (non atomic update for a delete operation)
+     *
+     * @param p_entry
+     *         Entry to flag as free
+     */
     public void entryFlagFree(final CIDTableChunkEntry p_entry) {
         m_heap.writeLong(p_entry.getPointer(), 0, CIDTableChunkEntry.RAW_VALUE_FREE);
     }
 
-    // non atomic update for a delete operation
+    /**
+     * Flag an entry as zombie (non atomic update for a delete operation)
+     *
+     * @param p_entry
+     *         Entry to flag as zombie
+     */
     public void entryFlagZombie(final CIDTableChunkEntry p_entry) {
         m_heap.writeLong(p_entry.getPointer(), 0, CIDTableZombieEntry.RAW_VALUE);
     }
 
-    // try an atomic update of an altered entry in memory
+    /**
+     * Try an atomic update of an altered entry in memory
+     *
+     * @param p_entry
+     *         Entry to update
+     * @return True if update successful, false otherwise. Entry is not automatically re-read
+     */
     public boolean entryAtomicUpdate(final CIDTableChunkEntry p_entry) {
         return m_heap.casLong(p_entry.getPointer(), 0, p_entry.getInitalValue(), p_entry.getValue());
     }
 
+    /**
+     * Returns the ChunkID ranges of all local and migrated chunks
+     *
+     * @return the ChunkID ranges
+     */
     public ChunkIDRanges getCIDRangesOfAllChunks() {
         ArrayListLong ret;
         long entry;
@@ -282,6 +352,11 @@ public final class CIDTable implements Importable, Exportable {
         return ChunkIDRanges.wrap(ret);
     }
 
+    /**
+     * Get all ranges of all migrated chunks
+     *
+     * @return Chunk ID ranges of all migrated chunks
+     */
     public ChunkIDRanges getCIDRangesOfAllMigratedChunks() {
         ArrayListLong ret;
         long entry;
@@ -368,7 +443,15 @@ public final class CIDTable implements Importable, Exportable {
         }
     }
 
-    // used for unpinning chunks with pinned address
+    /**
+     * Inverse search for CID to chunk address. Used for unpinning chunks with pinned addresses
+     *
+     * @param p_entry
+     *         Reference to write results to
+     * @param p_chunkAddress
+     *         Address of pinned chunk
+     * @return CID for address, or invalid CID if not found.
+     */
     public long getTableEntryWithChunkAddress(final CIDTableChunkEntry p_entry, final long p_chunkAddress) {
         p_entry.clear();
         p_entry.setAddress(p_chunkAddress);
@@ -382,6 +465,19 @@ public final class CIDTable implements Importable, Exportable {
         return cid;
     }
 
+    /**
+     * Search, get and remove zombie entries. Used in LIDStore when re-using CIDs
+     *
+     * @param p_nodeId
+     *         Node id of table to start searching in
+     * @param p_ringBuffer
+     *         Ring buffer to write found zombies to
+     * @param p_offset
+     *         Offset in ring buffer where to start
+     * @param p_maxCount
+     *         Max number of elements to search
+     * @return Number of zombies found
+     */
     int getAndEliminateZombies(final short p_nodeId, final long[] p_ringBuffer, final int p_offset,
             final int p_maxCount) {
         int count = 0;
@@ -397,6 +493,17 @@ public final class CIDTable implements Importable, Exportable {
 
     // for debugging (analyzer)
     // pass null for list references to not harvest entries for that category
+
+    /**
+     * For debugging (analyzer): deep scan all tables. Pass null for list references to omit harvesting that category
+     *
+     * @param p_tableEntries
+     *         Reference to ArrayList to return found table entries to
+     * @param p_chunkEntries
+     *         Reference to ArrayList to return found chunk entries to
+     * @param p_zombieEntries
+     *         Reference to ArrayList to return found zombie entries to
+     */
     void scanAllTables(final ArrayList<CIDTableTableEntry> p_tableEntries,
             final ArrayList<CIDTableChunkEntry> p_chunkEntries, final ArrayList<CIDTableZombieEntry> p_zombieEntries) {
         // root table
@@ -419,10 +526,11 @@ public final class CIDTable implements Importable, Exportable {
     }
 
     /**
-     * For debugging and heap analysis
+     * For debugging and heap analysis. Find heap area where table entry is stored
      *
      * @param p_entry
-     * @return
+     *         Table entry to search
+     * @return HeapArea which points to memory where table is stored in memory
      */
     HeapArea scanCIDTableEntry(final CIDTableTableEntry p_entry) {
         int tableSize;
@@ -439,6 +547,25 @@ public final class CIDTable implements Importable, Exportable {
         return new HeapArea(p_entry.getAddress() - 1, p_entry.getAddress() + tableSize);
     }
 
+    /**
+     * Get and remove zombie entries from lid table (recursive call)
+     *
+     * @param p_addressTable
+     *         Address of table to iterate
+     * @param p_level
+     *         Current table level
+     * @param p_cid
+     *         Current cid
+     * @param p_currentCount
+     *         Zombies found so far by child calls
+     * @param p_ringBuffer
+     *         Reference to ring buffer to write zombies to
+     * @param p_offset
+     *         Offset in ring buffer where to start writing to
+     * @param p_maxCount
+     *         Max number of zombies to get
+     * @return Number of zombies found and removed
+     */
     private int getAndEliminateZombiesRecursiveLIDTable(final long p_addressTable, final int p_level, final long p_cid,
             final int p_currentCount, final long[] p_ringBuffer, final int p_offset, final int p_maxCount) {
         int count = 0;
@@ -473,6 +600,22 @@ public final class CIDTable implements Importable, Exportable {
         return count;
     }
 
+    /**
+     * Recursive call for deep scan of cid table (debugging/analysis)
+     *
+     * @param p_addressTable
+     *         Address of table to iterate
+     * @param p_level
+     *         Current table level
+     * @param p_cid
+     *         Current cid
+     * @param p_tableEntries
+     *         Reference to ArrayList to return found table entries to
+     * @param p_chunkEntries
+     *         Reference to ArrayList to return found chunk entries to
+     * @param p_zombieEntries
+     *         Reference to ArrayList to return found zombie entries to
+     */
     private void scanRecursiveLIDTable(final long p_addressTable, final int p_level, final long p_cid,
             final ArrayList<CIDTableTableEntry> p_tableEntries, final ArrayList<CIDTableChunkEntry> p_chunkEntries,
             final ArrayList<CIDTableZombieEntry> p_zombieEntries) {
@@ -509,7 +652,8 @@ public final class CIDTable implements Importable, Exportable {
     /**
      * Creates the NodeID table
      *
-     * @return the address of the table
+     * @param p_entry
+     *         Reference to table entry to write results to
      */
     private void createNIDTable(final CIDTableTableEntry p_entry) {
         CIDTableChunkEntry tmp = new CIDTableChunkEntry();
@@ -532,9 +676,12 @@ public final class CIDTable implements Importable, Exportable {
     }
 
     /**
-     * Creates a table
+     * Creates a LID table
      *
-     * @return the address of the table
+     * @param p_entry
+     *         Reference to table entry to write results to
+     * @param p_level
+     *         Table level to create
      */
     private void createLIDTable(final CIDTableTableEntry p_entry, final int p_level) {
         CIDTableChunkEntry tmp = new CIDTableChunkEntry();
@@ -559,7 +706,6 @@ public final class CIDTable implements Importable, Exportable {
 
     /**
      * Reads a table entry
-     * (Need to be package-private because of the analyzer)
      *
      * @param p_addressTable
      *         the table
@@ -585,10 +731,32 @@ public final class CIDTable implements Importable, Exportable {
         m_heap.writeLong(p_addressTable, p_index * ENTRY_SIZE, p_entry);
     }
 
+    /**
+     * Calculate the absolute memory address of a table entry
+     *
+     * @param p_addressTable
+     *         Base address of table
+     * @param p_index
+     *         Index into table
+     * @return Absolute memory address of entry in table
+     */
     private long calcAddressTableEntry(final long p_addressTable, final long p_index) {
         return p_addressTable + p_index * ENTRY_SIZE;
     }
 
+    /**
+     * Find a table entry using the address (recursive call)
+     *
+     * @param p_entry
+     *         Reference to entry to write results to
+     * @param p_cid
+     *         Current cid
+     * @param p_addressTable
+     *         Address of current table
+     * @param p_level
+     *         Current level of table
+     * @return CID of address if found, invalid CID if not found
+     */
     private long getTableEntryWithChunkAddressRecursive(final CIDTableChunkEntry p_entry, final long p_cid,
             final long p_addressTable, final int p_level) {
         if (p_addressTable == Address.INVALID) {

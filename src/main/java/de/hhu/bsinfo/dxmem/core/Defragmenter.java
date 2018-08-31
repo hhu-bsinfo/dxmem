@@ -19,6 +19,11 @@ package de.hhu.bsinfo.dxmem.core;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Defragmenter
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Defragmenter {
     // TODO stub for now but we need to call the locks in the code path to ensure everything's ready
     // for the future implementation
@@ -26,6 +31,12 @@ public class Defragmenter {
     private final boolean m_enabled;
     private final ReadWriteLock m_lock;
 
+    /**
+     * Constructor
+     *
+     * @param p_enabled
+     *         True to enable defragmenter, false to disable
+     */
     public Defragmenter(final boolean p_enabled) {
         m_enabled = p_enabled;
 

@@ -16,6 +16,11 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+/**
+ * Wrapper object used to wrap various data structures used in operations
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Context {
     private final short m_nodeId;
     private final Heap m_heap;
@@ -26,6 +31,13 @@ public class Context {
     private final HeapDataStructureImExporterPool m_dataStructureImExporterPool;
     private final Defragmenter m_defragmenter;
 
+    /**
+     * Constructor
+     * Used when heap is loaded from a mem dump file
+     *
+     * @param p_memdumpFile
+     *         Path to memory dump file
+     */
     public Context(final String p_memdumpFile) {
         MemoryLoader loader = new MemoryLoader();
         loader.load(p_memdumpFile);
@@ -44,6 +56,14 @@ public class Context {
         m_defragmenter = new Defragmenter(false);
     }
 
+    /**
+     * Constructor
+     *
+     * @param p_ownNodeId
+     *         Node id of current instance
+     * @param p_sizeBytes
+     *         Size of heap in bytes
+     */
     public Context(final short p_ownNodeId, final long p_sizeBytes) {
         m_nodeId = p_ownNodeId;
         m_cidTranslationCache = new CIDTranslationCache();
@@ -58,34 +78,72 @@ public class Context {
         m_defragmenter = new Defragmenter(false);
     }
 
+    /**
+     * Destroy the context
+     */
     public void destroy() {
         m_heap.destroy();
     }
 
+    /**
+     * Get the node id of the current instance
+     *
+     * @return Node id
+     */
     public short getNodeId() {
         return m_nodeId;
     }
 
+    /**
+     * Get the heap
+     *
+     * @return Heap
+     */
     public Heap getHeap() {
         return m_heap;
     }
 
+    /**
+     * Get the CIDTable
+     *
+     * @return CIDTable
+     */
     public CIDTable getCIDTable() {
         return m_cidTable;
     }
 
+    /**
+     * Get the LIDStore
+     *
+     * @return LIDStore
+     */
     public LIDStore getLIDStore() {
         return m_lidStore;
     }
 
+    /**
+     * Get the CIDTableEntryPool
+     *
+     * @return CIDTableEntryPool
+     */
     public CIDTableEntryPool getCIDTableEntryPool() {
         return m_cidTableEntryPool;
     }
 
+    /**
+     * Get the HeapDataStructureImExporterPool
+     *
+     * @return HeapDataStructureImExporterPool
+     */
     public HeapDataStructureImExporterPool getDataStructureImExporterPool() {
         return m_dataStructureImExporterPool;
     }
 
+    /**
+     * Get the Defragmenter
+     *
+     * @return Defragmenter
+     */
     public Defragmenter getDefragmenter() {
         return m_defragmenter;
     }

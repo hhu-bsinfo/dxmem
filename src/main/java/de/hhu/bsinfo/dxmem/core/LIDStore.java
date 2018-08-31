@@ -30,8 +30,8 @@ import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 /**
  * Stores free LocalIDs
  *
- * @author Florian Klein
- * 30.04.2014
+ * @author Florian Klein 30.04.2014
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public final class LIDStore implements Importable, Exportable {
     private static final int STORE_CAPACITY = 100000;
@@ -39,9 +39,9 @@ public final class LIDStore implements Importable, Exportable {
     private SpareLIDStore m_spareLIDStore;
     private AtomicLong m_localIDCounter;
 
-    // Constructors
-
-    // for importing from memory dump
+    /**
+     * Constructor for importing from memory dump
+     */
     LIDStore() {
         m_spareLIDStore = new SpareLIDStore();
         m_localIDCounter = new AtomicLong(0);
@@ -49,12 +49,22 @@ public final class LIDStore implements Importable, Exportable {
 
     /**
      * Creates an instance of LIDStore
+     *
+     * @param p_ownNodeId
+     *         Node id of current instance
+     * @param p_cidTable
+     *         CIDTable instance
      */
     LIDStore(final short p_ownNodeId, final CIDTable p_cidTable) {
         m_spareLIDStore = new SpareLIDStore(p_ownNodeId, p_cidTable, STORE_CAPACITY);
         m_localIDCounter = new AtomicLong(0);
     }
 
+    /**
+     * Get the status object
+     *
+     * @return Status object
+     */
     public LIDStoreStatus getStatus() {
         LIDStoreStatus status = new LIDStoreStatus();
 
@@ -65,10 +75,20 @@ public final class LIDStore implements Importable, Exportable {
         return status;
     }
 
+    /**
+     * Get the currently highest LID used
+     *
+     * @return Currently highest LID used
+     */
     public long getCurrentHighestLID() {
         return m_localIDCounter.get() - 1;
     }
 
+    /**
+     * Get an LID from the store
+     *
+     * @return LID
+     */
     public long get() {
         long ret;
 
@@ -86,6 +106,16 @@ public final class LIDStore implements Importable, Exportable {
         return ret;
     }
 
+    /**
+     * Get multiple LIDs from the store
+     *
+     * @param p_lids
+     *         Array to write LIDs to
+     * @param p_offset
+     *         Offset to start in Array
+     * @param p_count
+     *         Number of LIDs to get
+     */
     public void get(final long[] p_lids, final int p_offset, final int p_count) {
         assert p_lids != null;
         assert p_count > 0;
@@ -121,6 +151,16 @@ public final class LIDStore implements Importable, Exportable {
         }
     }
 
+    /**
+     * Get multiple consecutive LIDs
+     *
+     * @param p_lids
+     *         Array to write LIDs to
+     * @param p_offset
+     *         Offset to start in Array
+     * @param p_count
+     *         Number of LIDs to get
+     */
     public void getConsecutive(final long[] p_lids, final int p_offset, final int p_count) {
         assert p_lids != null;
         assert p_count > 0;
@@ -148,11 +188,11 @@ public final class LIDStore implements Importable, Exportable {
     }
 
     /**
-     * Puts a free LocalID
+     * Puts a free LID back
      *
-     * @param p_localID
-     *         a LocalID
-     * @return True if adding an entry to our local ID store was successful, false otherwise.
+     * @param p_lid
+     *         LID to put back
+     * @return True if adding an entry to store was successful, false otherwise (full)
      */
     public boolean put(final long p_lid) {
         return m_spareLIDStore.put(p_lid);
@@ -175,9 +215,12 @@ public final class LIDStore implements Importable, Exportable {
         return Long.BYTES + m_spareLIDStore.sizeofObject();
     }
 
-    // note: using a lock here because this simplifies synchronization and we can't let
-    // multiple threads re-fill the spare lid store when it's empty but there are still
-    // zombie entries in the cid table
+    /**
+     * Store for spare free LIDs
+     * Note: using a lock here because this simplifies synchronization and we can't let
+     * multiple threads re-fill the spare lid store when it's empty but there are still
+     * zombie entries in the cid table
+     */
     public static final class SpareLIDStore implements Importable, Exportable {
         private short m_ownNodeId;
         private CIDTable m_cidTable;
@@ -195,11 +238,23 @@ public final class LIDStore implements Importable, Exportable {
 
         private final Lock m_ringBufferLock = new ReentrantLock(false);
 
-        // for importing from memory dump
+        /**
+         * Constructor for importing from memory dump
+         */
         SpareLIDStore() {
 
         }
 
+        /**
+         * Constructor
+         *
+         * @param p_ownNodeId
+         *         Node id of current instance
+         * @param p_cidTable
+         *         CIDTable instance
+         * @param p_capacity
+         *         Capacity of store
+         */
         SpareLIDStore(final short p_ownNodeId, final CIDTable p_cidTable, final int p_capacity) {
             m_ownNodeId = p_ownNodeId;
             m_cidTable = p_cidTable;
@@ -211,7 +266,11 @@ public final class LIDStore implements Importable, Exportable {
             m_overallCount = 0;
         }
 
-        // returns -1 if store is empty and no zombies are available anymore
+        /**
+         * Get a LID from the store
+         *
+         * @return LID or -1 if store is empty and no zombies are available anymore
+         */
         public long get() {
             long ret = -1;
 
@@ -237,6 +296,17 @@ public final class LIDStore implements Importable, Exportable {
             return ret;
         }
 
+        /**
+         * Get multiple LIDs from the store
+         *
+         * @param p_lids
+         *         Array to write LIDs to
+         * @param p_offset
+         *         Offset to start in Array
+         * @param p_count
+         *         Number of LIDs to get
+         * @return Number of LIDs returned. If less than p_count, store is empty and no zombies are available anymore
+         */
         public int get(final long[] p_lids, final int p_offset, final int p_count) {
             assert p_lids != null;
             assert p_offset >= 0;
@@ -271,6 +341,13 @@ public final class LIDStore implements Importable, Exportable {
             return counter;
         }
 
+        /**
+         * Put a LID to the store
+         *
+         * @param p_lid
+         *         LID to add to the store
+         * @return True if successful, false if store is full (callers has to treat chunk as a zombie)
+         */
         public boolean put(final long p_lid) {
             boolean ret;
 
@@ -294,6 +371,11 @@ public final class LIDStore implements Importable, Exportable {
             return ret;
         }
 
+        /**
+         * Refill the store. This calls a deep search for zombie entries in the CIDTable
+         *
+         * @return True if zombie entries were found, false if none were found
+         */
         private boolean refillStore() {
             return m_cidTable.getAndEliminateZombies(m_ownNodeId, m_ringBufferSpareLocalIDs, m_putPosition,
                     m_ringBufferSpareLocalIDs.length - m_count) > 0;

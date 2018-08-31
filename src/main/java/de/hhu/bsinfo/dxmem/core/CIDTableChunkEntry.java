@@ -16,8 +16,15 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
-// | pinned 1 bit | lock 8 bit (1 bit write, 7 bit read)
-// | length field 12 bit (1 bit embedded/non embedded, 11 bits lf) | address 43 bit |
+/**
+ * Helper class for handling a chunk entry (table level 0 entry) in the CIDTable. This class caches the entry read from
+ * memory, only. Any changes applied are NOT automatically written back to memory.
+ * Structure:
+ * | pinned 1 bit | lock 8 bit (1 bit write, 7 bit read) |
+ * length field 12 bit (1 bit embedded/non embedded, 11 bits lf) | address 43 bit |
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public final class CIDTableChunkEntry {
     static final long RAW_VALUE_FREE = 0;
 
@@ -70,14 +77,28 @@ public final class CIDTableChunkEntry {
 
     private long m_address;
 
+    /**
+     * Constructor
+     */
     public CIDTableChunkEntry() {
 
     }
 
+    /**
+     * Constructor
+     *
+     * @param p_pointer
+     *         Pointer (address) to chunk entry
+     * @param p_value
+     *         Value of chunk entry
+     */
     public CIDTableChunkEntry(final long p_pointer, final long p_value) {
         set(p_pointer, p_value);
     }
 
+    /**
+     * Clear the object
+     */
     public void clear() {
         m_pointer = Address.INVALID;
         m_initialValue = 0;
@@ -95,6 +116,14 @@ public final class CIDTableChunkEntry {
         m_address = Address.INVALID;
     }
 
+    /**
+     * Set the object. Extracts fields from raw entry
+     *
+     * @param p_pointer
+     *         Pointer (address) of chunk entry
+     * @param p_value
+     *         Value of chunk entry
+     */
     public void set(final long p_pointer, final long p_value) {
         m_pointer = p_pointer;
         m_initialValue = p_value;
@@ -119,18 +148,39 @@ public final class CIDTableChunkEntry {
         m_address = p_value >> OFFSET_ADDRESS & MASK_ADDRESS;
     }
 
+    /**
+     * Set the pointer
+     *
+     * @param p_pointer
+     *         Pointer to entry
+     */
     public void setPointer(final long p_pointer) {
         m_pointer = p_pointer;
     }
 
+    /**
+     * Get the pointer
+     *
+     * @return Pointer
+     */
     public long getPointer() {
         return m_pointer;
     }
 
+    /**
+     * Get the initial value set (i.e. previous value before altering)
+     *
+     * @return Initial value
+     */
     public long getInitalValue() {
         return m_initialValue;
     }
 
+    /**
+     * Get the value. Assembles all fields to fit into a single long
+     *
+     * @return Value
+     */
     public long getValue() {
         long tmp = 0;
 
@@ -154,23 +204,49 @@ public final class CIDTableChunkEntry {
         return tmp;
     }
 
+    /**
+     * Check if the chunk entry is valid
+     *
+     * @return True if valid, false otherwise
+     */
     public boolean isValid() {
         return m_pointer != Address.INVALID && m_initialValue != RAW_VALUE_FREE &&
                 m_initialValue != CIDTableZombieEntry.RAW_VALUE;
     }
 
+    /**
+     * Check if the chunk entry is pinned
+     *
+     * @return True if pinned, false otherwise
+     */
     public boolean isPinned() {
         return m_pinned > 0;
     }
 
+    /**
+     * Set the chunk entry pinned
+     *
+     * @param p_pinned
+     *         True to pin, false to unpin
+     */
     public void setPinned(final boolean p_pinned) {
         m_pinned = (byte) (p_pinned ? 1 : 0);
     }
 
+    /**
+     * Check if the write lock is acquired
+     *
+     * @return True if acquired, false otherwise
+     */
     public boolean isWriteLockAcquired() {
         return m_writeLock > 0;
     }
 
+    /**
+     * Acquire the write lock
+     *
+     * @return True if acquiring writing lock was successful, false if already acquired
+     */
     public boolean acquireWriteLock() {
         if (m_writeLock > 0) {
             return false;
@@ -180,16 +256,29 @@ public final class CIDTableChunkEntry {
         }
     }
 
+    /**
+     * Release the (acquired) write lock
+     */
     public void releaseWriteLock() {
         assert m_writeLock > 0;
 
         m_writeLock = 0;
     }
 
+    /**
+     * Check if any read locks are acquired
+     *
+     * @return True if one or multiple read locks are acquired, false otherwise
+     */
     public boolean areReadLocksAcquired() {
         return m_readLock > 0;
     }
 
+    /**
+     * Acquire a read lock
+     *
+     * @return True if acquired, false if no more read locks are left to acquire
+     */
     public boolean acquireReadLock() {
         if (m_readLock == MASK_READ_LOCK) {
             return false;
@@ -199,37 +288,75 @@ public final class CIDTableChunkEntry {
         }
     }
 
+    /**
+     * Release an acquired read lock
+     */
     public void releaseReadLock() {
         assert m_readLock > 0;
 
         m_readLock--;
     }
 
+    /**
+     * Get the number of read locks acquired
+     *
+     * @return Number of read locks
+     */
     public int getReadLockCounter() {
         return m_readLock;
     }
 
+    /**
+     * Check if the length field is fully embedded into the chunk entry
+     *
+     * @return True if embedded, false otherwise.
+     */
     public boolean isLengthFieldEmbedded() {
         return m_isLengthFieldEmbedded > 0;
     }
 
+    /**
+     * Get the embedded length field
+     *
+     * @return Embedded length field
+     */
     public int getEmbeddedLengthField() {
         return m_embeddedLengthField;
     }
 
+    /**
+     * Get the lsb part of the split length field
+     *
+     * @return Lsb part of split length field
+     */
     public int getSplitLengthFieldLsb() {
         return m_splitLengthFieldLsb;
     }
 
+    /**
+     * Get the msb part of the split length field
+     *
+     * @return Msb part of split length field
+     */
     public int getSplitLengthFieldMsb() {
         return m_splitLengthFieldMsb;
     }
 
+    /**
+     * Get the size of the split length field part
+     *
+     * @return Size of split length field
+     */
     public int getSplitLengthFieldSize() {
         return m_splitLengthFieldSize;
     }
 
-    // sets the total length and calculates the embedded and split length field parts
+    /**
+     * Sets the total length and calculates the embedded and split length field parts
+     *
+     * @param p_totalLength
+     *         Total size of chunk to set
+     */
     public void setLengthField(final int p_totalLength) {
         assert p_totalLength >= 0;
 
@@ -253,18 +380,41 @@ public final class CIDTableChunkEntry {
         }
     }
 
+    /**
+     * Combine split length field data (external) with the embedded length field part of this entry
+     *
+     * @param p_splitLengthFieldData
+     *         Split length field part to combine
+     * @return Resulting size of chunk of combined length fields
+     */
     public int combineWithSplitLengthFieldData(final int p_splitLengthFieldData) {
         return p_splitLengthFieldData << BITS_SPLIT_LENGTH_FIELD_LSB | m_splitLengthFieldLsb;
     }
 
+    /**
+     * Check if the address is valid
+     *
+     * @return True if valid, false otherwise
+     */
     public boolean isAddressValid() {
         return m_address != Address.INVALID;
     }
 
+    /**
+     * Get the address to the chunk
+     *
+     * @return Address to the chunk
+     */
     public long getAddress() {
         return m_address;
     }
 
+    /**
+     * Set the address to the chunk
+     *
+     * @param p_value
+     *         Address to set
+     */
     public void setAddress(final long p_value) {
         assert p_value >= 0 && p_value <= MASK_ADDRESS;
 
@@ -281,6 +431,13 @@ public final class CIDTableChunkEntry {
                 ", m_splitLengthFieldMsb " + m_splitLengthFieldMsb + ", m_address " + Address.toHexString(m_address);
     }
 
+    /**
+     * Calculate the size for the split length field part to store with the heap block
+     *
+     * @param p_totalSize
+     *         Total size of chunk
+     * @return Size of split part to store with the heap block
+     */
     public static int calculateLengthFieldSizeHeapBlock(final int p_totalSize) {
         if (p_totalSize <= MASK_EMBEDDED_LENGTH_FIELD) {
             return 0;
@@ -289,6 +446,13 @@ public final class CIDTableChunkEntry {
         }
     }
 
+    /**
+     * Calculate the number of bytes required to store a certain size
+     *
+     * @param p_val
+     *         Size of chunk
+     * @return Number of bytes required to store that size
+     */
     private static int calculateMinStorageBytes(final int p_val) {
         int n = 0;
         int val = p_val;
@@ -301,6 +465,13 @@ public final class CIDTableChunkEntry {
         return n;
     }
 
+    /**
+     * Get the address part of a chunk entry from a table
+     *
+     * @param p_rawValue
+     *         Raw chunk entry value from a table
+     * @return Address part (to chunk)
+     */
     public static long getAddressOfRawEntry(final long p_rawValue) {
         return p_rawValue >> OFFSET_ADDRESS & MASK_ADDRESS;
     }

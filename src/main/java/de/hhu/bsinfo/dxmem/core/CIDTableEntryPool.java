@@ -16,11 +16,19 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+/**
+ * Thread local pool for chunk entry objects (to avoid allocations)
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class CIDTableEntryPool {
     private static final int MAX_THREAD_COUNT = 1024;
 
     private CIDTableChunkEntry[] m_pool;
 
+    /**
+     * Constructor
+     */
     CIDTableEntryPool() {
         m_pool = new CIDTableChunkEntry[MAX_THREAD_COUNT];
 
@@ -29,6 +37,11 @@ public class CIDTableEntryPool {
         }
     }
 
+    /**
+     * Get an entry from the pool
+     *
+     * @return Chunk entry object
+     */
     public CIDTableChunkEntry get() {
         try {
             CIDTableChunkEntry entry = m_pool[(int) Thread.currentThread().getId()];
