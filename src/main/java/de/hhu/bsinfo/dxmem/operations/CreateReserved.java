@@ -45,7 +45,7 @@ public class CreateReserved {
      * Constructor
      *
      * @param p_context
-     *         CliContext with core components
+     *         Context
      */
     public CreateReserved(final Context p_context) {
         m_context = p_context;

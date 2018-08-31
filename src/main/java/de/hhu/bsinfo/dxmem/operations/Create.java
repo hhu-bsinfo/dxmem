@@ -19,9 +19,9 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
-import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.Value;
 
@@ -43,7 +43,7 @@ public final class Create {
      * Constructor
      *
      * @param p_context
-     *         CliContext with core components
+     *         Context
      */
     public Create(final Context p_context) {
         m_context = p_context;
@@ -91,6 +91,22 @@ public final class Create {
         return cid;
     }
 
+    /**
+     * Create one or multiple chunks of the same size
+     *
+     * @param p_chunkIDs
+     *         Pre-allocated array for the CIDs returned
+     * @param p_offset
+     *         Offset in array to start putting the CIDs to
+     * @param p_count
+     *         Number of chunks to allocate
+     * @param p_size
+     *         Size of a single chunk
+     * @param p_consecutiveIDs
+     *         True to enforce consecutive CIDs for all chunks to allocate, false might assign non
+     *         consecutive CIDs if available.
+     * @return Number of chunks successfully created
+     */
     public int create(final long[] p_chunkIDs, final int p_offset, final int p_count, final int p_size,
             final boolean p_consecutiveIDs) {
         assert p_size > 0;
@@ -142,6 +158,21 @@ public final class Create {
         return successfulMallocs;
     }
 
+    /**
+     * Create one or multiple chunks with different sizes
+     *
+     * @param p_chunkIDs
+     *         Pre-allocated array for the CIDs returned
+     * @param p_offset
+     *         Offset in array to start putting the CIDs to
+     * @param p_consecutiveIDs
+     *         True to enforce consecutive CIDs for all chunks to allocate, false might assign non
+     *         consecutive CIDs if available.
+     * @param p_sizes
+     *         One or multiple (different) sizes. The amount of sizes declared here denotes the number of
+     *         chunks to create
+     * @return Number of chunks successfully created
+     */
     public int create(final long[] p_chunkIDs, final int p_offset, final boolean p_consecutiveIDs,
             final int... p_sizes) {
         assert p_chunkIDs != null;
@@ -193,6 +224,21 @@ public final class Create {
         return successfulMallocs;
     }
 
+    /**
+     * Create one or multiple chunks using Chunk instances (with different sizes)
+     *
+     * @param p_offset
+     *         Offset in array to start putting the CIDs to
+     * @param p_count
+     *         Number of chunks to create (might be less than objects provided)
+     * @param p_consecutiveIDs
+     *         True to enforce consecutive CIDs for all chunks to allocate, false might assign non
+     *         consecutive CIDs if available.
+     * @param p_chunks
+     *         Instances of chunk objects to allocate storage for. On success, the CID is assigned to the object
+     *         and the state is set to OK.
+     * @return Number of chunks successfully created. If less than expected, check the chunk objects states for errors.
+     */
     public int create(final int p_offset, final int p_count, final boolean p_consecutiveIDs,
             final AbstractChunk... p_chunks) {
         assert p_chunks != null;

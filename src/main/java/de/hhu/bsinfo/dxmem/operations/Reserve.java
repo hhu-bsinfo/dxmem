@@ -45,7 +45,7 @@ public class Reserve {
      * Constructor
      *
      * @param p_context
-     *         CliContext with core components
+     *         Context
      */
     public Reserve(final Context p_context) {
         m_context = p_context;
@@ -69,6 +69,17 @@ public class Reserve {
         return cid;
     }
 
+    /**
+     * Reserve multiple CIDs but do not allocate memory for them. Allocation must be executed by the user explicitly
+     * using the CreateReserved operation.
+     *
+     * @param p_array
+     *         Reference to pre-allocated array to write CIDs to
+     * @param p_offset
+     *         Start offset in array
+     * @param p_count
+     *         Number of CIDs to reserve
+     */
     public void reserve(final long[] p_array, final int p_offset, final int p_count) {
         SOP_RESERVE.add(p_count);
 
@@ -79,6 +90,14 @@ public class Reserve {
         m_context.getDefragmenter().releaseApplicationThreadLock();
     }
 
+    /**
+     * Reserve multiple CIDs but do not allocate memory for them. Allocation must be executed by the user explicitly
+     * using the CreateReserved operation.
+     *
+     * @param p_count
+     *         Number of CIDs to reserve
+     * @return Array with CIDs reserved
+     */
     public long[] reserve(final int p_count) {
         long[] array = new long[p_count];
 

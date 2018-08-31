@@ -21,21 +21,47 @@ import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapStatus;
 import de.hhu.bsinfo.dxmem.core.LIDStoreStatus;
 
+/**
+ * Get stats from various components of DXMem
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ */
 public class Stats {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Stats(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Gets the status of the heap
+     *
+     * @return the status
+     */
     public HeapStatus getHeapStatus() {
         return m_context.getHeap().getStatus();
     }
 
+    /**
+     * Get the current status of the CIDTable
+     *
+     * @return Current status of CIDTable
+     */
     public CIDTableStatus getCIDTableStatus() {
         return m_context.getCIDTable().getStatus();
     }
 
+    /**
+     * Get the status of the LIDSTore
+     *
+     * @return Status object
+     */
     public LIDStoreStatus getLIDStoreStatus() {
         return m_context.getLIDStore().getStatus();
     }

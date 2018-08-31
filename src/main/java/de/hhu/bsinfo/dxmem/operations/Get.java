@@ -51,18 +51,27 @@ public final class Get {
      * Constructor
      *
      * @param p_context
-     *         CliContext with core components
+     *         Context
      */
     public Get(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Get a single chunk
+     *
+     * @param p_chunk
+     *         AbstractChunk with the CID set to read the chunk's data into. On success, the payload is
+     *         serialized into the AbstractChunk and the state is set to ok. On failure, the AbstractChunk
+     *         contains no (new) data or partial serialized data and the state indicates the failure.
+     * @return True if successful, false on error. Chunk state with additional information is set in p_chunk
+     */
     public boolean get(final AbstractChunk p_chunk) {
         return get(p_chunk, ChunkLockOperation.NONE, -1);
     }
 
     /**
-     * Get the data of a chunk from the heap memory
+     * Get the data of a chunk from the heap memory. Used for local gets.
      *
      * @param p_chunk
      *         AbstractChunk with the CID set to read the chunk's data into. On success, the payload is
@@ -75,7 +84,6 @@ public final class Get {
      *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
      * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
      */
-    // used for local gets
     public boolean get(final AbstractChunk p_chunk, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
         if (p_chunk.getID() == ChunkID.INVALID_ID) {
@@ -151,12 +159,31 @@ public final class Get {
         return true;
     }
 
+    /**
+     * Get the data of a chunk from the heap memory. Used in incoming gets when the type is unknown and we just want
+     * to grab the binary data to forward to the requester
+     *
+     * @param p_cid
+     *         CID of the chunk to get
+     * @return ChunkByteArray. Chunk state determines success or failure of the operation
+     */
     public ChunkByteArray get(final long p_cid) {
         return get(p_cid, ChunkLockOperation.NONE, -1);
     }
 
-    // used in incoming gets when the type is unknown and we just want to grab the binary data to forward to the
-    // requester
+    /**
+     * Get the data of a chunk from the heap memory. Used in incoming gets when the type is unknown and we just want
+     * to grab the binary data to forward to the requester
+     *
+     * @param p_cid
+     *         CID of the chunk to get
+     * @param p_lockOperation
+     *         Lock operation to execute with this get operation on the chunk
+     * @param p_lockTimeoutMs
+     *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
+     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     * @return ChunkByteArray. Chunk state determines success or failure of the operation
+     */
     public ChunkByteArray get(final long p_cid, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {
@@ -245,8 +272,25 @@ public final class Get {
         return ret;
     }
 
-    // used for replicating chunks. returns 0 if data does not fit into buffer (and on other errors)
-    // returns size on success
+    /**
+     * Get the data of a chunk from the heap memory. Used for replicating chunks. returns 0 if data does not fit into
+     * buffer (and on other errors) returns size on success
+     *
+     * @param p_cid
+     *         CID of the chunk to get
+     * @param p_buffer
+     *         Pre-allocated buffer to write chunk payload to
+     * @param p_offset
+     *         Offset in buffer to start at
+     * @param p_size
+     *         Size of buffer
+     * @param p_lockOperation
+     *         Lock operation to execute with this get operation on the chunk
+     * @param p_lockTimeoutMs
+     *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
+     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     * @return ChunkByteArray. Chunk state determines success or failure of the operation
+     */
     public int get(final long p_cid, final byte[] p_buffer, final int p_offset, final int p_size,
             final ChunkLockOperation p_lockOperation, final int p_lockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {

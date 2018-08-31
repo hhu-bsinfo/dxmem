@@ -23,17 +23,45 @@ import de.hhu.bsinfo.dxmem.core.LockUtils;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
+/**
+ * Pin a chunk to allow direct access to heap data using the address (and for RDMA)
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Pinning {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Pinning(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Pin a chunk
+     *
+     * @param p_cid
+     *         Cid of chunk to pin
+     * @return PinnedMemory object with ChunkState determining the result of the operation
+     */
     public PinnedMemory pin(final long p_cid) {
         return pin(p_cid, -1);
     }
 
+    /**
+     * Pin a chunk
+     *
+     * @param p_cid
+     *         Cid of chunk to pin
+     * @param p_acquireLockTimeoutMs
+     *         -1 for infinite retries (busy polling) until the lock operation
+     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     * @return PinnedMemory object with ChunkState determining the result of the operation
+     */
     public PinnedMemory pin(final long p_cid, final int p_acquireLockTimeoutMs) {
         if (p_cid == ChunkID.INVALID_ID) {
             return new PinnedMemory(ChunkState.INVALID_ID);
@@ -72,8 +100,14 @@ public class Pinning {
         return new PinnedMemory(tableEntry.getAddress());
     }
 
-    // depending on how many chunks are currently stored, this call is very slow because it has to perform
-    // a depth search on the CIDTable to find the CIDTable entry
+    /**
+     * Unpin a pinned chunk. Depending on how many chunks are currently stored, this call is very slow because it
+     * has to perform a depth search on the CIDTable to find the CIDTable entry
+     *
+     * @param p_pinnedChunkAddress
+     *         Address of pinned chunk
+     * @return CID of unpinned chunk on success, INVALID_ID on failure
+     */
     public long unpin(final long p_pinnedChunkAddress) {
         if (p_pinnedChunkAddress == Address.INVALID || p_pinnedChunkAddress < 0) {
             return ChunkID.INVALID_ID;
@@ -116,6 +150,12 @@ public class Pinning {
         return cid;
     }
 
+    /**
+     * Unpin a pinned chunk using the CID
+     *
+     * @param p_cidOfPinnedChunk
+     *         CID of pinned chunk
+     */
     public void unpinCID(final long p_cidOfPinnedChunk) {
         if (p_cidOfPinnedChunk == ChunkID.INVALID_ID) {
             return;
@@ -153,28 +193,58 @@ public class Pinning {
         m_context.getDefragmenter().releaseApplicationThreadLock();
     }
 
+    /**
+     * Wrapper class for pinned memory data
+     */
     public static final class PinnedMemory {
         private final ChunkState m_state;
         private final long m_address;
 
+        /**
+         * Constructor
+         *
+         * @param p_state
+         *         State of chunk (result of operation)
+         */
         private PinnedMemory(final ChunkState p_state) {
             m_state = p_state;
             m_address = Address.INVALID;
         }
 
+        /**
+         * Constructor
+         *
+         * @param p_address
+         *         Address of pinned chunk
+         */
         private PinnedMemory(final long p_address) {
             m_state = ChunkState.OK;
             m_address = p_address;
         }
 
+        /**
+         * Get the state of the chunk (result of last operation)
+         *
+         * @return ChunkState
+         */
         public ChunkState getState() {
             return m_state;
         }
 
+        /**
+         * Get the address of the pinned chunk
+         *
+         * @return Address of pinned chunk
+         */
         public long getAddress() {
             return m_address;
         }
 
+        /**
+         * Is chunk state ok (quick check on no errors)
+         *
+         * @return True on no errors, false otherwise
+         */
         public boolean isStateOk() {
             return m_state == ChunkState.OK;
         }

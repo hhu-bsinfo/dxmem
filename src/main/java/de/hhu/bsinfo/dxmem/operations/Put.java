@@ -50,18 +50,39 @@ public class Put {
      * Constructor
      *
      * @param p_context
-     *         CliContext with core components
+     *         Context
      */
     public Put(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Get the data of a chunk from the heap memory. Used with local puts and known chunks.
+     *
+     * @param p_chunk
+     *         AbstractChunk with the CID set and data to write to the heap. On success, the payload is
+     *         serialized into the heap and the state is set to ok. On failure, the AbstractChunk
+     *         state indicates the cause.
+     * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
+     */
     public boolean put(final AbstractChunk p_chunk) {
         return put(p_chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
     }
 
-    // used with local puts and known data structure (type)
-    // @return True on success, false on failure. Chunk state with additional information is set in p_chunk
+    /**
+     * Get the data of a chunk from the heap memory. Used with local puts and known chunks.
+     *
+     * @param p_chunk
+     *         AbstractChunk with the CID set and data to write to the heap. On success, the payload is
+     *         serialized into the heap and the state is set to ok. On failure, the AbstractChunk
+     *         state indicates the cause.
+     * @param p_lockOperation
+     *         Lock operation to execute with this put operation on the chunk
+     * @param p_lockTimeoutMs
+     *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
+     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
+     */
     public boolean put(final AbstractChunk p_chunk, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
         if (p_chunk.getID() == ChunkID.INVALID_ID) {
@@ -137,7 +158,21 @@ public class Put {
         return true;
     }
 
-    // used for incoming remote requests with binary data blob only (no type information)
+    /**
+     * Get the data of a chunk from the heap memory. Used for incoming remote requests with binary data blob only
+     * (no type information)
+     *
+     * @param p_chunkID
+     *         CID of the chunk to put
+     * @param p_data
+     *         Pre-allocated buffer with data write
+     * @param p_lockOperation
+     *         Lock operation to execute with this put operation on the chunk
+     * @param p_lockTimeoutMs
+     *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
+     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     * @return Chunk state with results of operation
+     */
     public ChunkState put(final long p_chunkID, final byte[] p_data, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
         if (p_chunkID == ChunkID.INVALID_ID) {

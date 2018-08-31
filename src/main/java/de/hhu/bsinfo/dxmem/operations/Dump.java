@@ -19,13 +19,30 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.MemoryDumper;
 
+/**
+ * Dump the heap to a file
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Dump {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Dump(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Dump the heap to a file
+     *
+     * @param p_file
+     *         Path to file to dump to
+     */
     public void dump(final String p_file) {
         m_context.getDefragmenter().acquireApplicationThreadLock();
 

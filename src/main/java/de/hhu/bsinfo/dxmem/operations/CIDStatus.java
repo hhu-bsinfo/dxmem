@@ -19,9 +19,20 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 
+/**
+ * Get CID status information (migrated, available chunks)
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class CIDStatus {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public CIDStatus(final Context p_context) {
         m_context = p_context;
     }
@@ -35,10 +46,20 @@ public class CIDStatus {
         return m_context.getLIDStore().getCurrentHighestLID();
     }
 
+    /**
+     * Get chunk ranges of all local chunks
+     *
+     * @return Chunk ranges of all local chunks
+     */
     public ChunkIDRanges getCIDRangesOfLocalChunks() {
         return getCIDRangesOfChunks(m_context.getNodeId());
     }
 
+    /**
+     * Get CID ranges of all chunks (local and migrated)
+     *
+     * @return CID ranges
+     */
     public ChunkIDRanges getCIDRangesOfChunks() {
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
@@ -49,6 +70,13 @@ public class CIDStatus {
         return ranges;
     }
 
+    /**
+     * Get CID ranges of all chunks
+     *
+     * @param p_nodeId
+     *         Filtered by the node id specified
+     * @return CID ranges
+     */
     public ChunkIDRanges getCIDRangesOfChunks(final short p_nodeId) {
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
@@ -59,6 +87,11 @@ public class CIDStatus {
         return ranges;
     }
 
+    /**
+     * Get CID ranges of all migrated chunks
+     *
+     * @return CID ranges
+     */
     public ChunkIDRanges getAllMigratedChunkIDRanges() {
         m_context.getDefragmenter().acquireApplicationThreadLock();
 

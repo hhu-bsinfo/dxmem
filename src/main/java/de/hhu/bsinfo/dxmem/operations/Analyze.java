@@ -24,29 +24,60 @@ import de.hhu.bsinfo.dxmem.core.CIDTableTableEntry;
 import de.hhu.bsinfo.dxmem.core.CIDTableZombieEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 
+/**
+ * Analyze the heap and check for errors
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Analyze {
     private final Context m_context;
 
     private Analyzer m_analyzer;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Analyze(final Context p_context) {
         m_context = p_context;
 
         m_analyzer = new Analyzer(m_context.getHeap(), m_context.getCIDTable());
     }
 
+    /**
+     * Analyze the heap
+     *
+     * @return True if errors were detected, false if heap is ok
+     */
     public boolean analyze() {
         return m_analyzer.analyze();
     }
 
+    /**
+     * Get the collected CIDTable table entries after analyzing
+     *
+     * @return List of collected CIDTable table entries
+     */
     public ArrayList<CIDTableTableEntry> getCIDTableTableEntries() {
         return m_analyzer.getCIDTableTableEntries();
     }
 
+    /**
+     * Get the collected CIDTable chunk entries after analyzing
+     *
+     * @return List of collected CIDTable chunk entries
+     */
     public ArrayList<CIDTableChunkEntry> getCIDTableChunkEntries() {
         return m_analyzer.getCIDTableChunkEntries();
     }
 
+    /**
+     * Get the collected CIDTable zombie entries after analyzing
+     *
+     * @return List of collected CIDTable zombie entries
+     */
     public ArrayList<CIDTableZombieEntry> getCIDTableZombieEntries() {
         return m_analyzer.getCIDTableZombieEntries();
     }

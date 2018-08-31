@@ -21,13 +21,33 @@ import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.LockUtils;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 
+/**
+ * Resize an existing chunk
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ */
 public class Resize {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Resize(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Resize an existing chunk
+     *
+     * @param p_cid
+     *         CID of chunk to resize
+     * @param p_newSize
+     *         New size for chunk
+     * @return True if succcessful, false on failure
+     */
     public boolean resize(final long p_cid, final int p_newSize) {
         // TODO statistics
         assert p_newSize > 0;

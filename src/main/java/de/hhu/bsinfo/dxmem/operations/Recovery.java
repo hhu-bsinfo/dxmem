@@ -24,6 +24,11 @@ import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.ThroughputPool;
 import de.hhu.bsinfo.dxutils.stats.Value;
 
+/**
+ * Special methods for the recovery of chunks
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ */
 public class Recovery {
     private static final ThroughputPool SOP_CREATE_AND_PUT_RAW = new ThroughputPool(Create.class,
             "CreateAndPutRecoveredRaw", Value.Base.B_10);
@@ -41,7 +46,7 @@ public class Recovery {
      * Constructor
      *
      * @param p_context
-     *         CliContext with core components
+     *         Context
      */
     public Recovery(final Context p_context) {
         m_context = p_context;
@@ -51,7 +56,7 @@ public class Recovery {
      * Special create and put call optimized for recovery
      * This is a management call and has to be locked using lockManage().
      *
-     * @param p_chunkIDs
+     * @param p_cids
      *         List of recovered chunk ids
      * @param p_dataAddress
      *         The address of the recovered data block

@@ -19,13 +19,31 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 
+/**
+ * Check if a chunk exists
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Exists {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Exists(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Check if a chunk exists
+     *
+     * @param p_cid
+     *         CID of chunk to check
+     * @return True if exists, false otherwise
+     */
     public boolean exists(final long p_cid) {
         CIDTableChunkEntry entry = m_context.getCIDTableEntryPool().get();
 

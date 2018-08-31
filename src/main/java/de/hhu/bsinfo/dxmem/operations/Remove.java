@@ -28,6 +28,11 @@ import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.Value;
 
+/**
+ * Remove chunks
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ */
 public class Remove {
     private static final Value SOP_REMOVE = new Value(DXMem.class, "Remove");
     private static final Value SOP_REMOVE_MIGRATED = new Value(DXMem.class, "RemoveMigrated");
@@ -39,13 +44,23 @@ public class Remove {
 
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Remove(final Context p_context) {
         m_context = p_context;
     }
 
-    // for migrated chunks: if deleted on remote, the remote has to
-    // send a message to the original owner to tell it that the cid
-    // is not used anymore and can be re-used
+    /**
+     * For migrated chunks: if deleted on remote, the remote has to send a message to the original owner to tell it
+     * that the cid is not used anymore and can be re-used
+     *
+     * @param p_cid
+     *         CID to reuse
+     */
     public void prepareChunkIDForReuse(final long p_cid) {
         // sanity check
         if (ChunkID.getCreatorID(p_cid) != m_context.getNodeId()) {
@@ -72,6 +87,13 @@ public class Remove {
         m_context.getDefragmenter().releaseApplicationThreadLock();
     }
 
+    /**
+     * Remove a chunk
+     *
+     * @param p_ds
+     *         Chunk to remove
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
     public int remove(final AbstractChunk p_ds) {
         int state = remove(p_ds.getID(), false);
 
@@ -82,6 +104,15 @@ public class Remove {
         return state;
     }
 
+    /**
+     * Remove a chunk
+     *
+     * @param p_ds
+     *         Chunk to remove
+     * @param p_wasMigrated
+     *         True if the chunk was migrated, false otherwise
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
     public int remove(final AbstractChunk p_ds, final boolean p_wasMigrated) {
         int state = remove(p_ds.getID(), p_wasMigrated);
 
@@ -92,12 +123,26 @@ public class Remove {
         return state;
     }
 
+    /**
+     * Remove a chunk
+     *
+     * @param p_cid
+     *         CID of chunk to remove
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
     public int remove(final long p_cid) {
         return remove(p_cid, false);
     }
 
-    // if positive, success and returns size of chunk deleted
-    // if negative, fail and returns negated chunk state indicating error
+    /**
+     * Remove a chunk
+     *
+     * @param p_cid
+     *         CID of chunk to remove
+     * @param p_wasMigrated
+     *         True if the chunk was migrated, false otherwise
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
     public int remove(final long p_cid, final boolean p_wasMigrated) {
         if (p_cid == ChunkID.INVALID_ID) {
             return -ChunkState.INVALID_ID.ordinal();

@@ -18,11 +18,21 @@ package de.hhu.bsinfo.dxmem.operations;
 
 import de.hhu.bsinfo.dxmem.core.Context;
 
-// methods to raw read/access a chunk in the heap by using the address (chunk must be pinned in order to get
-// the address, first)
+/**
+ * Methods to raw write a chunk in the heap by using the address (chunk must be pinned in order to get
+ * the address, first)
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ */
 public class RawWrite {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public RawWrite(final Context p_context) {
         m_context = p_context;
     }

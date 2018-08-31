@@ -19,13 +19,31 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 
+/**
+ * Get the size of a chunk
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ */
 public class Size {
     private final Context m_context;
 
+    /**
+     * Constructor
+     *
+     * @param p_context
+     *         Context
+     */
     public Size(final Context p_context) {
         m_context = p_context;
     }
 
+    /**
+     * Get the size of a chunk
+     *
+     * @param p_cid
+     *         CID of chunk
+     * @return Size of the chunk or -1 if it doesn't exist
+     */
     public int size(final long p_cid) {
         CIDTableChunkEntry entry = m_context.getCIDTableEntryPool().get();
 
