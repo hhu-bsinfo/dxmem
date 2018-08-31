@@ -37,6 +37,9 @@ import de.hhu.bsinfo.dxmem.generated.BuildConfig;
 import de.hhu.bsinfo.dxmonitor.info.InstanceInfo;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "benchmark",
         customSynopsis = "@|bold dxmem benchmark|@ @|yellow heapSize WORKLOAD|@ [...]",

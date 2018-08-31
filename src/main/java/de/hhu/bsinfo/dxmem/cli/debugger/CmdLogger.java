@@ -21,6 +21,9 @@ import picocli.CommandLine;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "logger",
         description = "Set the log level of the logger"

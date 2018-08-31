@@ -30,6 +30,9 @@ import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbB;
 import de.hhu.bsinfo.dxmem.benchmark.workload.YcsbC;
 import de.hhu.bsinfo.dxmem.cli.CliContext;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "benchmark",
         description = "Run a benchmark on the current instance of DXMem",

@@ -21,9 +21,26 @@ import de.hhu.bsinfo.dxmem.data.ChunkBenchmark;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
+/**
+ * Operation to put a chunk
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Put extends AbstractOperation {
     private final ChunkBenchmark m_chunk;
 
+    /**
+     * Constructor
+     *
+     * @param p_probability
+     *         Operation probability (0.0 - 1.0)
+     * @param p_batchCount
+     *         Number of batches to execute for a single operation
+     * @param p_verifyData
+     *         True to enable data verification
+     * @param p_chunkSize
+     *         Size of the chunk(s)
+     */
     public Put(final float p_probability, final int p_batchCount, final boolean p_verifyData, final int p_chunkSize) {
         super("put", p_probability, p_batchCount, p_verifyData);
 

@@ -19,9 +19,20 @@ package de.hhu.bsinfo.dxmem.benchmark.operation;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
+/**
+ * Dump the heap to a file
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Dump extends AbstractOperation {
     private final String m_outputFile;
 
+    /**
+     * Constructor
+     *
+     * @param p_outputFile
+     *         Path to output file to dump to
+     */
     public Dump(final String p_outputFile) {
         super("dump", 1.0f, 1, false);
 

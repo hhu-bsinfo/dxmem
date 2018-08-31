@@ -36,6 +36,11 @@ import de.hhu.bsinfo.dxmonitor.state.StateUpdateException;
 import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentile;
 
+/**
+ * Benchmark phase which is part of a benchmark
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class BenchmarkPhase {
     private final String m_name;
     private final DXMem m_memory;
@@ -48,6 +53,22 @@ public class BenchmarkPhase {
     private long m_totalTimeNs;
     private double m_aggregatedOpsPerSec;
 
+    /**
+     * Constructor
+     *
+     * @param p_name
+     *         Name of the phase
+     * @param p_memory
+     *         DXMem instance to use for this phase
+     * @param p_numThreads
+     *         Number of threads to run in parallel
+     * @param p_totalNumOperations
+     *         Total number of operations to execute by all threads
+     * @param p_delayNsBetweenOps
+     *         Add a delay between executing operations
+     * @param p_operations
+     *         Operations to execute in this phase
+     */
     public BenchmarkPhase(final String p_name, final DXMem p_memory, final int p_numThreads,
             final long p_totalNumOperations, final long p_delayNsBetweenOps, final AbstractOperation... p_operations) {
         m_name = p_name;
@@ -69,10 +90,23 @@ public class BenchmarkPhase {
         }
     }
 
+    /**
+     * Get the name of the phase
+     *
+     * @return Name
+     */
     public String getName() {
         return m_name;
     }
 
+    /**
+     * Execute the phase
+     *
+     * @param p_cidRanges
+     *         CID ranges available in this phase
+     * @param p_cidRangesLock
+     *         Lock for CID ranges to ensure thread safety
+     */
     public void execute(final ChunkIDRanges p_cidRanges, final ReentrantReadWriteLock p_cidRangesLock) {
         // init ops
         for (AbstractOperation op : m_operations) {
@@ -210,6 +244,9 @@ public class BenchmarkPhase {
         }
     }
 
+    /**
+     * Print the results of the phase
+     */
     public void printResults() {
         StringBuilder builder = new StringBuilder();
 
@@ -332,6 +369,9 @@ public class BenchmarkPhase {
         System.out.println(builder);
     }
 
+    /**
+     * A thread of the benchmark phase executing operations
+     */
     private static final class Thread extends java.lang.Thread {
         private final int m_id;
         private final AbstractOperation[] m_operations;
@@ -344,6 +384,18 @@ public class BenchmarkPhase {
         private final AtomicLong m_progressOperations;
         private final OperationSelector m_operationSelector;
 
+        /**
+         * Constructor
+         *
+         * @param p_id
+         *         Id of the thread
+         * @param p_operations
+         *         Operations available for execution
+         * @param p_delayNsBetweenOps
+         *         Delay between operations to add
+         * @param p_threadsRunning
+         *         Total number of threads running (shared counter)
+         */
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
                 final AtomicInteger p_threadsRunning) {
             super("ToolBenchmark-" + p_id);
@@ -360,10 +412,20 @@ public class BenchmarkPhase {
             m_operationSelector = new OperationSelector(p_operations);
         }
 
+        /**
+         * Get the progress (number of executed ops) of this thread
+         *
+         * @return Number of ops executed
+         */
         public long getProgressOperations() {
             return m_progressOperations.get();
         }
 
+        /**
+         * Get the current aggregated throughput in ops/sec
+         *
+         * @return Aggregated throughput ops/sec
+         */
         public double getAggregatedThroughputOpsSec() {
             double tp = 0.0;
 
@@ -376,6 +438,11 @@ public class BenchmarkPhase {
             return tp;
         }
 
+        /**
+         * ToString for all parameters and state of this thread
+         *
+         * @return String with parameters and state
+         */
         String parameterToString() {
             StringBuilder builder = new StringBuilder();
 
@@ -501,10 +568,19 @@ public class BenchmarkPhase {
             m_threadsRunning.decrementAndGet();
         }
 
+        /**
+         * Class to select an operation to execute next out of a list of operations based on their probability
+         */
         private static class OperationSelector {
             private final AbstractOperation[] m_operations;
             private final boolean[] m_opsActive;
 
+            /**
+             * Constructor
+             *
+             * @param p_operations
+             *         Array of operations to select from
+             */
             public OperationSelector(final AbstractOperation[] p_operations) {
                 m_operations = p_operations;
                 m_opsActive = new boolean[p_operations.length];
@@ -518,6 +594,11 @@ public class BenchmarkPhase {
                 }
             }
 
+            /**
+             * Select an operation based by index
+             *
+             * @return Index of operation selected or -1 if all consumed
+             */
             public int selectIndex() {
                 while (true) {
                     if (allConsumed()) {
@@ -545,6 +626,11 @@ public class BenchmarkPhase {
                 }
             }
 
+            /**
+             * Check if all operations are consumed
+             *
+             * @return True if all consumed, false otherwise
+             */
             private boolean allConsumed() {
                 for (boolean b : m_opsActive) {
                     if (b) {

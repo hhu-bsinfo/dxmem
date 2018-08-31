@@ -21,9 +21,24 @@ import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
+/**
+ * Remove a chunk
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Remove extends AbstractOperation {
     private final ChunkByteArray m_chunk;
 
+    /**
+     * Constructor
+     *
+     * @param p_probability
+     *         Operation probability (0.0 - 1.0)
+     * @param p_batchCount
+     *         Number of batches to execute for a single operation
+     * @param p_verifyData
+     *         True to enable data verification
+     */
     public Remove(final float p_probability, final int p_batchCount, final boolean p_verifyData) {
         super("remove", p_probability, p_batchCount, p_verifyData);
 

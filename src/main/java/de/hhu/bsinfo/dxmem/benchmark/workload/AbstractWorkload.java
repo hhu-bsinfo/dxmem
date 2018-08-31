@@ -22,10 +22,20 @@ import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
 import de.hhu.bsinfo.dxmem.cli.CliContext;
 import de.hhu.bsinfo.dxmem.cli.ToolBenchmark;
 
+/**
+ * Base class for benchmark workloads
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public abstract class AbstractWorkload implements Runnable {
     @CommandLine.ParentCommand
     private Object m_parent;
 
+    /**
+     * Create the workload
+     *
+     * @return Benchmark workload
+     */
     public abstract Benchmark createWorkload();
 
     @Override

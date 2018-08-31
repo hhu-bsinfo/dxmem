@@ -25,6 +25,9 @@ import org.jline.reader.UserInterruptException;
 
 import de.hhu.bsinfo.dxmem.cli.debugger.SubcmdsDebugger;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "debugger",
         description = "Interactive debugger session to analyze and debug (dumped) dxmem instances"

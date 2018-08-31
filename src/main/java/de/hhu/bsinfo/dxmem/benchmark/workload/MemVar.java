@@ -29,6 +29,9 @@ import de.hhu.bsinfo.dxmem.cli.CliContext;
 import de.hhu.bsinfo.dxmem.cli.types.TypeConverterStorageUnit;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "mem-var",
         description = "Generic and variable memory workload. Define benchmark parameters via arguments"
@@ -113,29 +116,6 @@ public class MemVar extends AbstractWorkload {
             paramLabel = "<probRemove>",
             description = "Remove operation probability")
     private float m_probRemove;
-
-    public MemVar() {
-
-    }
-
-    public MemVar(final boolean p_verifyData, final boolean p_dumpMemory, final StorageUnit p_objectSizeMin,
-            final StorageUnit p_objectSizeMax, final int p_batchCount, final int p_loadThreads,
-            final long p_totalLoadObjects, final int p_runThreads, final long p_runTotalOperations,
-            final float p_probCreate, final float p_probGet, final float p_probPut, final float p_probRemove) {
-        m_verifyData = p_verifyData;
-        m_dumpMemory = p_dumpMemory;
-        m_objectSizeMin = p_objectSizeMin;
-        m_objectSizeMax = p_objectSizeMax;
-        m_batchCount = p_batchCount;
-        m_loadThreads = p_loadThreads;
-        m_loadTotalObjects = p_totalLoadObjects;
-        m_runThreads = p_runThreads;
-        m_runTotalOperations = p_runTotalOperations;
-        m_probCreate = p_probCreate;
-        m_probGet = p_probGet;
-        m_probPut = p_probPut;
-        m_probRemove = p_probRemove;
-    }
 
     @Override
     public Benchmark createWorkload() {

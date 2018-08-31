@@ -26,6 +26,11 @@ import de.hhu.bsinfo.dxmem.benchmark.operation.Get;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Put;
 import de.hhu.bsinfo.dxmem.cli.CliContext;
 
+/**
+ * Base class for YCSB type benchmarks
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public abstract class AbstractYcsb extends AbstractWorkload {
     private final String m_name;
     private final int m_batchCount;
@@ -69,6 +74,20 @@ public abstract class AbstractYcsb extends AbstractWorkload {
             description = "Total number of run operations to execute (on all threads)")
     private long m_runTotalOperations;
 
+    /**
+     * Constructor
+     *
+     * @param p_name
+     *         Name of the benchmark
+     * @param p_batchCount
+     *         Batch count for operation
+     * @param p_objectSize
+     *         Size of a single object
+     * @param p_probGet
+     *         Probability for get operations
+     * @param p_probPut
+     *         Probability for put operations
+     */
     AbstractYcsb(final String p_name, final int p_batchCount, final int p_objectSize, final float p_probGet,
             final float p_probPut) {
         m_name = p_name;
@@ -76,23 +95,6 @@ public abstract class AbstractYcsb extends AbstractWorkload {
         m_objectSize = p_objectSize;
         m_probGet = p_probGet;
         m_probPut = p_probPut;
-    }
-
-    AbstractYcsb(final String p_name, final int p_batchCount, final int p_objectSize, final float p_probGet,
-            final float p_probPut, boolean p_verifyData, final boolean p_dumpMemory, final int p_loadThreads,
-            final long p_totalLoadObjects, final int p_runThreads, final long p_runTotalOperations) {
-        m_name = p_name;
-        m_batchCount = p_batchCount;
-        m_objectSize = p_objectSize;
-        m_probGet = p_probGet;
-        m_probPut = p_probPut;
-
-        m_verifyData = p_verifyData;
-        m_dumpMemory = p_dumpMemory;
-        m_loadThreads = p_loadThreads;
-        m_loadTotalObjects = p_totalLoadObjects;
-        m_runThreads = p_runThreads;
-        m_runTotalOperations = p_runTotalOperations;
     }
 
     @Override

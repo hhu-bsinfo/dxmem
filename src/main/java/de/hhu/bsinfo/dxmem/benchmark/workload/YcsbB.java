@@ -18,6 +18,9 @@ package de.hhu.bsinfo.dxmem.benchmark.workload;
 
 import picocli.CommandLine;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "ycsb-b",
         description = "YCSB workload with 10x 100 byte objects (0.95 get, 0.05 put)"

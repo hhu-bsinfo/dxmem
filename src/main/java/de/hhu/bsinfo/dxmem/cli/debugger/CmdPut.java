@@ -25,6 +25,9 @@ import de.hhu.bsinfo.dxmem.cli.types.TypeConverterChunkId;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "put",
         description = "Put data to a chunk"

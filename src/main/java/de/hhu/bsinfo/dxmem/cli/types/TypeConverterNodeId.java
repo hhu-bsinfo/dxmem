@@ -20,6 +20,11 @@ import picocli.CommandLine;
 
 import de.hhu.bsinfo.dxutils.NodeID;
 
+/**
+ * Type converter for picocli to handle node IDs
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class TypeConverterNodeId implements CommandLine.ITypeConverter<Short> {
     @Override
     public Short convert(final String p_value) throws Exception {

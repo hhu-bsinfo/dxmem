@@ -18,25 +18,51 @@ package de.hhu.bsinfo.dxmem.cli;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 
+/**
+ * Wrapper class which is necessary to access the memory instance in various places. This solutions is quite ugly
+ * but I haven't found a way to allow passing some sort of context along with the picocli's commands.
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class CliContext {
-    private final static CliContext ms_instance = new CliContext();
+    private static final CliContext INSTANCE = new CliContext();
 
     private DXMem m_memory;
 
-    // singletons are bad but having to use a dependency injection framework
-    // for a single object is overkill
+    /**
+     * Singletons are bad but having to use a dependency injection framework
+     * for a single object is overkill
+     *
+     * @return Singleton
+     */
     public static CliContext getInstance() {
-        return ms_instance;
+        return INSTANCE;
     }
 
+    /**
+     * Singleton class
+     */
     private CliContext() {
 
     }
 
+    /**
+     * Check if memory is loaded
+     *
+     * @return True if loaded, false otherwise
+     */
     public boolean isMemoryLoaded() {
         return m_memory != null;
     }
 
+    /**
+     * Create a new memory instance
+     *
+     * @param p_nodeId
+     *         Node id to use for instance
+     * @param p_heapSize
+     *         Size of heap in bytes
+     */
     public void newMemory(final short p_nodeId, final long p_heapSize) {
         if (m_memory != null) {
             m_memory.shutdown();
@@ -45,6 +71,12 @@ public class CliContext {
         m_memory = new DXMem(p_nodeId, p_heapSize);
     }
 
+    /**
+     * Load the heap from a file
+     *
+     * @param p_inFile
+     *         File to load heap from
+     */
     public void loadFromFile(final String p_inFile) {
         if (m_memory != null) {
             m_memory.shutdown();
@@ -53,6 +85,11 @@ public class CliContext {
         m_memory = new DXMem(p_inFile);
     }
 
+    /**
+     * Get the memory instance
+     *
+     * @return DXMem instance
+     */
     public DXMem getMemory() {
         return m_memory;
     }

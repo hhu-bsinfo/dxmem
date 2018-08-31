@@ -25,6 +25,9 @@ import org.apache.logging.log4j.core.config.Configurator;
 import de.hhu.bsinfo.dxmem.core.Analyzer;
 import de.hhu.bsinfo.dxmem.core.MemoryLoader;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "analyzer",
         description = "Analyze a memory dump to detect memory errors"

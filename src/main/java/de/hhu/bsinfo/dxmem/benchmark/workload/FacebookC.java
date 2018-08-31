@@ -18,6 +18,9 @@ package de.hhu.bsinfo.dxmem.benchmark.workload;
 
 import picocli.CommandLine;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "facebook-c",
         description = "Facebook (memcached) workload with 24x 32 byte objects (0.5 get, 0.5 put)"

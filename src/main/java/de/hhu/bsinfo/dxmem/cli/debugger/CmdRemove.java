@@ -23,6 +23,9 @@ import de.hhu.bsinfo.dxmem.cli.types.TypeConverterChunkId;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "remove",
         description = "Remove a chunk"

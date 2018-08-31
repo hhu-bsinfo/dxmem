@@ -21,6 +21,11 @@ import picocli.CommandLine;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxutils.NodeID;
 
+/**
+ * Type converter for picocli to handle chunk IDs
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class TypeConverterChunkId implements CommandLine.ITypeConverter<Long> {
     @Override
     public Long convert(final String p_value) throws Exception {

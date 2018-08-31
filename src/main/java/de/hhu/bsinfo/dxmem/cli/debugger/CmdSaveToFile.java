@@ -20,6 +20,9 @@ import picocli.CommandLine;
 
 import de.hhu.bsinfo.dxmem.cli.CliContext;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "save",
         description = "Save the currently loaded DXMemory to a file"

@@ -23,6 +23,9 @@ import de.hhu.bsinfo.dxmem.cli.types.TypeConverterNodeId;
 import de.hhu.bsinfo.dxmem.cli.types.TypeConverterStorageUnit;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "new",
         description = "Create a new empty dxmemory instance"

@@ -22,19 +22,39 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 
+/**
+ * Memory benchmark class to execute multiple benchmark phases
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Benchmark {
     private final String m_name;
     private final List<BenchmarkPhase> m_phases;
 
+    /**
+     * Constructor
+     *
+     * @param p_name
+     *         Name of the benchmark
+     */
     public Benchmark(final String p_name) {
         m_name = p_name;
         m_phases = new ArrayList<>();
     }
 
+    /**
+     * Add a phase to the benchmark. Phases are executed sequentially.
+     *
+     * @param p_phase
+     *         Phase to add
+     */
     public void addPhase(final BenchmarkPhase p_phase) {
         m_phases.add(p_phase);
     }
 
+    /**
+     * Execute the benchmark
+     */
     public void execute() {
         System.out.println("Executing benchmark '" + m_name + "'");
 

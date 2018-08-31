@@ -18,6 +18,9 @@ package de.hhu.bsinfo.dxmem.cli.debugger;
 
 import picocli.CommandLine;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "",
         customSynopsis = "[COMMAND] ...",

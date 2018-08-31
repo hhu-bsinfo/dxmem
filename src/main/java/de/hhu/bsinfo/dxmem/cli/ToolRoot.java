@@ -18,6 +18,9 @@ package de.hhu.bsinfo.dxmem.cli;
 
 import picocli.CommandLine;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "dxmem",
         description = "DXMemory command line tool with various subtools for debugging and development",

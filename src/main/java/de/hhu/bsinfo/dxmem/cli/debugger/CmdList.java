@@ -23,6 +23,9 @@ import de.hhu.bsinfo.dxmem.cli.types.TypeConverterNodeId;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxutils.NodeID;
 
+/**
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 @CommandLine.Command(
         name = "ls",
         description = "List all active chunk IDs"

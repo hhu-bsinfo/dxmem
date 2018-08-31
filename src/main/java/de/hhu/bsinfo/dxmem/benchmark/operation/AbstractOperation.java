@@ -25,6 +25,11 @@ import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentilePool;
 
+/**
+ * Base class for all operations offered by the benchmark framework
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public abstract class AbstractOperation {
     private final String m_name;
     private final float m_probability;
@@ -42,6 +47,18 @@ public abstract class AbstractOperation {
 
     private long m_curStartTime;
 
+    /**
+     * Constructor
+     *
+     * @param p_name
+     *         Name of the operation
+     * @param p_probability
+     *         Probability (0.0 - 1.0)
+     * @param p_batchCount
+     *         Batch count
+     * @param p_verifyData
+     *         True to verify data with the operation, false to disable data verification
+     */
     public AbstractOperation(final String p_name, final float p_probability, final int p_batchCount,
             final boolean p_verifyData) {
         m_name = p_name;
@@ -58,26 +75,63 @@ public abstract class AbstractOperation {
         }
     }
 
+    /**
+     * Get the probability for the operation
+     *
+     * @return Probability (0.0 - 1.0)
+     */
     public float getProbability() {
         return m_probability;
     }
 
+    /**
+     * Get the batch count for the operation
+     *
+     * @return Batch count
+     */
     public int getBatchCount() {
         return m_batchCount;
     }
 
+    /**
+     * Check if data must be verified with the operation
+     *
+     * @return True to verify data
+     */
     public boolean verifyData() {
         return m_verifyData;
     }
 
+    /**
+     * Get the name of the operation
+     *
+     * @return Name
+     */
     public String getName() {
         return m_name;
     }
 
+    /**
+     * Get the name tag (e.g. [test]) of the operation
+     *
+     * @return Name tag
+     */
     public String getNameTag() {
         return '[' + m_name + ']';
     }
 
+    /**
+     * Initialize the operation
+     *
+     * @param p_memory
+     *         Instance of DXMem to operate on
+     * @param p_cids
+     *         Chunk ranges for operation to use
+     * @param p_cidsLock
+     *         Lock for concurrent access to chunk ranges
+     * @param p_totalOps
+     *         Total operations to execute
+     */
     public void init(final DXMem p_memory, final ChunkIDRanges p_cids, final ReentrantReadWriteLock p_cidsLock,
             final long p_totalOps) {
         m_memory = p_memory;
@@ -92,22 +146,48 @@ public abstract class AbstractOperation {
         }
     }
 
+    /**
+     * Call this once the benchmark is finished
+     */
     public void finish() {
         m_time.sortValues();
     }
 
+    /**
+     * Get the total operations to excecute
+     *
+     * @return Total operations to execute
+     */
     public long getTotalOperations() {
         return m_totalOps;
     }
 
+    /**
+     * Get the number of return codes for a specific state
+     *
+     * @param p_state
+     *         State
+     * @return Number of return codes of specified state
+     */
     public long getNumReturnCodes(final ChunkState p_state) {
         return m_opsReturnCodes[p_state.ordinal()].get();
     }
 
+    /**
+     * Increment the return code counter for a specific state
+     *
+     * @param p_chunkState
+     *         State to increment the counter of
+     */
     public void incReturnCode(final ChunkState p_chunkState) {
         m_opsReturnCodes[p_chunkState.ordinal()].incrementAndGet();
     }
 
+    /**
+     * Consume one operation
+     *
+     * @return True if successful, false if no operations are left to consume
+     */
     public boolean consumeOperation() {
         long opsRemain;
 
@@ -122,10 +202,20 @@ public abstract class AbstractOperation {
         return true;
     }
 
+    /**
+     * Get the TimePercentilePool used for measuring operation execution
+     *
+     * @return TimePercentilePool
+     */
     public TimePercentilePool getTimePercentile() {
         return m_time;
     }
 
+    /**
+     * Generate an output string of the operation and it's stats
+     *
+     * @return Readable output string of operation state
+     */
     public String parameterToString() {
         StringBuilder builder = new StringBuilder();
 
@@ -200,26 +290,57 @@ public abstract class AbstractOperation {
         return builder.toString();
     }
 
+    /**
+     * Execute the operation
+     *
+     * @return ChunkState of the operation executed
+     */
     public ChunkState execute() {
         return execute(m_memory, m_verifyData);
     }
 
+    /**
+     * Implement this to execute your operation
+     *
+     * @param p_memory
+     *         Instance of DXMem to execute the operation on
+     * @param p_verifyData
+     *         True to verify data after execution (if possible), false otherwise
+     * @return ChunkState result of execution
+     */
     protected abstract ChunkState execute(final DXMem p_memory, final boolean p_verifyData);
 
+    /**
+     * Call this to start measuring time once you execute your operation
+     */
     protected void executeTimeStart() {
         m_curStartTime = System.nanoTime();
     }
 
+    /**
+     * Call this to stop measuring time after you executed your operation
+     */
     protected void executeTimeEnd() {
         m_time.record(System.nanoTime() - m_curStartTime);
     }
 
+    /**
+     * Call this if you generated a new cid when executing your operation
+     *
+     * @param p_cid
+     *         New cid generated
+     */
     protected void executeNewCid(final long p_cid) {
         m_cidsLock.writeLock().lock();
         m_cids.add(p_cid);
         m_cidsLock.writeLock().unlock();
     }
 
+    /**
+     * Get a random cid for executing your operation
+     *
+     * @return Random cid
+     */
     protected long executeGetRandomCid() {
         long tmp;
 
@@ -230,6 +351,12 @@ public abstract class AbstractOperation {
         return tmp;
     }
 
+    /**
+     * Call this if you removed a chunk
+     *
+     * @param p_cid
+     *         Cid of chunk removed
+     */
     protected void executeRemoveCid(final long p_cid) {
         m_cidsLock.writeLock().lock();
         m_cids.remove(p_cid);

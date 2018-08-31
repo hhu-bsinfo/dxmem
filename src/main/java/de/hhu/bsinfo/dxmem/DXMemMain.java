@@ -28,7 +28,9 @@ import de.hhu.bsinfo.dxmem.cli.ToolRoot;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.07.2018
  */
 public final class DXMemMain {
-
+    /**
+     * Private constructor, main entry point only
+     */
     private DXMemMain() {
 
     }

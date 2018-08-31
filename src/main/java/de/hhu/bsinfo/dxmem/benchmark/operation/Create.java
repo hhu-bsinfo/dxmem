@@ -22,12 +22,31 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
 
+/**
+ * Operation to create a chunk
+ *
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ */
 public class Create extends AbstractOperation {
     private final int m_minSize;
     private final int m_maxSize;
 
     private final ChunkBenchmark[] m_chunks;
 
+    /**
+     * Constructor
+     *
+     * @param p_probability
+     *         Operation probability (0.0 - 1.0)
+     * @param p_batchCount
+     *         Number of batches to execute for a single operation
+     * @param p_verifyData
+     *         True to enable data verification
+     * @param p_minSize
+     *         Min size of chunk to create
+     * @param p_maxSize
+     *         Max size of chunk to create
+     */
     public Create(final float p_probability, final int p_batchCount, final boolean p_verifyData, final int p_minSize,
             final int p_maxSize) {
         super("create", p_probability, p_batchCount, p_verifyData);
