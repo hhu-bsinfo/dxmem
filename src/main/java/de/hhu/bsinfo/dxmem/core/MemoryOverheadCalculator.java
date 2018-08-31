@@ -1,9 +1,24 @@
+/*
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.hhu.bsinfo.dxmem.core;
 
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
-public class MemoryOverheadCalculator
-{
+public class MemoryOverheadCalculator {
     private final int m_chunkPayloadSize;
     private final long m_totalChunkCount;
     private final StorageUnit m_totalPayloadMem;
@@ -48,7 +63,8 @@ public class MemoryOverheadCalculator
             return;
         }
 
-        MemoryOverheadCalculator calc = new MemoryOverheadCalculator(Integer.parseInt(p_args[0]), Long.parseLong(p_args[1]));
+        MemoryOverheadCalculator calc = new MemoryOverheadCalculator(Integer.parseInt(p_args[0]),
+                Long.parseLong(p_args[1]));
         System.out.println(calc);
     }
 
@@ -147,7 +163,8 @@ public class MemoryOverheadCalculator
 
     private static long calcSizeLIDTable(final int p_tableLevel, final long p_totalNumChunks) {
         // round up to full lid tables
-        return (long) Math.ceil(p_totalNumChunks / Math.pow(2, 12 * (p_tableLevel + 1))) * CIDTable.ENTRIES_PER_LID_LEVEL * CIDTable.ENTRY_SIZE;
+        return (long) Math.ceil(p_totalNumChunks / Math.pow(2, 12 * (p_tableLevel + 1))) *
+                CIDTable.ENTRIES_PER_LID_LEVEL * CIDTable.ENTRY_SIZE;
     }
 
     private static long calcTotalChunkSizeMemory(final int p_chunkPayloadSize, final long p_totalChunkCount) {
@@ -155,6 +172,7 @@ public class MemoryOverheadCalculator
     }
 
     private static long calcTotalChunkSizeMemory(final int p_chunkPayloadSize) {
-        return Heap.SIZE_MARKER_BYTE + CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(p_chunkPayloadSize) + p_chunkPayloadSize;
+        return Heap.SIZE_MARKER_BYTE + CIDTableChunkEntry.calculateLengthFieldSizeHeapBlock(p_chunkPayloadSize) +
+                p_chunkPayloadSize;
     }
 }

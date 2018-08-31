@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.hhu.bsinfo.dxmem.core;
 
 import org.apache.logging.log4j.Level;
@@ -6,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class LockTest {
-    @Test(timeout=2000)
+    @Test(timeout = 2000)
     public void readLockSimpleST() {
         Configurator.setRootLevel(Level.TRACE);
 
@@ -45,7 +61,7 @@ public class LockTest {
         Assert.assertEquals(0, chunkEntry.getReadLockCounter());
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readLockLoopST() {
         Configurator.setRootLevel(Level.TRACE);
 
@@ -86,7 +102,7 @@ public class LockTest {
         }
     }
 
-    @Test(timeout=2000)
+    @Test(timeout = 2000)
     public void writeLockSimpleST() {
         Configurator.setRootLevel(Level.TRACE);
 
@@ -125,7 +141,7 @@ public class LockTest {
         Assert.assertEquals(0, chunkEntry.getReadLockCounter());
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void writeLockLoopST() {
         Configurator.setRootLevel(Level.TRACE);
 
@@ -166,62 +182,62 @@ public class LockTest {
         }
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readLockMT2() {
         run(2, 0, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readLockMT4() {
         run(4, 0, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void writeLockMT2() {
         run(0, 2, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void writeLockMT4() {
         run(0, 4, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT1_1() {
         run(1, 1, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT3_1() {
         run(3, 1, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT2_2() {
         run(2, 2, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT3_3() {
         run(3, 3, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT4_2() {
         run(4, 2, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT1_5() {
         run(1, 5, 10000000);
     }
 
-    @Test(timeout=20000)
+    @Test(timeout = 20000)
     public void readWriteLockMT5_1() {
         run(5, 1, 10000000);
     }
 
-    @Test(timeout=10000)
+    @Test(timeout = 10000)
     public void readWriteTryLock() {
         Configurator.setRootLevel(Level.TRACE);
 
@@ -425,7 +441,7 @@ public class LockTest {
                 Assert.assertTrue(chunkEntry.isValid());
                 Assert.assertTrue(chunkEntry.isWriteLockAcquired());
                 Assert.assertFalse(chunkEntry.areReadLocksAcquired());
-                Assert.assertEquals(0 , chunkEntry.getReadLockCounter());
+                Assert.assertEquals(0, chunkEntry.getReadLockCounter());
 
                 LockUtils.releaseWriteLock(m_cidTable, chunkEntry);
 
