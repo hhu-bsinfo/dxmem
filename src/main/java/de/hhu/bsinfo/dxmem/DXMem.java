@@ -18,6 +18,9 @@ package de.hhu.bsinfo.dxmem;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.operations.Analyze;
@@ -46,6 +49,8 @@ import de.hhu.bsinfo.dxutils.unit.StorageUnit;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public class DXMem {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(DXMem.class.getSimpleName());
+
     private Context m_context;
 
     private Create m_create;
@@ -77,21 +82,7 @@ public class DXMem {
      *         Path to memory dump file
      */
     public DXMem(final String p_memdumpFile) {
-        StorageUnit fileSize = new StorageUnit(new File(p_memdumpFile).length(), StorageUnit.BYTE);
-        MemState state = new MemState();
-
-        try {
-            state.update();
-        } catch (StateUpdateException e) {
-            throw new MemoryRuntimeException(e.getMessage());
-        }
-
-        StorageUnit freeMem = state.getFree();
-
-        if (fileSize.getMBDouble() > freeMem.getMBDouble()) {
-            throw new MemoryRuntimeException("Cannot load memory dump file " + p_memdumpFile +
-                    " insufficient free RAM: " + fileSize + " > " + freeMem);
-        }
+        checkSufficientMemory(new StorageUnit(new File(p_memdumpFile).length(), StorageUnit.BYTE));
 
         m_context = new Context(p_memdumpFile);
 
@@ -108,20 +99,7 @@ public class DXMem {
      *         Size of heap to create (in bytes)
      */
     public DXMem(final short p_nodeId, final long p_heapSize) {
-        StorageUnit heapSize = new StorageUnit(p_heapSize, StorageUnit.BYTE);
-        MemState state = new MemState();
-
-        try {
-            state.update();
-        } catch (StateUpdateException e) {
-            throw new MemoryRuntimeException(e.getMessage());
-        }
-
-        StorageUnit freeMem = state.getFree();
-
-        if (heapSize.getMBDouble() > freeMem.getMBDouble()) {
-            throw new MemoryRuntimeException("Cannot create heap insufficient free RAM: " + heapSize + " > " + freeMem);
-        }
+        checkSufficientMemory(new StorageUnit(p_heapSize, StorageUnit.BYTE));
 
         m_context = new Context(p_nodeId, p_heapSize);
 
@@ -316,5 +294,27 @@ public class DXMem {
 
         m_analyze = new Analyze(m_context);
         m_dump = new Dump(m_context);
+    }
+
+    private void checkSufficientMemory(final StorageUnit p_heapSize) {
+        MemState state = new MemState();
+
+        try {
+            state.update();
+        } catch (StateUpdateException e) {
+            throw new MemoryRuntimeException(e.getMessage());
+        }
+
+        StorageUnit freeMem = state.getFree();
+
+        if (p_heapSize.getMBDouble() > freeMem.getMBDouble()) {
+            throw new MemoryRuntimeException(
+                    "Cannot create heap insufficient free RAM: " + p_heapSize + " > " + freeMem);
+        }
+
+        if (freeMem.getGBDouble() - p_heapSize.getGBDouble() < 1.0) {
+            LOGGER.warn("Less than 1 GB of free RAM available after allocating heap. This might lead to performance " +
+                    "issues or even out of memory. Consider creating a smaller heap.");
+        }
     }
 }

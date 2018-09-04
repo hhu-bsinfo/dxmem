@@ -9,7 +9,6 @@ import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 public class DXMemTest {
     @Test
     public void insufficientMemory() {
-       
         try {
             DXMem dxmem = new DXMem(DXMemoryTestConstants.NODE_ID, new StorageUnit(1, StorageUnit.TB).getBytes());
         } catch (MemoryRuntimeException ignored) {
