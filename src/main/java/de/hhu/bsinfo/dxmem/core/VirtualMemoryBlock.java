@@ -117,7 +117,8 @@ public class VirtualMemoryBlock {
             final int p_offset, final int p_length) {
         assert assertMemoryBounds(p_address + p_offset, p_length);
 
-        UnsafeMemory.copyBytes(p_addressSource + p_offset, p_address + p_addressOffset, p_length);
+        UnsafeMemory.copyBytes(m_memoryBase + p_addressSource + p_offset, m_memoryBase + p_address + p_addressOffset,
+                p_length);
     }
 
     /**
