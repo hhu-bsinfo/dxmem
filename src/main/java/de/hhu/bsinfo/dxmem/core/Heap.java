@@ -333,6 +333,11 @@ public final class Heap implements Importable, Exportable {
     public boolean resize(final CIDTableChunkEntry p_tableEntry, final int p_newSize) {
         int oldSize = getSize(p_tableEntry);
 
+        // don't resize if size did not change
+        if (oldSize == p_newSize) {
+            return true;
+        }
+
         CIDTableChunkEntry[] newLocation = new CIDTableChunkEntry[1];
         newLocation[0] = new CIDTableChunkEntry();
 
