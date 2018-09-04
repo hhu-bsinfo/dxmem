@@ -16,10 +16,14 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
+import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.LockUtils;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkState;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.Value;
 
 /**
  * Resize an existing chunk
@@ -27,6 +31,12 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Resize {
+    private static final Value SOP_RESIZE = new Value(DXMem.class, "Resize");
+
+    static {
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_RESIZE);
+    }
+
     private final Context m_context;
 
     /**
@@ -48,12 +58,11 @@ public class Resize {
      *         New size for chunk
      * @return True if succcessful, false on failure
      */
-    public boolean resize(final long p_cid, final int p_newSize) {
-        // TODO statistics
+    public ChunkState resize(final long p_cid, final int p_newSize) {
         assert p_newSize > 0;
 
         if (p_cid == ChunkID.INVALID_ID) {
-            return false;
+            return ChunkState.INVALID_ID;
         }
 
         CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
@@ -65,26 +74,30 @@ public class Resize {
         if (!tableEntry.isValid()) {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            return false;
+            return ChunkState.DOES_NOT_EXIST;
         }
 
         LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
 
         // use write lock because we might have to change the address and modify metadata
         if (lockStatus != LockUtils.LockStatus.OK) {
-            // TODO return chunk state to give more insight on what happened here
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             // someone else deleted the chunk while waiting for the lock
-            return false;
+            return ChunkState.DOES_NOT_EXIST;
         }
 
         m_context.getHeap().resize(tableEntry, p_newSize);
+
+        // update cid table entry
+        m_context.getCIDTable().entryUpdate(tableEntry);
 
         LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
-        return true;
+        SOP_RESIZE.inc();
+
+        return ChunkState.OK;
     }
 }

@@ -330,12 +330,30 @@ public final class Heap implements Importable, Exportable {
      * @param p_newSize
      *         New size
      */
-    public void resize(final CIDTableChunkEntry p_tableEntry, final int p_newSize) {
-        // TODO implement resize
-        // shrinking is simple
-        // otherwise, try to expand current memory first. if not possible, reallocate, move data and set new address
-        // important: this operation must be locked using the heap lock
-        throw new RuntimeException("Not implemented");
+    public boolean resize(final CIDTableChunkEntry p_tableEntry, final int p_newSize) {
+        int oldSize = getSize(p_tableEntry);
+
+        CIDTableChunkEntry[] newLocation = new CIDTableChunkEntry[1];
+        newLocation[0] = new CIDTableChunkEntry();
+
+        m_lock.lock();
+
+        if (!multiReserveBlocks(newLocation, new int[] {p_newSize}, 0, 1)) {
+            return false;
+        }
+
+        copyNative(newLocation[0].getAddress(), 0, p_tableEntry.getAddress(), 0, oldSize);
+
+        // start address between marker and length field
+        freeReservedBlock(p_tableEntry.getAddress() - p_tableEntry.getSplitLengthFieldSize(),
+                p_tableEntry.getSplitLengthFieldSize(), oldSize);
+
+        m_lock.unlock();
+
+        p_tableEntry.setLengthField(p_newSize);
+        p_tableEntry.setAddress(newLocation[0].getAddress());
+
+        return true;
     }
 
     /**
