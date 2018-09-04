@@ -16,7 +16,10 @@
 
 package de.hhu.bsinfo.dxmem;
 
+import java.io.File;
+
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.operations.Analyze;
 import de.hhu.bsinfo.dxmem.operations.CIDStatus;
 import de.hhu.bsinfo.dxmem.operations.Create;
@@ -33,6 +36,9 @@ import de.hhu.bsinfo.dxmem.operations.Remove;
 import de.hhu.bsinfo.dxmem.operations.Reserve;
 import de.hhu.bsinfo.dxmem.operations.Size;
 import de.hhu.bsinfo.dxmem.operations.Stats;
+import de.hhu.bsinfo.dxmonitor.state.MemState;
+import de.hhu.bsinfo.dxmonitor.state.StateUpdateException;
+import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 /**
  * DXMem "main" class. Access to all operations offered by the the memory management
@@ -71,6 +77,22 @@ public class DXMem {
      *         Path to memory dump file
      */
     public DXMem(final String p_memdumpFile) {
+        StorageUnit fileSize = new StorageUnit(new File(p_memdumpFile).length(), StorageUnit.BYTE);
+        MemState state = new MemState();
+
+        try {
+            state.update();
+        } catch (StateUpdateException e) {
+            throw new MemoryRuntimeException(e.getMessage());
+        }
+
+        StorageUnit freeMem = state.getFree();
+
+        if (fileSize.getMBDouble() > freeMem.getMBDouble()) {
+            throw new MemoryRuntimeException("Cannot load memory dump file " + p_memdumpFile +
+                    " insufficient free RAM: " + fileSize + " > " + freeMem);
+        }
+
         m_context = new Context(p_memdumpFile);
 
         initOperations();
@@ -86,6 +108,21 @@ public class DXMem {
      *         Size of heap to create (in bytes)
      */
     public DXMem(final short p_nodeId, final long p_heapSize) {
+        StorageUnit heapSize = new StorageUnit(p_heapSize, StorageUnit.BYTE);
+        MemState state = new MemState();
+
+        try {
+            state.update();
+        } catch (StateUpdateException e) {
+            throw new MemoryRuntimeException(e.getMessage());
+        }
+
+        StorageUnit freeMem = state.getFree();
+
+        if (heapSize.getMBDouble() > freeMem.getMBDouble()) {
+            throw new MemoryRuntimeException("Cannot create heap insufficient free RAM: " + heapSize + " > " + freeMem);
+        }
+
         m_context = new Context(p_nodeId, p_heapSize);
 
         initOperations();
