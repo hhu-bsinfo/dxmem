@@ -17,17 +17,23 @@
 package de.hhu.bsinfo.dxmem.operations;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.DXMemTestUtils;
 import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxmem.TestChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxutils.RandomUtils;
+import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 public class GetPutTest {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(GetPutTest.class.getSimpleName());
+
     @Test
     public void getSimple() {
         Configurator.setRootLevel(Level.TRACE);
@@ -185,6 +191,11 @@ public class GetPutTest {
     }
 
     private static void putGetTestChunk(final int p_count, final long p_heapSize) {
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         TestChunk[] chunks = new TestChunk[p_count];

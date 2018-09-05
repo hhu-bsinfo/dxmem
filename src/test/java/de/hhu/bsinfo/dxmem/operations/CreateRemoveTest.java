@@ -24,11 +24,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.DXMemTestUtils;
 import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxmem.TestChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.RandomUtils;
+import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 public class CreateRemoveTest {
     private static final Logger LOGGER = LogManager.getFormatterLogger(CreateRemoveTest.class.getSimpleName());
@@ -391,6 +393,11 @@ public class CreateRemoveTest {
 
     private void createMultiThreaded(final long p_heapSize, final int p_chunkSizeMin, final int p_chunkSizeMax,
             final int p_allocCount, final int p_threads) {
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         Thread[] threads = new Thread[p_threads];
@@ -431,6 +438,11 @@ public class CreateRemoveTest {
     }
 
     private static void createSizes(final long p_heapSize, final int... p_sizes) {
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_sizes.length];
@@ -461,6 +473,11 @@ public class CreateRemoveTest {
     }
 
     private static void createSize(final long p_heapSize, final int p_chunkCount, final int p_chunkSize) {
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_chunkCount];
@@ -504,6 +521,12 @@ public class CreateRemoveTest {
         // add some more memory to ensure everything fits
         totalSize += (int) (totalSize * p_additionalMemoryPercent);
 
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(
+                new StorageUnit(totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         // note: depending on the sizes created, this test might crash if you don't have sufficient memory available
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize);
@@ -535,6 +558,11 @@ public class CreateRemoveTest {
 
     private void createTestChunk(final long p_heapSize, final int p_count) {
         Configurator.setRootLevel(Level.TRACE);
+
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
 
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
@@ -585,6 +613,12 @@ public class CreateRemoveTest {
         // add some more memory to ensure everything fits
         totalSize += (int) (totalSize * p_additionalMemoryPercent);
 
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(
+                new StorageUnit(totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         // note: depending on the sizes created, this test might crash if you don't have sufficient memory available
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize);
@@ -623,6 +657,12 @@ public class CreateRemoveTest {
         // add some more memory to ensure everything fits
         long totalSize = (long) (p_size * p_count * p_additionalMemoryPercent);
 
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(
+                new StorageUnit(totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         // note: depending on the sizes created, this test might crash if you don't have sufficient memory available
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID,
                 totalSize < 1024 * 1024 ? DXMemoryTestConstants.HEAP_SIZE_SMALL : totalSize);
@@ -656,6 +696,11 @@ public class CreateRemoveTest {
     // to create and test zombie entries
     private static void createAndRemoveRepetitive(final long p_heapSize, final int p_chunkCount,
             final int p_chunkSize) {
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, p_heapSize);
 
         long[] cids = new long[p_chunkCount];
