@@ -17,22 +17,25 @@
 package de.hhu.bsinfo.dxmem.core;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.DXMemTestUtils;
+import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxutils.RandomUtils;
+import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
 public class HeapTest {
-    private static final long HEAP_SIZE_SMALL = 1024 * 1024;
-    private static final long HEAP_SIZE_MEDIUM = 1024 * 1024 * 128;
-    private static final long HEAP_SIZE_LARGE = 1024 * 1024 * 1024 * 4L;
+    private static final Logger LOGGER = LogManager.getFormatterLogger(HeapTest.class.getSimpleName());
 
     @Test
     public void mallocSimple() {
         Configurator.setRootLevel(Level.TRACE);
 
-        Heap heap = new Heap(HEAP_SIZE_SMALL);
+        Heap heap = new Heap(DXMemoryTestConstants.HEAP_SIZE_SMALL);
 
         CIDTableChunkEntry entry = new CIDTableChunkEntry();
 
@@ -45,53 +48,58 @@ public class HeapTest {
     @Test
     public void malloc1() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_SMALL, 1, 1, 100000, 1);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_SMALL, 1, 1, 100000, 1);
     }
 
     @Test
     public void malloc2() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_MEDIUM, 1, 1, 10000000, 1);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1, 1, 10000000, 1);
     }
 
     @Test
     public void malloc3() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_MEDIUM, 1024, 1024, 10000, 1);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1024, 1024, 10000, 1);
     }
 
     @Test
     public void malloc4() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_MEDIUM, 1, 128, 1000000, 1);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1, 128, 1000000, 1);
     }
 
     @Test
     public void malloc5() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_MEDIUM, 1, 1, 10000000, 2);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1, 1, 10000000, 2);
     }
 
     @Test
     public void malloc6() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_MEDIUM, 1, 1, 10000000, 4);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_MEDIUM, 1, 1, 10000000, 4);
     }
 
     @Test
     public void malloc7() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_LARGE, 1, 128, 10000000, 2);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1, 128, 10000000, 2);
     }
 
     @Test
     public void malloc8() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(HEAP_SIZE_LARGE, 1, 128, 10000000, 4);
+        mallocTest(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1, 128, 10000000, 4);
     }
 
     private void mallocTest(final long p_heapSize, final int p_chunkSizeMin, final int p_chunkSizeMax,
             final int p_allocCount, final int p_threads) {
+        if (!DXMemTestUtils.sufficientMemoryForBenchmark(new StorageUnit(p_heapSize, "b"))) {
+            LOGGER.warn("Skipping test due to insufficient memory available");
+            return;
+        }
+
         Heap heap = new Heap(p_heapSize);
 
         Thread[] threads = new Thread[p_threads];
