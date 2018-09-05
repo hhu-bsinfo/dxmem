@@ -32,9 +32,9 @@ public class BenchmarkTest {
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
 
         Benchmark benchmark = new Benchmark("test");
-        benchmark.addPhase(new BenchmarkPhase("test", memory, 1, 1000000, 0, new Create(1.0f, 1, true, 32, 32)));
+        benchmark.addPhase(new BenchmarkPhase("test", 1, 1000000, 0, new Create(1.0f, 1, true, 32, 32)));
 
-        benchmark.execute();
+        benchmark.execute(new DXMemBenchmarkContext(memory));
 
         memory.shutdown();
     }
@@ -45,9 +45,9 @@ public class BenchmarkTest {
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
 
         Benchmark benchmark = new Benchmark("test");
-        benchmark.addPhase(new BenchmarkPhase("test", memory, 2, 1000000, 0, new Create(1.0f, 1, true, 32, 32)));
+        benchmark.addPhase(new BenchmarkPhase("test", 2, 1000000, 0, new Create(1.0f, 1, true, 32, 32)));
 
-        benchmark.execute();
+        benchmark.execute(new DXMemBenchmarkContext(memory));
 
         memory.shutdown();
     }
@@ -58,10 +58,10 @@ public class BenchmarkTest {
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
 
         Benchmark benchmark = new Benchmark("test");
-        benchmark.addPhase(new BenchmarkPhase("test", memory, 1, 1000000, 0,
+        benchmark.addPhase(new BenchmarkPhase("test", 1, 1000000, 0,
                 new Create(0.5f, 1, true, 32, 32), new Get(0.5f, 1, true, 32)));
 
-        benchmark.execute();
+        benchmark.execute(new DXMemBenchmarkContext(memory));
 
         memory.shutdown();
     }
@@ -72,10 +72,10 @@ public class BenchmarkTest {
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_MEDIUM);
 
         Benchmark benchmark = new Benchmark("test");
-        benchmark.addPhase(new BenchmarkPhase("test", memory, 2, 1000, 0,
+        benchmark.addPhase(new BenchmarkPhase("test", 2, 1000, 0,
                 new Create(0.5f, 1, true, 32, 32), new Get(0.5f, 1, true, 32)));
 
-        benchmark.execute();
+        benchmark.execute(new DXMemBenchmarkContext(memory));
 
         memory.shutdown();
     }
