@@ -24,7 +24,6 @@ import de.hhu.bsinfo.dxmem.benchmark.operation.Create;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Dump;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Get;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Put;
-import de.hhu.bsinfo.dxmem.cli.CliContext;
 
 /**
  * Base class for YCSB type benchmarks
@@ -101,17 +100,14 @@ public abstract class AbstractYcsb extends AbstractWorkload {
     public Benchmark createWorkload() {
         Benchmark benchmark = new Benchmark(m_name);
 
-        benchmark.addPhase(new BenchmarkPhase("load", CliContext.getInstance().getMemory(), m_loadThreads,
-                m_loadTotalObjects, 0,
+        benchmark.addPhase(new BenchmarkPhase("load", m_loadThreads, m_loadTotalObjects, 0,
                 new Create(1.0f, m_batchCount, m_verifyData, m_objectSize, m_objectSize)));
-        benchmark.addPhase(new BenchmarkPhase("run", CliContext.getInstance().getMemory(), m_runThreads,
-                m_runTotalOperations, 0,
+        benchmark.addPhase(new BenchmarkPhase("run", m_runThreads, m_runTotalOperations, 0,
                 new Get(m_probGet, m_batchCount, m_verifyData, m_objectSize),
                 new Put(m_probPut, m_batchCount, m_verifyData, m_objectSize)));
 
         if (m_dumpMemory) {
-            benchmark.addPhase(new BenchmarkPhase("dump", CliContext.getInstance().getMemory(), 1, 1, 0,
-                    new Dump("benchmark_mem_var.dump")));
+            benchmark.addPhase(new BenchmarkPhase("dump", 1, 1, 0, new Dump("benchmark_mem_var.dump")));
         }
 
         return benchmark;

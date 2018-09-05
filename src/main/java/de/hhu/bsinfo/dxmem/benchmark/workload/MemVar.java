@@ -25,7 +25,6 @@ import de.hhu.bsinfo.dxmem.benchmark.operation.Dump;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Get;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Put;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Remove;
-import de.hhu.bsinfo.dxmem.cli.CliContext;
 import de.hhu.bsinfo.dxmem.cli.types.TypeConverterStorageUnit;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
@@ -121,13 +120,11 @@ public class MemVar extends AbstractWorkload {
     public Benchmark createWorkload() {
         Benchmark benchmark = new Benchmark("mem-var");
 
-        benchmark.addPhase(new BenchmarkPhase("load", CliContext.getInstance().getMemory(), m_loadThreads,
-                m_loadTotalObjects, 0,
+        benchmark.addPhase(new BenchmarkPhase("load", m_loadThreads, m_loadTotalObjects, 0,
                 new Create(1.0f, m_batchCount, m_verifyData, (int) m_objectSizeMin.getBytes(),
                         (int) m_objectSizeMax.getBytes())));
 
-        benchmark.addPhase(new BenchmarkPhase("run", CliContext.getInstance().getMemory(), m_runThreads,
-                m_runTotalOperations, 0,
+        benchmark.addPhase(new BenchmarkPhase("run", m_runThreads, m_runTotalOperations, 0,
                 new Get(m_probGet, m_batchCount, m_verifyData, (int) m_objectSizeMax.getBytes()),
                 new Put(m_probPut, m_batchCount, m_verifyData, (int) m_objectSizeMax.getBytes()),
                 new Create(m_probCreate, m_batchCount, m_verifyData, (int) m_objectSizeMin.getBytes(),
@@ -135,8 +132,7 @@ public class MemVar extends AbstractWorkload {
                 new Remove(m_probRemove, m_batchCount, m_verifyData)));
 
         if (m_dumpMemory) {
-            benchmark.addPhase(new BenchmarkPhase("dump", CliContext.getInstance().getMemory(), 1, 1, 0,
-                    new Dump("benchmark_mem_var.dump")));
+            benchmark.addPhase(new BenchmarkPhase("dump", 1, 1, 0, new Dump("benchmark_mem_var.dump")));
         }
 
         return benchmark;

@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
-import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.benchmark.BenchmarkContext;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
 /**
@@ -40,9 +40,9 @@ public class Dump extends AbstractOperation {
     }
 
     @Override
-    protected ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
+    protected ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData) {
         executeTimeStart();
-        p_memory.dump().dump(m_outputFile);
+        p_context.dump(m_outputFile);
         executeTimeEnd();
 
         return ChunkState.OK;

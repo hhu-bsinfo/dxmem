@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.benchmark.operation.AbstractOperation;
 import de.hhu.bsinfo.dxmem.core.CIDTableStatus;
 import de.hhu.bsinfo.dxmem.core.HeapStatus;
@@ -43,7 +42,6 @@ import de.hhu.bsinfo.dxutils.stats.TimePercentile;
  */
 public class BenchmarkPhase {
     private final String m_name;
-    private final DXMem m_memory;
     private final int m_numThreads;
     private final long m_totalNumOperations;
     private final long m_delayNsBetweenOps;
@@ -58,8 +56,6 @@ public class BenchmarkPhase {
      *
      * @param p_name
      *         Name of the phase
-     * @param p_memory
-     *         DXMem instance to use for this phase
      * @param p_numThreads
      *         Number of threads to run in parallel
      * @param p_totalNumOperations
@@ -69,10 +65,9 @@ public class BenchmarkPhase {
      * @param p_operations
      *         Operations to execute in this phase
      */
-    public BenchmarkPhase(final String p_name, final DXMem p_memory, final int p_numThreads,
-            final long p_totalNumOperations, final long p_delayNsBetweenOps, final AbstractOperation... p_operations) {
+    public BenchmarkPhase(final String p_name, final int p_numThreads, final long p_totalNumOperations,
+            final long p_delayNsBetweenOps, final AbstractOperation... p_operations) {
         m_name = p_name;
-        m_memory = p_memory;
         m_numThreads = p_numThreads;
         m_totalNumOperations = p_totalNumOperations;
         m_delayNsBetweenOps = p_delayNsBetweenOps;
@@ -102,15 +97,18 @@ public class BenchmarkPhase {
     /**
      * Execute the phase
      *
+     * @param p_context
+     *         Context to execute benchmark on
      * @param p_cidRanges
      *         CID ranges available in this phase
      * @param p_cidRangesLock
      *         Lock for CID ranges to ensure thread safety
      */
-    public void execute(final ChunkIDRanges p_cidRanges, final ReentrantReadWriteLock p_cidRangesLock) {
+    public void execute(final BenchmarkContext p_context, final ChunkIDRanges p_cidRanges,
+            final ReentrantReadWriteLock p_cidRangesLock) {
         // init ops
         for (AbstractOperation op : m_operations) {
-            op.init(m_memory, p_cidRanges, p_cidRangesLock, (long) (m_totalNumOperations * op.getProbability()));
+            op.init(p_context, p_cidRanges, p_cidRangesLock, (long) (m_totalNumOperations * op.getProbability()));
         }
 
         AtomicInteger threadsRunning = new AtomicInteger(0);
@@ -162,15 +160,15 @@ public class BenchmarkPhase {
                     System.out.println("Updating memory state failed: " + e);
                 }
 
-                HeapStatus heapStatus = m_memory.stats().getHeapStatus();
-                CIDTableStatus cidTableStatus = m_memory.stats().getCIDTableStatus();
-                LIDStoreStatus lidStoreStatus = m_memory.stats().getLIDStoreStatus();
+                HeapStatus heapStatus = p_context.getHeapStatus();
+                CIDTableStatus cidTableStatus = p_context.getCIDTableStatus();
+                LIDStoreStatus lidStoreStatus = p_context.getLIDStoreStatus();
 
                 StringBuilder builder = new StringBuilder();
 
                 builder.append(
                         String.format("[PROGRESS: %s] %d sec [OPS: Perc=%.2f, Total=%d/%d]",
-                                m_name, totalTime, ((double) opsExecuted / m_totalNumOperations) * 100,
+                                m_name, totalTime, (double) opsExecuted / m_totalNumOperations * 100,
                                 opsExecuted, m_totalNumOperations));
 
                 builder.append(
@@ -246,13 +244,16 @@ public class BenchmarkPhase {
 
     /**
      * Print the results of the phase
+     *
+     * @param p_context
+     *         Context used during benchmark phase
      */
-    public void printResults() {
+    public void printResults(final BenchmarkContext p_context) {
         StringBuilder builder = new StringBuilder();
 
-        HeapStatus heapStatus = m_memory.stats().getHeapStatus();
-        CIDTableStatus cidTableStatus = m_memory.stats().getCIDTableStatus();
-        LIDStoreStatus lidStoreStatus = m_memory.stats().getLIDStoreStatus();
+        HeapStatus heapStatus = p_context.getHeapStatus();
+        CIDTableStatus cidTableStatus = p_context.getCIDTableStatus();
+        LIDStoreStatus lidStoreStatus = p_context.getLIDStoreStatus();
 
         builder.append("[OVERALL],BenchmarkPhase,");
         builder.append(m_name);

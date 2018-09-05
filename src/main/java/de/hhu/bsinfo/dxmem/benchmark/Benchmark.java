@@ -54,20 +54,23 @@ public class Benchmark {
 
     /**
      * Execute the benchmark
+     *
+     * @param p_context
+     *         Context to execute benchmark on
      */
-    public void execute() {
-        System.out.println("Executing benchmark '" + m_name + "'");
+    public void execute(final BenchmarkContext p_context) {
+        System.out.println("Executing benchmark '" + m_name + '\'');
 
         ChunkIDRanges cidRanges = new ChunkIDRanges();
         ReentrantReadWriteLock cidRangesLock = new ReentrantReadWriteLock(false);
 
         for (BenchmarkPhase phase : m_phases) {
             System.out.println("Executing benchmark phase '" + phase.getName() + "'...");
-            phase.execute(cidRanges, cidRangesLock);
+            phase.execute(p_context, cidRanges, cidRangesLock);
             System.out.println("Results of benchmark phase '" + phase.getName() + "'...");
-            phase.printResults();
+            phase.printResults(p_context);
         }
 
-        System.out.println("Finished executing benchmark '" + m_name + "'");
+        System.out.println("Finished executing benchmark '" + m_name + '\'');
     }
 }

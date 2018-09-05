@@ -19,7 +19,7 @@ package de.hhu.bsinfo.dxmem.benchmark.operation;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.benchmark.BenchmarkContext;
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.Time;
@@ -40,7 +40,7 @@ public abstract class AbstractOperation {
     private final AtomicLong m_opsRemaining;
     private final AtomicLong[] m_opsReturnCodes;
 
-    private DXMem m_memory;
+    private BenchmarkContext m_context;
     private ChunkIDRanges m_cids;
     private ReentrantReadWriteLock m_cidsLock;
     private long m_totalOps;
@@ -123,8 +123,8 @@ public abstract class AbstractOperation {
     /**
      * Initialize the operation
      *
-     * @param p_memory
-     *         Instance of DXMem to operate on
+     * @param p_context
+     *         Instance of context to operate on
      * @param p_cids
      *         Chunk ranges for operation to use
      * @param p_cidsLock
@@ -132,9 +132,9 @@ public abstract class AbstractOperation {
      * @param p_totalOps
      *         Total operations to execute
      */
-    public void init(final DXMem p_memory, final ChunkIDRanges p_cids, final ReentrantReadWriteLock p_cidsLock,
-            final long p_totalOps) {
-        m_memory = p_memory;
+    public void init(final BenchmarkContext p_context, final ChunkIDRanges p_cids,
+            final ReentrantReadWriteLock p_cidsLock, final long p_totalOps) {
+        m_context = p_context;
         m_cids = p_cids;
         m_cidsLock = p_cidsLock;
         m_totalOps = p_totalOps;
@@ -296,19 +296,19 @@ public abstract class AbstractOperation {
      * @return ChunkState of the operation executed
      */
     public ChunkState execute() {
-        return execute(m_memory, m_verifyData);
+        return execute(m_context, m_verifyData);
     }
 
     /**
      * Implement this to execute your operation
      *
-     * @param p_memory
-     *         Instance of DXMem to execute the operation on
+     * @param p_context
+     *         Instance of context to execute the operation on
      * @param p_verifyData
      *         True to verify data after execution (if possible), false otherwise
      * @return ChunkState result of execution
      */
-    protected abstract ChunkState execute(final DXMem p_memory, final boolean p_verifyData);
+    protected abstract ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData);
 
     /**
      * Call this to start measuring time once you execute your operation

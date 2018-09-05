@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
-import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.benchmark.BenchmarkContext;
 import de.hhu.bsinfo.dxmem.data.ChunkBenchmark;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
@@ -48,7 +48,7 @@ public class Put extends AbstractOperation {
     }
 
     @Override
-    public ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
+    public ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData) {
         long cid = executeGetRandomCid();
 
         // no chunks available, yet?
@@ -63,7 +63,7 @@ public class Put extends AbstractOperation {
         }
 
         executeTimeStart();
-        p_memory.put().put(m_chunk);
+        p_context.put(m_chunk);
         executeTimeEnd();
 
         return m_chunk.getState();

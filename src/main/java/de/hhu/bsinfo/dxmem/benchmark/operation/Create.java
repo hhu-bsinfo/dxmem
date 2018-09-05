@@ -16,7 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
-import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.benchmark.BenchmarkContext;
 import de.hhu.bsinfo.dxmem.data.ChunkBenchmark;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
@@ -58,7 +58,7 @@ public class Create extends AbstractOperation {
     }
 
     @Override
-    public ChunkState execute(final DXMem p_memory, final boolean p_verifyData) {
+    public ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData) {
         int size;
 
         if (m_minSize == m_maxSize) {
@@ -69,7 +69,7 @@ public class Create extends AbstractOperation {
 
         // throw allocation exceptions. the benchmark cannot continue once that happens
         executeTimeStart();
-        long cid = p_memory.create().create(size);
+        long cid = p_context.create(size);
         executeTimeEnd();
 
         executeNewCid(cid);
@@ -85,7 +85,7 @@ public class Create extends AbstractOperation {
             m_chunks[tid].setCurrentSize(size);
             m_chunks[tid].fillContents();
 
-            p_memory.put().put(m_chunks[tid]);
+            p_context.put(m_chunks[tid]);
 
             if (!m_chunks[tid].isStateOk()) {
                 return ChunkState.UNDEFINED;

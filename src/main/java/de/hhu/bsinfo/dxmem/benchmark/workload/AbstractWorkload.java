@@ -19,6 +19,7 @@ package de.hhu.bsinfo.dxmem.benchmark.workload;
 import picocli.CommandLine;
 
 import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
+import de.hhu.bsinfo.dxmem.benchmark.DXMemBenchmarkContext;
 import de.hhu.bsinfo.dxmem.cli.CliContext;
 import de.hhu.bsinfo.dxmem.cli.ToolBenchmark;
 
@@ -52,6 +53,6 @@ public abstract class AbstractWorkload implements Runnable {
             }
         }
 
-        createWorkload().execute();
+        createWorkload().execute(new DXMemBenchmarkContext(CliContext.getInstance().getMemory()));
     }
 }
