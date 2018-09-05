@@ -1,5 +1,8 @@
 # DXMem: Memory allocator and management for billions of very small objects
 
+[![Build Status master](https://travis-ci.org/hhu-bsinfo/dxmem.svg?branch=master)](https://travis-ci.org/hhu-bsinfo/dxmem)
+[![Build Status development](https://travis-ci.org/hhu-bsinfo/dxmem.svg?branch=development)](https://travis-ci.org/hhu-bsinfo/dxmem)
+
 DXMem implements a custom memory allocator and stores allocated data outside of the Java heap using Unsafe. The
 allocator is optimized for very small objects (< 64 byte) with low per object metadata overhead. Objects stored are
 referred to as "chunks". Chunks are identified using a unique chunk ID which is translated by the memory management
