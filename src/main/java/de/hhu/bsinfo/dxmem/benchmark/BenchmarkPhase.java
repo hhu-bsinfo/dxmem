@@ -47,6 +47,8 @@ public class BenchmarkPhase {
     private final long m_delayNsBetweenOps;
     private final AbstractOperation[] m_operations;
 
+    private final ReentrantReadWriteLock m_cidRangesLock;
+
     private Thread[] m_threads;
     private long m_totalTimeNs;
     private double m_aggregatedOpsPerSec;
@@ -72,6 +74,8 @@ public class BenchmarkPhase {
         m_totalNumOperations = p_totalNumOperations;
         m_delayNsBetweenOps = p_delayNsBetweenOps;
         m_operations = p_operations;
+
+        m_cidRangesLock = new ReentrantReadWriteLock(false);
 
         // check, probabilities have to sum up to 1.0
         float totalProb = 0.0f;
@@ -101,14 +105,11 @@ public class BenchmarkPhase {
      *         Context to execute benchmark on
      * @param p_cidRanges
      *         CID ranges available in this phase
-     * @param p_cidRangesLock
-     *         Lock for CID ranges to ensure thread safety
      */
-    public void execute(final BenchmarkContext p_context, final ChunkIDRanges p_cidRanges,
-            final ReentrantReadWriteLock p_cidRangesLock) {
+    public void execute(final BenchmarkContext p_context, final ChunkIDRanges p_cidRanges) {
         // init ops
         for (AbstractOperation op : m_operations) {
-            op.init(p_context, p_cidRanges, p_cidRangesLock, (long) (m_totalNumOperations * op.getProbability()));
+            op.init(p_context, p_cidRanges, m_cidRangesLock, (long) (m_totalNumOperations * op.getProbability()));
         }
 
         AtomicInteger threadsRunning = new AtomicInteger(0);

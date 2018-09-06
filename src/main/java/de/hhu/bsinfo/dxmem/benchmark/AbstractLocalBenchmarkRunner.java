@@ -16,8 +16,6 @@
 
 package de.hhu.bsinfo.dxmem.benchmark;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 
 /**
@@ -51,11 +49,10 @@ public abstract class AbstractLocalBenchmarkRunner implements BenchmarkRunner {
         System.out.println("Executing benchmark '" + p_benchmark.getName() + '\'');
 
         ChunkIDRanges cidRanges = new ChunkIDRanges();
-        ReentrantReadWriteLock cidRangesLock = new ReentrantReadWriteLock(false);
 
         for (BenchmarkPhase phase : p_benchmark.getPhases()) {
             System.out.println("Executing benchmark phase '" + phase.getName() + "'...");
-            phase.execute(m_context, cidRanges, cidRangesLock);
+            phase.execute(m_context, cidRanges);
             System.out.println("Results of benchmark phase '" + phase.getName() + "'...");
             phase.printResults(m_context);
         }
