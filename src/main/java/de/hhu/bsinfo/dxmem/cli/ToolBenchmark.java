@@ -22,6 +22,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.List;
 
+import de.hhu.bsinfo.dxmem.benchmark.AbstractLocalBenchmarkRunner;
+import de.hhu.bsinfo.dxmem.benchmark.DXMemBenchmarkContext;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookA;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookB;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookC;
@@ -57,7 +59,7 @@ import de.hhu.bsinfo.dxutils.unit.StorageUnit;
                 YcsbC.class,
         }
 )
-public class ToolBenchmark implements Runnable {
+public class ToolBenchmark extends AbstractLocalBenchmarkRunner implements Runnable {
     @CommandLine.Parameters(
             index = "0",
             converter = TypeConverterStorageUnit.class,
@@ -65,12 +67,22 @@ public class ToolBenchmark implements Runnable {
             description = "Total heap size in bytes or StorageUnit")
     private StorageUnit m_heapSize;
 
-    public void init() {
+    /**
+     * Constructor
+     */
+    public ToolBenchmark() {
+        super(new DXMemBenchmarkContext());
+    }
+
+    @Override
+    public boolean init() {
         printJVMArgs();
         printBuildInfo();
         printInstanceInfo();
 
         CliContext.getInstance().newMemory((short) 0, m_heapSize.getBytes());
+
+        return true;
     }
 
     @Override

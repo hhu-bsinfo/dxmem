@@ -18,6 +18,8 @@ package de.hhu.bsinfo.dxmem.cli.debugger;
 
 import picocli.CommandLine;
 
+import de.hhu.bsinfo.dxmem.benchmark.AbstractLocalBenchmarkRunner;
+import de.hhu.bsinfo.dxmem.benchmark.DXMemBenchmarkContext;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookA;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookB;
 import de.hhu.bsinfo.dxmem.benchmark.workload.FacebookC;
@@ -50,7 +52,24 @@ import de.hhu.bsinfo.dxmem.cli.CliContext;
                 YcsbC.class,
         }
 )
-public class CmdBenchmark implements Runnable {
+public class CmdBenchmark extends AbstractLocalBenchmarkRunner implements Runnable {
+    /**
+     * Constructor
+     */
+    public CmdBenchmark() {
+        super(new DXMemBenchmarkContext());
+    }
+
+    @Override
+    public boolean init() {
+        if (!CliContext.getInstance().isMemoryLoaded()) {
+            System.out.println("ERROR: No memory instance loaded");
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public void run() {
         if (!CliContext.getInstance().isMemoryLoaded()) {

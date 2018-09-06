@@ -36,7 +36,7 @@ import de.hhu.bsinfo.dxutils.stats.Time;
 import de.hhu.bsinfo.dxutils.stats.TimePercentile;
 
 /**
- * Benchmark phase which is part of a benchmark
+ * AbstractLocalBenchmarkRunner phase which is part of a benchmark
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */

@@ -34,7 +34,8 @@ public class BenchmarkTest {
         Benchmark benchmark = new Benchmark("test");
         benchmark.addPhase(new BenchmarkPhase("test", 1, 1000000, 0, new Create(1.0f, 1, true, 32, 32)));
 
-        benchmark.execute(new DXMemBenchmarkContext(memory));
+        TestBenchmarkRunner runner = new TestBenchmarkRunner(new DXMemTestContext(memory));
+        runner.runBenchmark(benchmark);
 
         memory.shutdown();
     }
@@ -47,7 +48,8 @@ public class BenchmarkTest {
         Benchmark benchmark = new Benchmark("test");
         benchmark.addPhase(new BenchmarkPhase("test", 2, 1000000, 0, new Create(1.0f, 1, true, 32, 32)));
 
-        benchmark.execute(new DXMemBenchmarkContext(memory));
+        TestBenchmarkRunner runner = new TestBenchmarkRunner(new DXMemTestContext(memory));
+        runner.runBenchmark(benchmark);
 
         memory.shutdown();
     }
@@ -61,7 +63,8 @@ public class BenchmarkTest {
         benchmark.addPhase(new BenchmarkPhase("test", 1, 1000000, 0,
                 new Create(0.5f, 1, true, 32, 32), new Get(0.5f, 1, true, 32)));
 
-        benchmark.execute(new DXMemBenchmarkContext(memory));
+        TestBenchmarkRunner runner = new TestBenchmarkRunner(new DXMemTestContext(memory));
+        runner.runBenchmark(benchmark);
 
         memory.shutdown();
     }
@@ -75,7 +78,8 @@ public class BenchmarkTest {
         benchmark.addPhase(new BenchmarkPhase("test", 2, 1000, 0,
                 new Create(0.5f, 1, true, 32, 32), new Get(0.5f, 1, true, 32)));
 
-        benchmark.execute(new DXMemBenchmarkContext(memory));
+        TestBenchmarkRunner runner = new TestBenchmarkRunner(new DXMemTestContext(memory));
+        runner.runBenchmark(benchmark);
 
         memory.shutdown();
     }

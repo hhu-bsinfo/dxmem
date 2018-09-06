@@ -19,9 +19,7 @@ package de.hhu.bsinfo.dxmem.benchmark.workload;
 import picocli.CommandLine;
 
 import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
-import de.hhu.bsinfo.dxmem.benchmark.DXMemBenchmarkContext;
-import de.hhu.bsinfo.dxmem.cli.CliContext;
-import de.hhu.bsinfo.dxmem.cli.ToolBenchmark;
+import de.hhu.bsinfo.dxmem.benchmark.BenchmarkRunner;
 
 /**
  * Base class for benchmark workloads
@@ -35,24 +33,18 @@ public abstract class AbstractWorkload implements Runnable {
     /**
      * Create the workload
      *
-     * @return Benchmark workload
+     * @return Benchmark benchmark workload with phases
      */
     public abstract Benchmark createWorkload();
 
     @Override
     public void run() {
-        if (m_parent instanceof ToolBenchmark) {
-            ToolBenchmark parent = (ToolBenchmark) m_parent;
+        if (m_parent instanceof BenchmarkRunner) {
+            BenchmarkRunner parent = (BenchmarkRunner) m_parent;
 
-            // for the standalone tool, we have to create a new heap
-            parent.init();
+            parent.runBenchmark(createWorkload());
         } else {
-            if (!CliContext.getInstance().isMemoryLoaded()) {
-                System.out.println("ERROR: No memory instance loaded");
-                return;
-            }
+            throw new IllegalStateException("Parent command does not implement BenchmarkRunner interface");
         }
-
-        createWorkload().execute(new DXMemBenchmarkContext(CliContext.getInstance().getMemory()));
     }
 }
