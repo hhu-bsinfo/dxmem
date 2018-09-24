@@ -38,8 +38,9 @@ public class RawWrite {
     }
 
     public void copyNative(final long p_address, final int p_addressOffset, final long p_addressSource,
-            final int p_offset, final int p_length) {
-        m_context.getHeap().copyNative(p_address, p_addressOffset, p_addressSource, p_offset, p_length);
+            final int p_offset, final int p_length, final boolean p_isAddressSourceAbsolute) {
+        m_context.getHeap()
+                .copyNative(p_address, p_addressOffset, p_addressSource, p_offset, p_length, p_isAddressSourceAbsolute);
     }
 
     public void writeByte(final long p_address, final int p_addressOffset, final byte p_value) {

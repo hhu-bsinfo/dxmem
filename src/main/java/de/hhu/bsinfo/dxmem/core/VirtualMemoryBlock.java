@@ -112,13 +112,15 @@ public class VirtualMemoryBlock {
      *         Offset to start in the source data
      * @param p_length
      *         Number of bytes to copy from the source
+     * @param p_isAddressSourceAbsolute
+     *         true if source address is absolute (no need to add memory base address)
      */
     public void copyNative(final long p_address, final int p_addressOffset, final long p_addressSource,
-            final int p_offset, final int p_length) {
+            final int p_offset, final int p_length, final boolean p_isAddressSourceAbsolute) {
         assert assertMemoryBounds(p_address + p_offset, p_length);
 
-        UnsafeMemory.copyBytes(m_memoryBase + p_addressSource + p_offset, m_memoryBase + p_address + p_addressOffset,
-                p_length);
+        UnsafeMemory.copyBytes((p_isAddressSourceAbsolute ? 0 : m_memoryBase) + p_addressSource + p_offset,
+                m_memoryBase + p_address + p_addressOffset, p_length);
     }
 
     /**
@@ -521,8 +523,9 @@ public class VirtualMemoryBlock {
         }
 
         if (p_ptr + p_length > m_memorySize || p_ptr + p_length < 0) {
-            throw new MemoryRuntimeException("Accessing memory at " + p_ptr + ", length " + p_length +
-                    " out of bounds: base " + m_memoryBase + ", size " + m_memorySize);
+            throw new MemoryRuntimeException(
+                    "Accessing memory at " + p_ptr + ", length " + p_length + " out of bounds: base " + m_memoryBase +
+                            ", size " + m_memorySize);
         }
 
         return true;

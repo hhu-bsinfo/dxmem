@@ -30,10 +30,10 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Recovery {
-    private static final ThroughputPool SOP_CREATE_AND_PUT_RAW = new ThroughputPool(Create.class,
-            "CreateAndPutRecoveredRaw", Value.Base.B_10);
-    private static final ThroughputPool SOP_CREATE_AND_PUT_DS = new ThroughputPool(Create.class,
-            "CreateAndPutRecoveredDS", Value.Base.B_10);
+    private static final ThroughputPool SOP_CREATE_AND_PUT_RAW =
+            new ThroughputPool(Create.class, "CreateAndPutRecoveredRaw", Value.Base.B_10);
+    private static final ThroughputPool SOP_CREATE_AND_PUT_DS =
+            new ThroughputPool(Create.class, "CreateAndPutRecoveredDS", Value.Base.B_10);
 
     static {
         StatisticsManager.get().registerOperation(Create.class, SOP_CREATE_AND_PUT_RAW);
@@ -76,6 +76,10 @@ public class Recovery {
         // can't use thread local pool here
         CIDTableChunkEntry[] entries = new CIDTableChunkEntry[p_usedEntries];
 
+        for (int i = 0; i < entries.length; i++) {
+            entries[i] = new CIDTableChunkEntry();
+        }
+
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
         m_context.getHeap().malloc(entries, p_lengths, 0, p_usedEntries);
@@ -85,7 +89,7 @@ public class Recovery {
         }
 
         for (int i = 0; i < p_usedEntries; i++) {
-            m_context.getHeap().copyNative(entries[i].getAddress(), 0, p_dataAddress, p_offsets[i], p_lengths[i]);
+            m_context.getHeap().copyNative(entries[i].getAddress(), 0, p_dataAddress, p_offsets[i], p_lengths[i], true);
             totalSize += p_lengths[i];
         }
 

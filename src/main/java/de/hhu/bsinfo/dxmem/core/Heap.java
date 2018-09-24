@@ -347,7 +347,7 @@ public final class Heap implements Importable, Exportable {
             return false;
         }
 
-        copyNative(newLocation[0].getAddress(), 0, p_tableEntry.getAddress(), 0, oldSize);
+        copyNative(newLocation[0].getAddress(), 0, p_tableEntry.getAddress(), 0, oldSize, false);
 
         // start address between marker and length field
         freeReservedBlock(p_tableEntry.getAddress() - p_tableEntry.getSplitLengthFieldSize(),
@@ -413,12 +413,14 @@ public final class Heap implements Importable, Exportable {
      *         Offset to start in the source data
      * @param p_length
      *         Number of bytes to copy from the source
+     * @param p_isAddressSourceAbsolute
+     *         true if source address is absolute (no need to add memory base address)
      */
     public void copyNative(final long p_address, final int p_addressOffset, final long p_addressSource,
-            final int p_offset, final int p_length) {
+            final int p_offset, final int p_length, final boolean p_isAddressSourceAbsolute) {
         assert assertMemoryBounds(p_address, p_offset, p_length);
 
-        m_memory.copyNative(p_address, p_addressOffset, p_addressSource, p_offset, p_length);
+        m_memory.copyNative(p_address, p_addressOffset, p_addressSource, p_offset, p_length, p_isAddressSourceAbsolute);
     }
 
     /**
@@ -809,8 +811,7 @@ public final class Heap implements Importable, Exportable {
      *         New value to swap if the specified location matches p_expectedData
      * @return True if successful, false if the expected value is different to p_expectedData
      */
-    public boolean casLong(final long p_address, final long p_offset, final long p_expectedData,
-            final long p_newData) {
+    public boolean casLong(final long p_address, final long p_offset, final long p_expectedData, final long p_newData) {
         assert assertMemoryBounds(p_address, p_offset, Long.BYTES);
 
         return m_memory.compareAndSwapLong(p_address + p_offset, p_expectedData, p_newData);
@@ -1320,8 +1321,8 @@ public final class Heap implements Importable, Exportable {
 
             switch (leftMarker) {
                 case 0:
-                    throw new MemoryRuntimeException("Invalid marker state 0 at address " +
-                            Address.toHexString(address - SIZE_MARKER_BYTE));
+                    throw new MemoryRuntimeException(
+                            "Invalid marker state 0 at address " + Address.toHexString(address - SIZE_MARKER_BYTE));
 
                 case UNTRACKED_FREE_BLOCK_MARKER:
                     // Left neighbor block (< 14 byte) is free -> merge free blocks
@@ -1370,8 +1371,8 @@ public final class Heap implements Importable, Exportable {
 
             switch (rightMarker) {
                 case 0:
-                    throw new MemoryRuntimeException("Invalid marker state 0 at address " +
-                            Address.toHexString(address - SIZE_MARKER_BYTE));
+                    throw new MemoryRuntimeException(
+                            "Invalid marker state 0 at address " + Address.toHexString(address - SIZE_MARKER_BYTE));
 
                 case UNTRACKED_FREE_BLOCK_MARKER:
                     // Right neighbor block (< 14 byte) is free -> merge free blocks
@@ -1478,8 +1479,8 @@ public final class Heap implements Importable, Exportable {
      */
     private boolean assertMemoryBounds(final long p_address, final long p_offset, final long p_length) {
         if (p_address < 0) {
-            throw new MemoryRuntimeException("Address negative: " + Address.toHexString(p_address) + ", " + p_offset +
-                    ", " + p_length);
+            throw new MemoryRuntimeException(
+                    "Address negative: " + Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
         }
 
         if (p_address > m_status.m_totalSizeBytes) {
@@ -1488,13 +1489,13 @@ public final class Heap implements Importable, Exportable {
         }
 
         if (p_offset < 0) {
-            throw new MemoryRuntimeException("Offset negative: " + Address.toHexString(p_address) + ", " + p_offset +
-                    ", " + p_length);
+            throw new MemoryRuntimeException(
+                    "Offset negative: " + Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
         }
 
         if (p_length < 0) {
-            throw new MemoryRuntimeException("Length negative: " + Address.toHexString(p_address) + ", " + p_offset +
-                    ", " + p_length);
+            throw new MemoryRuntimeException(
+                    "Length negative: " + Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
         }
 
         if (p_address + p_offset > m_status.m_totalSizeBytes) {
@@ -1505,8 +1506,8 @@ public final class Heap implements Importable, Exportable {
 
         if (p_address + p_offset + p_length > m_status.m_totalSizeBytes) {
             throw new MemoryRuntimeException(
-                    "Address + offset + length exceeds memory bounds (" + m_status.m_totalSizeBytes +
-                            ": " + Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
+                    "Address + offset + length exceeds memory bounds (" + m_status.m_totalSizeBytes + ": " +
+                            Address.toHexString(p_address) + ", " + p_offset + ", " + p_length);
         }
 
         return true;
