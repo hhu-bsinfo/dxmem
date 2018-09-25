@@ -31,13 +31,13 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  */
 public class Recovery {
     private static final ThroughputPool SOP_CREATE_AND_PUT_RAW =
-            new ThroughputPool(Create.class, "CreateAndPutRecoveredRaw", Value.Base.B_10);
+            new ThroughputPool(Recovery.class, "CreateAndPutRecoveredRaw", Value.Base.B_10);
     private static final ThroughputPool SOP_CREATE_AND_PUT_DS =
-            new ThroughputPool(Create.class, "CreateAndPutRecoveredDS", Value.Base.B_10);
+            new ThroughputPool(Recovery.class, "CreateAndPutRecoveredDS", Value.Base.B_10);
 
     static {
-        StatisticsManager.get().registerOperation(Create.class, SOP_CREATE_AND_PUT_RAW);
-        StatisticsManager.get().registerOperation(Create.class, SOP_CREATE_AND_PUT_DS);
+        StatisticsManager.get().registerOperation(Recovery.class, SOP_CREATE_AND_PUT_RAW);
+        StatisticsManager.get().registerOperation(Recovery.class, SOP_CREATE_AND_PUT_DS);
     }
 
     private final Context m_context;
