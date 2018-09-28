@@ -103,6 +103,10 @@ public class DXMem {
     public DXMem(final String p_memdumpFile, final boolean p_disableChunkLock) {
         checkSufficientMemory(new StorageUnit(new File(p_memdumpFile).length(), StorageUnit.BYTE));
 
+        if (p_disableChunkLock) {
+            LOGGER.warn("Chunk locks are disabled. Remove and resize operations cannot be used and throw errors");
+        }
+
         m_context = new Context(p_memdumpFile, p_disableChunkLock);
 
         initOperations();
@@ -138,6 +142,10 @@ public class DXMem {
      */
     public DXMem(final short p_nodeId, final long p_heapSize, final boolean p_disableChunkLock) {
         checkSufficientMemory(new StorageUnit(p_heapSize, StorageUnit.BYTE));
+
+        if (p_disableChunkLock) {
+            LOGGER.warn("Chunk locks are disabled. Remove and resize operations cannot be used and throw errors");
+        }
 
         m_context = new Context(p_nodeId, p_heapSize, p_disableChunkLock);
 
