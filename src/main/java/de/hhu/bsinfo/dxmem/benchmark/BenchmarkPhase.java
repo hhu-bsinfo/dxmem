@@ -113,14 +113,16 @@ public class BenchmarkPhase {
         }
 
         AtomicInteger threadsRunning = new AtomicInteger(0);
+        AtomicInteger threadsPostProcessing = new AtomicInteger(0);
 
         m_threads = new Thread[m_numThreads];
 
         for (int i = 0; i < m_threads.length; i++) {
-            m_threads[i] = new Thread(i, m_operations, m_delayNsBetweenOps, threadsRunning);
+            m_threads[i] = new Thread(i, m_operations, m_delayNsBetweenOps, threadsRunning, threadsPostProcessing);
         }
 
         threadsRunning.set(m_numThreads);
+        threadsPostProcessing.set(m_numThreads);
 
         long startTime = System.nanoTime();
 
@@ -220,6 +222,10 @@ public class BenchmarkPhase {
             } catch (InterruptedException ignored) {
 
             }
+        }
+
+        if (threadsPostProcessing.get() > 0) {
+            System.out.println("Threads finished running but still have to do some post processing...");
         }
 
         for (Thread thread : m_threads) {
@@ -379,6 +385,7 @@ public class BenchmarkPhase {
         private final AbstractOperation[] m_operations;
         private final long m_delayNsBetweenOps;
         private final AtomicInteger m_threadsRunning;
+        private final AtomicInteger m_threadsPostProcessing;
 
         private final long[] m_opCountExecuted;
         private final TimePercentile[] m_threadLocalTimePercentiles;
@@ -399,13 +406,14 @@ public class BenchmarkPhase {
          *         Total number of threads running (shared counter)
          */
         private Thread(final int p_id, final AbstractOperation[] p_operations, final long p_delayNsBetweenOps,
-                final AtomicInteger p_threadsRunning) {
+                final AtomicInteger p_threadsRunning, final AtomicInteger p_threadsPostProcessing) {
             super("ToolBenchmark-" + p_id);
 
             m_id = p_id;
             m_operations = p_operations;
             m_delayNsBetweenOps = p_delayNsBetweenOps;
             m_threadsRunning = p_threadsRunning;
+            m_threadsPostProcessing = p_threadsPostProcessing;
 
             m_opCountExecuted = new long[m_operations.length];
             m_threadLocalTimePercentiles = new TimePercentile[m_operations.length];
@@ -561,13 +569,15 @@ public class BenchmarkPhase {
                 }
             }
 
+            m_threadsRunning.decrementAndGet();
+
             // sort thread local values for per thread results
             for (int i = 0; i < m_operations.length; i++) {
                 m_operations[i].getTimePercentile().getThreadLocal().sortValues();
                 m_threadLocalTimePercentiles[i] = m_operations[i].getTimePercentile().getThreadLocal();
             }
 
-            m_threadsRunning.decrementAndGet();
+            m_threadsPostProcessing.decrementAndGet();
         }
 
         /**
