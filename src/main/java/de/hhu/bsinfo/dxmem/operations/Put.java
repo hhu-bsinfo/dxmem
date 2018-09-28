@@ -110,29 +110,31 @@ public class Put {
 
         LockUtils.LockStatus lockStatus = LockUtils.LockStatus.OK;
 
-        if (p_lockOperation == ChunkLockOperation.NONE) {
-            lockStatus = LockUtils.acquireReadLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-        } else {
-            if (p_lockOperation == ChunkLockOperation.ACQUIRE_BEFORE_OP ||
-                    p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-            }
-        }
-
-        if (lockStatus != LockUtils.LockStatus.OK) {
-            m_context.getDefragmenter().releaseApplicationThreadLock();
-
-            if (lockStatus == LockUtils.LockStatus.INVALID) {
-                // entry was deleted in the meanwhile
-                p_chunk.setState(ChunkState.DOES_NOT_EXIST);
-            } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
-                // try lock did not succeed
-                p_chunk.setState(ChunkState.LOCK_TIMEOUT);
+        if (!m_context.isChunkLockDisabled()) {
+            if (p_lockOperation == ChunkLockOperation.NONE) {
+                lockStatus = LockUtils.acquireReadLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
             } else {
-                throw new IllegalStateException();
+                if (p_lockOperation == ChunkLockOperation.ACQUIRE_BEFORE_OP ||
+                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
+                    lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
+                }
             }
 
-            return false;
+            if (lockStatus != LockUtils.LockStatus.OK) {
+                m_context.getDefragmenter().releaseApplicationThreadLock();
+
+                if (lockStatus == LockUtils.LockStatus.INVALID) {
+                    // entry was deleted in the meanwhile
+                    p_chunk.setState(ChunkState.DOES_NOT_EXIST);
+                } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
+                    // try lock did not succeed
+                    p_chunk.setState(ChunkState.LOCK_TIMEOUT);
+                } else {
+                    throw new IllegalStateException();
+                }
+
+                return false;
+            }
         }
 
         // TODO wrap with try catch and catch memory runtime exception? are there any left to catch?
@@ -140,12 +142,14 @@ public class Put {
 
         imExporter.exportObject(p_chunk);
 
-        if (p_lockOperation == ChunkLockOperation.NONE) {
-            LockUtils.releaseReadLock(m_context.getCIDTable(), tableEntry);
-        } else {
-            if (p_lockOperation == ChunkLockOperation.RELEASE_AFTER_OP ||
-                    p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        if (!m_context.isChunkLockDisabled()) {
+            if (p_lockOperation == ChunkLockOperation.NONE) {
+                LockUtils.releaseReadLock(m_context.getCIDTable(), tableEntry);
+            } else {
+                if (p_lockOperation == ChunkLockOperation.RELEASE_AFTER_OP ||
+                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
+                    LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+                }
             }
         }
 
@@ -198,26 +202,28 @@ public class Put {
 
         LockUtils.LockStatus lockStatus = LockUtils.LockStatus.OK;
 
-        if (p_lockOperation == ChunkLockOperation.NONE) {
-            lockStatus = LockUtils.acquireReadLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-        } else {
-            if (p_lockOperation == ChunkLockOperation.ACQUIRE_BEFORE_OP ||
-                    p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-            }
-        }
-
-        if (lockStatus != LockUtils.LockStatus.OK) {
-            m_context.getDefragmenter().releaseApplicationThreadLock();
-
-            if (lockStatus == LockUtils.LockStatus.INVALID) {
-                // entry was deleted in the meanwhile
-                return ChunkState.DOES_NOT_EXIST;
-            } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
-                // try lock did not succeed
-                return ChunkState.LOCK_TIMEOUT;
+        if (!m_context.isChunkLockDisabled()) {
+            if (p_lockOperation == ChunkLockOperation.NONE) {
+                lockStatus = LockUtils.acquireReadLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
             } else {
-                throw new IllegalStateException();
+                if (p_lockOperation == ChunkLockOperation.ACQUIRE_BEFORE_OP ||
+                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
+                    lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
+                }
+            }
+
+            if (lockStatus != LockUtils.LockStatus.OK) {
+                m_context.getDefragmenter().releaseApplicationThreadLock();
+
+                if (lockStatus == LockUtils.LockStatus.INVALID) {
+                    // entry was deleted in the meanwhile
+                    return ChunkState.DOES_NOT_EXIST;
+                } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
+                    // try lock did not succeed
+                    return ChunkState.LOCK_TIMEOUT;
+                } else {
+                    throw new IllegalStateException();
+                }
             }
         }
 
@@ -229,12 +235,14 @@ public class Put {
 
         imExporter.writeBytes(p_data);
 
-        if (p_lockOperation == ChunkLockOperation.NONE) {
-            LockUtils.releaseReadLock(m_context.getCIDTable(), tableEntry);
-        } else {
-            if (p_lockOperation == ChunkLockOperation.RELEASE_AFTER_OP ||
-                    p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        if (!m_context.isChunkLockDisabled()) {
+            if (p_lockOperation == ChunkLockOperation.NONE) {
+                LockUtils.releaseReadLock(m_context.getCIDTable(), tableEntry);
+            } else {
+                if (p_lockOperation == ChunkLockOperation.RELEASE_AFTER_OP ||
+                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
+                    LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+                }
             }
         }
 

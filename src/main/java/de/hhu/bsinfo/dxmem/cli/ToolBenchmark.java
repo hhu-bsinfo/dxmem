@@ -67,6 +67,13 @@ public class ToolBenchmark extends AbstractLocalBenchmarkRunner implements Runna
             description = "Total heap size in bytes or StorageUnit")
     private StorageUnit m_heapSize;
 
+    @CommandLine.Parameters(
+            index = "1",
+            paramLabel = "disableChunkLocks",
+            description = "Disable the chunk locks (see DXMem class documentation for details), set to false for " +
+                    "default behaviour")
+    private boolean m_disableChunkLocks = false;
+
     /**
      * Constructor
      */
@@ -80,7 +87,7 @@ public class ToolBenchmark extends AbstractLocalBenchmarkRunner implements Runna
         printBuildInfo();
         printInstanceInfo();
 
-        CliContext.getInstance().newMemory((short) 0, m_heapSize.getBytes());
+        CliContext.getInstance().newMemory((short) 0, m_heapSize.getBytes(), m_disableChunkLocks);
 
         return true;
     }

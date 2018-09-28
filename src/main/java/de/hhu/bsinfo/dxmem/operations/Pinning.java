@@ -79,21 +79,25 @@ public class Pinning {
             return new PinnedMemory(ChunkState.DOES_NOT_EXIST);
         }
 
-        LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry,
-                p_acquireLockTimeoutMs);
+        if (!m_context.isChunkLockDisabled()) {
+            LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry,
+                    p_acquireLockTimeoutMs);
 
-        // acquire write lock to ensure the chunk is not deleted while trying to pin it
-        if (lockStatus != LockUtils.LockStatus.OK) {
-            m_context.getDefragmenter().releaseApplicationThreadLock();
+            // acquire write lock to ensure the chunk is not deleted while trying to pin it
+            if (lockStatus != LockUtils.LockStatus.OK) {
+                m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            return new PinnedMemory(ChunkState.DOES_NOT_EXIST);
+                return new PinnedMemory(ChunkState.DOES_NOT_EXIST);
+            }
         }
 
         tableEntry.setPinned(true);
 
         m_context.getCIDTable().entryUpdate(tableEntry);
 
-        LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        if (!m_context.isChunkLockDisabled()) {
+            LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
@@ -129,21 +133,25 @@ public class Pinning {
                     " with chunk table entry " + tableEntry + ", not previously pinned");
         }
 
-        LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
+        if (!m_context.isChunkLockDisabled()) {
+            LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
 
-        // acquire write lock to ensure the chunk is not deleted while trying to pin it
-        if (lockStatus != LockUtils.LockStatus.OK) {
-            m_context.getDefragmenter().releaseApplicationThreadLock();
+            // acquire write lock to ensure the chunk is not deleted while trying to pin it
+            if (lockStatus != LockUtils.LockStatus.OK) {
+                m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            throw new IllegalStateException("Pinned chunk with CID " + ChunkID.toHexString(cid) +
-                    " with chunk table entry " + tableEntry + " deleted while waiting for write lock");
+                throw new IllegalStateException("Pinned chunk with CID " + ChunkID.toHexString(cid) +
+                        " with chunk table entry " + tableEntry + " deleted while waiting for write lock");
+            }
         }
 
         tableEntry.setPinned(false);
 
         m_context.getCIDTable().entryUpdate(tableEntry);
 
-        LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        if (!m_context.isChunkLockDisabled()) {
+            LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
@@ -174,14 +182,16 @@ public class Pinning {
                     " is supposed to be pinned (?) but entry is not valid");
         }
 
-        LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
+        if (!m_context.isChunkLockDisabled()) {
+            LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
 
-        // acquire write lock to ensure the chunk is not deleted while trying to pin it
-        if (lockStatus != LockUtils.LockStatus.OK) {
-            m_context.getDefragmenter().releaseApplicationThreadLock();
+            // acquire write lock to ensure the chunk is not deleted while trying to pin it
+            if (lockStatus != LockUtils.LockStatus.OK) {
+                m_context.getDefragmenter().releaseApplicationThreadLock();
 
-            throw new IllegalStateException("Pinned chunk " + ChunkID.toHexString(p_cidOfPinnedChunk) +
-                    " deleted while waiting for write lock");
+                throw new IllegalStateException("Pinned chunk " + ChunkID.toHexString(p_cidOfPinnedChunk) +
+                        " deleted while waiting for write lock");
+            }
         }
 
         tableEntry.setPinned(false);

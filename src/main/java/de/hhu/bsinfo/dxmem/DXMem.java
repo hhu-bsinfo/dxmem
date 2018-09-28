@@ -84,9 +84,26 @@ public class DXMem {
      *         Path to memory dump file
      */
     public DXMem(final String p_memdumpFile) {
+        this(p_memdumpFile, false);
+    }
+
+    /**
+     * Constructor
+     * Load a memory dump from a file and initialize DXMem with it.
+     *
+     * @param p_memdumpFile
+     *         Path to memory dump file
+     * @param p_disableChunkLock
+     *         Disable the chunk lock mechanism which increases performance but blocks the remove
+     *         and resize operations. All lock operation arguments provided on operation calls are
+     *         ignored. DXMem cannot guarantee application data consistency on parallel writes to
+     *         the same chunk. Useful for read only applications or if the application handles
+     *         synchronization when writing to chunks.
+     */
+    public DXMem(final String p_memdumpFile, final boolean p_disableChunkLock) {
         checkSufficientMemory(new StorageUnit(new File(p_memdumpFile).length(), StorageUnit.BYTE));
 
-        m_context = new Context(p_memdumpFile);
+        m_context = new Context(p_memdumpFile, p_disableChunkLock);
 
         initOperations();
     }
@@ -101,9 +118,28 @@ public class DXMem {
      *         Size of heap to create (in bytes)
      */
     public DXMem(final short p_nodeId, final long p_heapSize) {
+        this(p_nodeId, p_heapSize, false);
+    }
+
+    /**
+     * Constructor
+     * Create a new empty heap and initialize DXMem.
+     *
+     * @param p_nodeId
+     *         Node id of current instance
+     * @param p_heapSize
+     *         Size of heap to create (in bytes)
+     * @param p_disableChunkLock
+     *         Disable the chunk lock mechanism which increases performance but blocks the remove
+     *         and resize operations. All lock operation arguments provided on operation calls are
+     *         ignored. DXMem cannot guarantee application data consistency on parallel writes to
+     *         the same chunk. Useful for read only applications or if the application handles
+     *         synchronization when writing to chunks.
+     */
+    public DXMem(final short p_nodeId, final long p_heapSize, final boolean p_disableChunkLock) {
         checkSufficientMemory(new StorageUnit(p_heapSize, StorageUnit.BYTE));
 
-        m_context = new Context(p_nodeId, p_heapSize);
+        m_context = new Context(p_nodeId, p_heapSize, p_disableChunkLock);
 
         initOperations();
     }
@@ -122,9 +158,10 @@ public class DXMem {
     public void reset() {
         short nodeId = m_context.getNodeId();
         long heapSize = m_context.getHeap().getStatus().getTotalSizeBytes();
+        boolean disableChunkLock = m_context.isChunkLockDisabled();
 
         shutdown();
-        m_context = new Context(nodeId, heapSize);
+        m_context = new Context(nodeId, heapSize, disableChunkLock);
         initOperations();
     }
 

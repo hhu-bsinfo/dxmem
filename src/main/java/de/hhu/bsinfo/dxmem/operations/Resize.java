@@ -20,6 +20,7 @@ import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.LockUtils;
+import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
@@ -60,6 +61,10 @@ public class Resize {
      */
     public ChunkState resize(final long p_cid, final int p_newSize) {
         assert p_newSize > 0;
+
+        if (!m_context.isChunkLockDisabled()) {
+            throw new MemoryRuntimeException("Not supporting resize operation if chunk locks are disabled");
+        }
 
         if (p_cid == ChunkID.INVALID_ID) {
             return ChunkState.INVALID_ID;

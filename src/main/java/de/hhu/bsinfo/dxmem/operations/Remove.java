@@ -62,6 +62,10 @@ public class Remove {
      *         CID to reuse
      */
     public void prepareChunkIDForReuse(final long p_cid) {
+        if (!m_context.isChunkLockDisabled()) {
+            throw new MemoryRuntimeException("Not supporting remove operation if chunk locks are disabled");
+        }
+
         // sanity check
         if (ChunkID.getCreatorID(p_cid) != m_context.getNodeId()) {
             throw new IllegalStateException("Cannot reuse foreign cid " + ChunkID.toHexString(p_cid) + " on node " +
@@ -144,6 +148,10 @@ public class Remove {
      * @return On success, size of chunk removed, on failure negative ChunkState
      */
     public int remove(final long p_cid, final boolean p_wasMigrated) {
+        if (!m_context.isChunkLockDisabled()) {
+            throw new MemoryRuntimeException("Not supporting remove operation if chunk locks are disabled");
+        }
+
         if (p_cid == ChunkID.INVALID_ID) {
             return -ChunkState.INVALID_ID.ordinal();
         }

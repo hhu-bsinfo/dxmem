@@ -31,14 +31,22 @@ public class Context {
     private final HeapDataStructureImExporterPool m_dataStructureImExporterPool;
     private final Defragmenter m_defragmenter;
 
+    private final boolean m_disableChunkLock;
+
     /**
      * Constructor
      * Used when heap is loaded from a mem dump file
      *
      * @param p_memdumpFile
      *         Path to memory dump file
+     * @param p_disableChunkLock
+     *         Disable the chunk lock mechanism which increases performance but blocks the remove
+     *         and resize operations. All lock operation arguments provided on operation calls are
+     *         ignored. DXMem cannot guarantee application data consistency on parallel writes to
+     *         the same chunk. Useful for read only applications or if the application handles
+     *         synchronization when writing to chunks.
      */
-    public Context(final String p_memdumpFile) {
+    public Context(final String p_memdumpFile, final boolean p_disableChunkLock) {
         MemoryLoader loader = new MemoryLoader();
         loader.load(p_memdumpFile);
 
@@ -54,6 +62,8 @@ public class Context {
 
         // TODO non implemented defragmenter disabled for now (hardcoded)
         m_defragmenter = new Defragmenter(false);
+
+        m_disableChunkLock = p_disableChunkLock;
     }
 
     /**
@@ -63,8 +73,14 @@ public class Context {
      *         Node id of current instance
      * @param p_sizeBytes
      *         Size of heap in bytes
+     * @param p_disableChunkLock
+     *         Disable the chunk lock mechanism which increases performance but blocks the remove
+     *         and resize operations. All lock operation arguments provided on operation calls are
+     *         ignored. DXMem cannot guarantee application data consistency on parallel writes to
+     *         the same chunk. Useful for read only applications or if the application handles
+     *         synchronization when writing to chunks.
      */
-    public Context(final short p_ownNodeId, final long p_sizeBytes) {
+    public Context(final short p_ownNodeId, final long p_sizeBytes, final boolean p_disableChunkLock) {
         m_nodeId = p_ownNodeId;
         m_cidTranslationCache = new CIDTranslationCache();
         m_cidTableEntryPool = new CIDTableEntryPool();
@@ -76,6 +92,8 @@ public class Context {
 
         // TODO non implemented defragmenter disabled for now (hardcoded)
         m_defragmenter = new Defragmenter(false);
+
+        m_disableChunkLock = p_disableChunkLock;
     }
 
     /**
@@ -146,5 +164,14 @@ public class Context {
      */
     public Defragmenter getDefragmenter() {
         return m_defragmenter;
+    }
+
+    /**
+     * Chunk lock disabled flag
+     *
+     * @return True on disabled, false on enabled
+     */
+    public boolean isChunkLockDisabled() {
+        return m_disableChunkLock;
     }
 }

@@ -34,8 +34,15 @@ public class CmdLoadFromFile implements Runnable {
             description = "Path to input file which contains a DXMemory dump")
     private String m_inputFile;
 
+    @CommandLine.Parameters(
+            index = "1",
+            arity = "0..1",
+            paramLabel = "disableChunkLocks",
+            description = "Disable the chunk locks (see DXMem class documentation for details)")
+    private boolean m_disableChunkLocks = false;
+
     @Override
     public void run() {
-        CliContext.getInstance().loadFromFile(m_inputFile);
+        CliContext.getInstance().loadFromFile(m_inputFile, m_disableChunkLocks);
     }
 }

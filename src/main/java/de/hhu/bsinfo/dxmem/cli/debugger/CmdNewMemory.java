@@ -45,8 +45,15 @@ public class CmdNewMemory implements Runnable {
             description = "Total heap size in bytes or StorageUnit")
     private StorageUnit m_heapSize;
 
+    @CommandLine.Parameters(
+            index = "2",
+            arity = "0..1",
+            paramLabel = "disableChunkLocks",
+            description = "Disable the chunk locks (see DXMem class documentation for details)")
+    private boolean m_disableChunkLocks = false;
+
     @Override
     public void run() {
-        CliContext.getInstance().newMemory(m_nodeId, m_heapSize.getBytes());
+        CliContext.getInstance().newMemory(m_nodeId, m_heapSize.getBytes(), m_disableChunkLocks);
     }
 }

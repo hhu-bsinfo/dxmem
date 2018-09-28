@@ -63,12 +63,12 @@ public class CliContext {
      * @param p_heapSize
      *         Size of heap in bytes
      */
-    public void newMemory(final short p_nodeId, final long p_heapSize) {
+    public void newMemory(final short p_nodeId, final long p_heapSize, final boolean p_disableChunkLocks) {
         if (m_memory != null) {
             m_memory.shutdown();
         }
 
-        m_memory = new DXMem(p_nodeId, p_heapSize);
+        m_memory = new DXMem(p_nodeId, p_heapSize, p_disableChunkLocks);
     }
 
     /**
@@ -77,12 +77,12 @@ public class CliContext {
      * @param p_inFile
      *         File to load heap from
      */
-    public void loadFromFile(final String p_inFile) {
+    public void loadFromFile(final String p_inFile, final boolean p_disableChunkLocks) {
         if (m_memory != null) {
             m_memory.shutdown();
         }
 
-        m_memory = new DXMem(p_inFile);
+        m_memory = new DXMem(p_inFile, p_disableChunkLocks);
     }
 
     /**
