@@ -27,7 +27,8 @@ import picocli.CommandLine;
         subcommands = {
                 ToolAnalyzer.class,
                 ToolBenchmark.class,
-                ToolDebugger.class
+                ToolDebugger.class,
+                ToolOverheadCalc.class
         }
 )
 public class ToolRoot implements Runnable {

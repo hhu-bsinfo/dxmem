@@ -70,24 +70,6 @@ public class MemoryOverheadCalculator {
     }
 
     /**
-     * Main entry point
-     *
-     * @param p_args
-     *         Cmd args
-     */
-    public static void main(final String[] p_args) {
-        if (p_args.length < 2) {
-            System.out.println("Calculate the required space and overhead of the memory manager");
-            System.out.println("Usage: <chunkPayloadSize> <totalChunkCount>");
-            return;
-        }
-
-        MemoryOverheadCalculator calc = new MemoryOverheadCalculator(Integer.parseInt(p_args[0]),
-                Long.parseLong(p_args[1]));
-        System.out.println(calc);
-    }
-
-    /**
      * Calculate the overhead based on HeapStatus and CIDTableStatus
      *
      * @param p_heapStatus
@@ -205,10 +187,10 @@ public class MemoryOverheadCalculator {
         builder.append(m_nidTableSize);
         builder.append('\n');
 
-        for (int i = 0; i < m_lidTableSizes.length; i++) {
-            builder.append("Lid table level ");
+        for (int i = m_lidTableSizes.length - 1; i >= 0; i--) {
+            builder.append("Lid tables level ");
             builder.append(i);
-            builder.append(" size: ");
+            builder.append(" total size: ");
             builder.append(m_lidTableSizes[i]);
             builder.append('\n');
         }
