@@ -85,6 +85,9 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.assertj:assertj-core:3.9.0'
+
+    extTestImplementation 'junit:junit:4.12'
+    extTestImplementation 'org.assertj:assertj-core:3.9.0'
 }
 
 artifacts {
