@@ -62,7 +62,7 @@ public class Resize {
     public ChunkState resize(final long p_cid, final int p_newSize) {
         assert p_newSize > 0;
 
-        if (!m_context.isChunkLockDisabled()) {
+        if (m_context.isChunkLockDisabled()) {
             throw new MemoryRuntimeException("Not supporting resize operation if chunk locks are disabled");
         }
 

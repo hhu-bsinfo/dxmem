@@ -62,7 +62,7 @@ public class Remove {
      *         CID to reuse
      */
     public void prepareChunkIDForReuse(final long p_cid) {
-        if (!m_context.isChunkLockDisabled()) {
+        if (m_context.isChunkLockDisabled()) {
             throw new MemoryRuntimeException("Not supporting remove operation if chunk locks are disabled");
         }
 
@@ -148,7 +148,7 @@ public class Remove {
      * @return On success, size of chunk removed, on failure negative ChunkState
      */
     public int remove(final long p_cid, final boolean p_wasMigrated) {
-        if (!m_context.isChunkLockDisabled()) {
+        if (m_context.isChunkLockDisabled()) {
             throw new MemoryRuntimeException("Not supporting remove operation if chunk locks are disabled");
         }
 
