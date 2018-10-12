@@ -111,6 +111,7 @@ public class CreateReserved {
      *         Start offset in size array
      * @param p_sizesLength
      *         Number of elements to consider of size array
+     * @return Number of chunks successfully created
      */
     public int createReserved(final long[] p_cids, final long[] p_addresses, final int[] p_sizes,
             final int p_sizesOffset, final int p_sizesLength) {
@@ -166,6 +167,7 @@ public class CreateReserved {
      *         Array of chunks with reserved CIDs set
      * @param p_addresses
      *         Optional (can be null): Array to return the raw addresses of the allocate chunks
+     * @return Number of chunks successfully created
      */
     public int createReserved(final AbstractChunk[] p_ds, final long[] p_addresses) {
         assert p_ds != null;
