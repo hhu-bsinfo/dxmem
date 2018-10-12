@@ -84,13 +84,23 @@ public class HeapTest {
     @Test
     public void malloc7() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1, 128, 10000000, 2);
+
+        if (DXMemTestUtils.sufficientMemoryForBenchmark(DXMemoryTestConstants.HEAP_SIZE_LARGE)) {
+            mallocTest(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1, 128, 10000000, 2);
+        } else {
+            LOGGER.warn("Insufficient memory for benchmark, skipping");
+        }
     }
 
     @Test
     public void malloc8() {
         Configurator.setRootLevel(Level.TRACE);
-        mallocTest(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1, 128, 10000000, 4);
+
+        if (DXMemTestUtils.sufficientMemoryForBenchmark(DXMemoryTestConstants.HEAP_SIZE_LARGE)) {
+            mallocTest(DXMemoryTestConstants.HEAP_SIZE_LARGE, 1, 128, 10000000, 4);
+        } else {
+            LOGGER.warn("Insufficient memory for benchmark, skipping");
+        }
     }
 
     private void mallocTest(final long p_heapSize, final int p_chunkSizeMin, final int p_chunkSizeMax,

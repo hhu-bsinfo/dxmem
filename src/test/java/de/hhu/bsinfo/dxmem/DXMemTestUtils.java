@@ -10,6 +10,10 @@ public final class DXMemTestUtils {
 
     }
 
+    public static boolean sufficientMemoryForBenchmark(final long p_heapSizeBytes) {
+        return sufficientMemoryForBenchmark(new StorageUnit(p_heapSizeBytes, StorageUnit.BYTE));
+    }
+
     public static boolean sufficientMemoryForBenchmark(final StorageUnit p_heapSize) {
         MemState state = new MemState();
 
