@@ -16,6 +16,7 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
+import de.hhu.bsinfo.dxmem.AllocationException;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
@@ -72,9 +73,19 @@ public class CreateReserved {
 
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        m_context.getHeap().malloc(p_size, tableEntry);
+        if (!m_context.getHeap().malloc(p_size, tableEntry)) {
+            m_context.getDefragmenter().releaseApplicationThreadLock();
 
-        m_context.getCIDTable().insert(p_cid, tableEntry);
+            throw new AllocationException(p_size);
+        }
+
+        if (!m_context.getCIDTable().insert(p_cid, tableEntry)) {
+            m_context.getHeap().free(tableEntry);
+
+            m_context.getDefragmenter().releaseApplicationThreadLock();
+
+            throw new AllocationException("Allocation of block of memory for LID table failed. Out of memory.");
+        }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
@@ -101,7 +112,7 @@ public class CreateReserved {
      * @param p_sizesLength
      *         Number of elements to consider of size array
      */
-    public void createReserved(final long[] p_cids, final long[] p_addresses, final int[] p_sizes,
+    public int createReserved(final long[] p_cids, final long[] p_addresses, final int[] p_sizes,
             final int p_sizesOffset, final int p_sizesLength) {
         assert p_cids != null;
         // p_addresses is optional
@@ -118,14 +129,22 @@ public class CreateReserved {
 
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        m_context.getHeap().malloc(entries, p_sizes, p_sizesOffset, p_sizesLength);
+        int successfulMallocs = m_context.getHeap().malloc(entries, p_sizes, p_sizesOffset, p_sizesLength);
 
-        for (int i = 0; i < p_sizesLength; i++) {
-            m_context.getCIDTable().insert(p_cids[i], entries[i]);
+        // add all entries to table
+        for (int i = 0; i < successfulMallocs; i++) {
+            if (!m_context.getCIDTable().insert(p_cids[i], entries[i])) {
+                // revert mallocs for remaining chunks to avoid corrupted memory
+                for (int j = i; j < successfulMallocs; j++) {
+                    m_context.getHeap().free(entries[j]);
+                }
+
+                successfulMallocs = i;
+            }
         }
 
         if (p_addresses != null) {
-            for (int i = 0; i < p_sizesLength; i++) {
+            for (int i = 0; i < successfulMallocs; i++) {
                 p_addresses[i] = entries[i].getAddress();
             }
         }
@@ -133,6 +152,8 @@ public class CreateReserved {
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         SOP_CREATE_RESERVE_MULTI.inc();
+
+        return successfulMallocs;
     }
 
     /**
@@ -146,7 +167,7 @@ public class CreateReserved {
      * @param p_addresses
      *         Optional (can be null): Array to return the raw addresses of the allocate chunks
      */
-    public void createReserved(final AbstractChunk[] p_ds, final long[] p_addresses) {
+    public int createReserved(final AbstractChunk[] p_ds, final long[] p_addresses) {
         assert p_ds != null;
         // p_addresses is optional
 
@@ -165,14 +186,22 @@ public class CreateReserved {
 
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        m_context.getHeap().malloc(entries, sizes, 0, sizes.length);
+        int successfulMallocs = m_context.getHeap().malloc(entries, sizes, 0, sizes.length);
 
-        for (int i = 0; i < sizes.length; i++) {
-            m_context.getCIDTable().insert(p_ds[i].getID(), entries[i]);
+        // add all entries to table
+        for (int i = 0; i < successfulMallocs; i++) {
+            if (!m_context.getCIDTable().insert(p_ds[i].getID(), entries[i])) {
+                // revert mallocs for remaining chunks to avoid corrupted memory
+                for (int j = i; j < successfulMallocs; j++) {
+                    m_context.getHeap().free(entries[j]);
+                }
+
+                successfulMallocs = i;
+            }
         }
 
         if (p_addresses != null) {
-            for (int i = 0; i < sizes.length; i++) {
+            for (int i = 0; i < successfulMallocs; i++) {
                 p_addresses[i] = entries[i].getAddress();
             }
         }
@@ -180,5 +209,7 @@ public class CreateReserved {
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         SOP_CREATE_RESERVE_MULTI.inc();
+
+        return successfulMallocs;
     }
 }

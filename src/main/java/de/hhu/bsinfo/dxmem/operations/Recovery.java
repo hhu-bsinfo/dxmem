@@ -83,13 +83,21 @@ public class Recovery {
 
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        m_context.getHeap().malloc(entries, p_lengths, 0, p_usedEntries);
+        int successfulMallocs = m_context.getHeap().malloc(entries, p_lengths, 0, p_usedEntries);
 
-        for (int i = 0; i < p_usedEntries; i++) {
-            m_context.getCIDTable().insert(p_cids[i], entries[i]);
+        // add all entries to table
+        for (int i = 0; i < successfulMallocs; i++) {
+            if (!m_context.getCIDTable().insert(p_cids[i], entries[i])) {
+                // revert mallocs for remaining chunks to avoid corrupted memory
+                for (int j = i; j < successfulMallocs; j++) {
+                    m_context.getHeap().free(entries[j]);
+                }
+
+                successfulMallocs = i;
+            }
         }
 
-        for (int i = 0; i < p_usedEntries; i++) {
+        for (int i = 0; i < successfulMallocs; i++) {
             m_context.getHeap().copyNative(entries[i].getAddress(), 0, p_dataAddress, p_offsets[i], p_lengths[i], true);
             totalSize += p_lengths[i];
         }
@@ -115,7 +123,6 @@ public class Recovery {
 
         for (int i = 0; i < p_chunks.length; i++) {
             sizes[i] = p_chunks[i].sizeofObject();
-            totalSize += sizes[i];
         }
 
         SOP_CREATE_AND_PUT_DS.start(sizes.length);
@@ -125,17 +132,26 @@ public class Recovery {
 
         m_context.getDefragmenter().acquireApplicationThreadLock();
 
-        m_context.getHeap().malloc(entries, sizes);
+        int successfulMallocs = m_context.getHeap().malloc(entries, sizes);
 
-        for (int i = 0; i < p_chunks.length; i++) {
-            m_context.getCIDTable().insert(p_chunks[i].getID(), entries[i]);
+        // add all entries to table
+        for (int i = 0; i < successfulMallocs; i++) {
+            if (!m_context.getCIDTable().insert(p_chunks[i].getID(), entries[i])) {
+                // revert mallocs for remaining chunks to avoid corrupted memory
+                for (int j = i; j < successfulMallocs; j++) {
+                    m_context.getHeap().free(entries[j]);
+                }
+
+                successfulMallocs = i;
+            }
         }
 
         HeapDataStructureImExporter exporter = m_context.getDataStructureImExporterPool().get();
 
-        for (int i = 0; i < p_chunks.length; i++) {
+        for (int i = 0; i < successfulMallocs; i++) {
             exporter.setHeapAddress(entries[i].getAddress());
             exporter.exportObject(p_chunks[i]);
+            totalSize += sizes[i];
         }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();

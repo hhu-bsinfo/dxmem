@@ -23,6 +23,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.AllocationException;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
@@ -145,10 +146,12 @@ public class OutOfMemoryTest {
 
         LOGGER.info("Multi creating %d chunks with size %d...", p_count, p_size);
 
-        try {
-            memory.create().create(cids, 0, p_count, p_size, false);
-        } catch (final AllocationException e) {
-            LOGGER.info("Caught allocation exception", e);
+        memory.dump().dump("/tmp/asdf.bin");
+
+        int successful = memory.create().create(cids, 0, p_count, p_size, false);
+
+        if (successful != p_count) {
+            LOGGER.info("Caught out of memory");
 
             Assert.assertTrue(memory.analyze().analyze());
             memory.shutdown();

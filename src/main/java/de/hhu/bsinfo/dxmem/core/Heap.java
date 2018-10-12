@@ -220,7 +220,7 @@ public final class Heap implements Importable, Exportable {
             // large batch allocation failed, fallback to single malloc calls on failure
 
             for (int i = 0; i < p_count; i++) {
-                if (!malloc(p_size, p_entry[i])) {
+                if (!reserveBlock(p_size, p_entry[i], false)) {
                     break;
                 }
 
@@ -280,7 +280,7 @@ public final class Heap implements Importable, Exportable {
             // large batch allocation failed, fallback to single malloc calls on failure
 
             for (int i = 0; i < p_sizes.length; i++) {
-                if (!malloc(p_sizes[p_sizesOffset + i], p_entry[i])) {
+                if (!reserveBlock(p_sizes[p_sizesOffset + i], p_entry[i], false)) {
                     break;
                 }
 

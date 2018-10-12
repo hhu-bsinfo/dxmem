@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.hhu.bsinfo.dxmem.operations;
+package de.hhu.bsinfo.dxmem;
 
 /**
  * Exception thrown on heap allocation errors
@@ -29,6 +29,16 @@ public class AllocationException extends RuntimeException {
      *         Block size the caller tried to allocate
      */
     public AllocationException(final int p_blockSize) {
-        super("Could not allocate a block of memory of " + p_blockSize + " bytes. Maybe out of memory?");
+        super("Could not allocate a block of memory of " + p_blockSize + " bytes. Out of memory.");
+    }
+
+    /**
+     * Constructor
+     *
+     * @param p_msg
+     *         Message for exception
+     */
+    public AllocationException(final String p_msg) {
+        super(p_msg);
     }
 }

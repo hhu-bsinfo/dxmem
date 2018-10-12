@@ -35,7 +35,7 @@ public class LockTest {
 
         Assert.assertTrue(heap.malloc(1, chunkEntry));
 
-        cidTable.insert(cid, chunkEntry);
+        Assert.assertTrue(cidTable.insert(cid, chunkEntry));
         cidTable.entryReread(chunkEntry);
 
         Assert.assertTrue(chunkEntry.isValid());
@@ -74,7 +74,7 @@ public class LockTest {
 
         Assert.assertTrue(heap.malloc(1, chunkEntry));
 
-        cidTable.insert(cid, chunkEntry);
+        Assert.assertTrue(cidTable.insert(cid, chunkEntry));
         cidTable.entryReread(chunkEntry);
 
         Assert.assertTrue(chunkEntry.isValid());
@@ -115,7 +115,7 @@ public class LockTest {
 
         Assert.assertTrue(heap.malloc(1, chunkEntry));
 
-        cidTable.insert(cid, chunkEntry);
+        Assert.assertTrue(cidTable.insert(cid, chunkEntry));
         cidTable.entryReread(chunkEntry);
 
         Assert.assertTrue(chunkEntry.isValid());
@@ -154,7 +154,7 @@ public class LockTest {
 
         Assert.assertTrue(heap.malloc(1, chunkEntry));
 
-        cidTable.insert(cid, chunkEntry);
+        Assert.assertTrue(cidTable.insert(cid, chunkEntry));
         cidTable.entryReread(chunkEntry);
 
         Assert.assertTrue(chunkEntry.isValid());
@@ -250,7 +250,7 @@ public class LockTest {
 
         Assert.assertTrue(heap.malloc(1, chunkEntry));
 
-        cidTable.insert(cid, chunkEntry);
+        Assert.assertTrue(cidTable.insert(cid, chunkEntry));
         cidTable.entryReread(chunkEntry);
 
         Assert.assertTrue(chunkEntry.isValid());
@@ -343,7 +343,7 @@ public class LockTest {
 
         Assert.assertTrue(heap.malloc(1, chunkEntry));
 
-        cidTable.insert(cid, chunkEntry);
+        Assert.assertTrue(cidTable.insert(cid, chunkEntry));
         cidTable.entryReread(chunkEntry);
 
         Assert.assertTrue(chunkEntry.isValid());

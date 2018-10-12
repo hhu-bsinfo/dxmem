@@ -183,8 +183,9 @@ public final class CIDTable implements Importable, Exportable {
      *         Chunk id to insert at
      * @param p_entry
      *         Entry to insert
+     * @return True if insert successful, false on error (out of memory for new LID table malloc)
      */
-    public void insert(final long p_chunkID, final CIDTableChunkEntry p_entry) {
+    public boolean insert(final long p_chunkID, final CIDTableChunkEntry p_entry) {
         long index;
         long entry;
 
@@ -225,7 +226,11 @@ public final class CIDTable implements Importable, Exportable {
 
                     if (entry == CIDTableChunkEntry.RAW_VALUE_FREE) {
                         CIDTableTableEntry tmpEntry = new CIDTableTableEntry();
-                        createLIDTable(tmpEntry, level - 1);
+
+                        if (!createLIDTable(tmpEntry, level - 1)) {
+                            // out of memory abort insert
+                            return false;
+                        }
 
                         writeTableEntry(addressTable, index, tmpEntry.getValue());
 
@@ -256,11 +261,13 @@ public final class CIDTable implements Importable, Exportable {
 
                 // update entry state
                 p_entry.setPointer(addressTable + index * ENTRY_SIZE);
-                return;
+                return true;
             }
 
             level--;
         } while (level >= 0);
+
+        return true;
     }
 
     /**
@@ -664,7 +671,9 @@ public final class CIDTable implements Importable, Exportable {
         tmp.setLengthField(0);
 
         // TODO reduce pointer length to 6 byte because TableEntry is address only
-        m_heap.malloc(NID_TABLE_SIZE, tmp, true);
+        if (!m_heap.malloc(NID_TABLE_SIZE, tmp, true)) {
+            throw new MemoryRuntimeException("Creating the NID table should not fail");
+        }
 
         p_entry.clear();
         p_entry.setAddress(tmp.getAddress());
@@ -684,15 +693,18 @@ public final class CIDTable implements Importable, Exportable {
      *         Reference to table entry to write results to
      * @param p_level
      *         Table level to create
+     * @return True on success, false on out of memory
      */
-    private void createLIDTable(final CIDTableTableEntry p_entry, final int p_level) {
+    private boolean createLIDTable(final CIDTableTableEntry p_entry, final int p_level) {
         CIDTableChunkEntry tmp = new CIDTableChunkEntry();
 
         // no need to store any length information
         tmp.setLengthField(0);
 
         // TODO reduce pointer length for all levels except 0 to 6 byte because TableEntry is address only
-        m_heap.malloc(LID_TABLE_SIZE, tmp, true);
+        if (!m_heap.malloc(LID_TABLE_SIZE, tmp, true)) {
+            return false;
+        }
 
         p_entry.clear();
         p_entry.setAddress(tmp.getAddress());
@@ -704,6 +716,8 @@ public final class CIDTable implements Importable, Exportable {
         m_status.m_totalTableCount++;
 
         LOGGER.trace("Created LID table size %d at %X", LID_TABLE_SIZE, p_entry.getAddress());
+
+        return true;
     }
 
     /**

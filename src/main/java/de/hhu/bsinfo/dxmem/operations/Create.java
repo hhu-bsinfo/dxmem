@@ -16,6 +16,10 @@
 
 package de.hhu.bsinfo.dxmem.operations;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.hhu.bsinfo.dxmem.AllocationException;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
@@ -31,6 +35,8 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public final class Create {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(Create.class.getSimpleName());
+
     private static final Value SOP_CREATE = new Value(DXMem.class, "Create");
 
     static {
@@ -82,7 +88,15 @@ public final class Create {
         }
 
         long cid = ChunkID.getChunkID(m_context.getNodeId(), m_context.getLIDStore().get());
-        m_context.getCIDTable().insert(cid, tableEntry);
+
+        if (!m_context.getCIDTable().insert(cid, tableEntry)) {
+            // revert malloc to avoid corrupted memory
+            m_context.getHeap().free(tableEntry);
+
+            m_context.getDefragmenter().releaseApplicationThreadLock();
+
+            throw new AllocationException("Allocation of block of memory for LID table failed. Out of memory.");
+        }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
@@ -138,7 +152,14 @@ public final class Create {
 
         // add all entries to table
         for (int i = 0; i < successfulMallocs; i++) {
-            m_context.getCIDTable().insert(p_chunkIDs[p_offset + i], entries[i]);
+            if (!m_context.getCIDTable().insert(p_chunkIDs[p_offset + i], entries[i])) {
+                // revert mallocs for remaining chunks to avoid corrupted memory
+                for (int j = i; j < successfulMallocs; j++) {
+                    m_context.getHeap().free(entries[j]);
+                }
+
+                successfulMallocs = i;
+            }
         }
 
         // put back or flag as zombies: entries of non successful allocs (rare case)
@@ -148,7 +169,12 @@ public final class Create {
             for (int i = successfulMallocs; i < p_count; i++) {
                 if (!m_context.getLIDStore().put(ChunkID.getLocalID(p_chunkIDs[p_offset + i]))) {
                     // lid store full, flag as zombie
-                    m_context.getCIDTable().entryFlagZombie(entries[i]);
+                    if (entries[i].isValid()) {
+                        m_context.getCIDTable().entryFlagZombie(entries[i]);
+                    } else {
+                        LOGGER.error("Putting back LIDs failed, invalid entry due to malloc failure. LID %X lost",
+                                ChunkID.getLocalID(p_chunkIDs[p_offset + i]));
+                    }
                 }
             }
         }
@@ -204,7 +230,14 @@ public final class Create {
 
         // add all entries to table
         for (int i = 0; i < successfulMallocs; i++) {
-            m_context.getCIDTable().insert(p_chunkIDs[p_offset + i], entries[i]);
+            if (!m_context.getCIDTable().insert(p_chunkIDs[p_offset + i], entries[i])) {
+                // revert mallocs for remaining chunks to avoid corrupted memory
+                for (int j = i; j < successfulMallocs; j++) {
+                    m_context.getHeap().free(entries[j]);
+                }
+
+                successfulMallocs = i;
+            }
         }
 
         // put back or flag as zombies: entries of non successful allocs (rare case)
@@ -214,7 +247,12 @@ public final class Create {
             for (int i = successfulMallocs; i < p_sizes.length; i++) {
                 if (!m_context.getLIDStore().put(ChunkID.getLocalID(p_chunkIDs[p_offset + i]))) {
                     // lid store full, flag as zombie
-                    m_context.getCIDTable().entryFlagZombie(entries[i]);
+                    if (entries[i].isValid()) {
+                        m_context.getCIDTable().entryFlagZombie(entries[i]);
+                    } else {
+                        LOGGER.error("Putting back LIDs failed, invalid entry due to malloc failure. LID %X lost",
+                                ChunkID.getLocalID(p_chunkIDs[p_offset + i]));
+                    }
                 }
             }
         }
