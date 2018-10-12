@@ -59,7 +59,7 @@ public class Pinning {
      *         Cid of chunk to pin
      * @param p_acquireLockTimeoutMs
      *         -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return PinnedMemory object with ChunkState determining the result of the operation
      */
     public PinnedMemory pin(final long p_cid, final int p_acquireLockTimeoutMs) {

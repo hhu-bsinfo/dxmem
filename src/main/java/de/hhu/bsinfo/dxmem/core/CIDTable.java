@@ -339,6 +339,8 @@ public final class CIDTable implements Importable, Exportable {
     /**
      * Returns the ChunkID ranges of all locally stored Chunks
      *
+     * @param p_nodeId
+     *         Node id of the remote to get the data from
      * @return the ChunkID ranges
      */
     public ChunkIDRanges getCIDRangesOfAllChunks(final short p_nodeId) {

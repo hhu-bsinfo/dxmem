@@ -80,7 +80,7 @@ public class Put {
      *         Lock operation to execute with this put operation on the chunk
      * @param p_lockTimeoutMs
      *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
      */
     public boolean put(final AbstractChunk p_chunk, final ChunkLockOperation p_lockOperation,
@@ -174,7 +174,7 @@ public class Put {
      *         Lock operation to execute with this put operation on the chunk
      * @param p_lockTimeoutMs
      *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return Chunk state with results of operation
      */
     public ChunkState put(final long p_chunkID, final byte[] p_data, final ChunkLockOperation p_lockOperation,

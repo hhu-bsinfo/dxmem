@@ -62,6 +62,8 @@ public class CliContext {
      *         Node id to use for instance
      * @param p_heapSize
      *         Size of heap in bytes
+     * @param p_disableChunkLocks
+     *         True to disable the chunk locking feature built into the CIDTable.
      */
     public void newMemory(final short p_nodeId, final long p_heapSize, final boolean p_disableChunkLocks) {
         if (m_memory != null) {
@@ -76,6 +78,8 @@ public class CliContext {
      *
      * @param p_inFile
      *         File to load heap from
+     * @param p_disableChunkLocks
+     *         True to disable the chunk locking feature built into the CIDTable.
      */
     public void loadFromFile(final String p_inFile, final boolean p_disableChunkLocks) {
         if (m_memory != null) {

@@ -48,7 +48,7 @@ public class ChunkIDRanges implements Importable, Exportable, Iterable<Long> {
      * @param p_end
      *         End of range (including)
      * @throws IllegalArgumentException
-     *         If p_start > p_end
+     *         If p_start &gt; p_end
      */
     public ChunkIDRanges(final long p_start, final long p_end) {
         if (!isLessThanOrEqualsUnsigned(p_start, p_end)) {
@@ -206,7 +206,7 @@ public class ChunkIDRanges implements Importable, Exportable, Iterable<Long> {
      * @param p_end
      *         End of the range (including)
      * @throws IllegalArgumentException
-     *         If p_start > p_end
+     *         If p_start &gt; p_end
      */
     public void add(final long p_start, final long p_end) {
         assert p_start <= p_end;
@@ -326,6 +326,7 @@ public class ChunkIDRanges implements Importable, Exportable, Iterable<Long> {
      *
      * @param p_cid
      *         Cid to remove from ranges
+     * @return True if element was found and removed, false otherwise.
      */
     public boolean remove(final long p_cid) {
         // [1,1] - 1 - []

@@ -48,7 +48,7 @@ public final class LockUtils {
      * @param p_entry
      *         Chunk entry of CIDTable to lock
      * @param p_retryTimeoutMs
-     *         -1 = infinite, 0 = one shot, > 0 timeout in ms
+     *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
      * @return Lock status
      */
     public static LockStatus acquireReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
@@ -131,7 +131,7 @@ public final class LockUtils {
      * @param p_entry
      *         Chunk entry of CIDTable to lock
      * @param p_retryTimeoutMs
-     *         -1 = infinite, 0 = one shot, > 0 timeout in ms
+     *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
      * @return Lock status
      */
     public static LockStatus acquireWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,

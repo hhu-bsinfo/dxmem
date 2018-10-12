@@ -19,7 +19,7 @@ package de.hhu.bsinfo.dxmem.core;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 
 /**
- * Cache for translated addresses (CID -> address)
+ * Cache for translated addresses (CID to address)
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */

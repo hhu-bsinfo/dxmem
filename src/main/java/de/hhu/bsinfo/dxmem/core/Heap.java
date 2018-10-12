@@ -329,6 +329,7 @@ public final class Heap implements Importable, Exportable {
      *         Table entry of existing chunk to resize
      * @param p_newSize
      *         New size
+     * @return True if resizing was successful, false if not possible (e.g. due to insufficient memory)
      */
     public boolean resize(final CIDTableChunkEntry p_tableEntry, final int p_newSize) {
         int oldSize = getSize(p_tableEntry);
@@ -389,6 +390,8 @@ public final class Heap implements Importable, Exportable {
      *
      * @param p_address
      *         the address to start
+     * @param p_offset
+     *         the offset added to the address to start at
      * @param p_size
      *         the number of bytes to overwrite
      * @param p_value

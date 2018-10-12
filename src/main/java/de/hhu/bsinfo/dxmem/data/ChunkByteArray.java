@@ -95,9 +95,9 @@ public final class ChunkByteArray extends AbstractChunk {
 
     /**
      * Gets the underlying byte buffer with the stored payload.
+     * Note: The position gets reset to 0 before returning the reference.
      *
      * @return ByteBuffer with position reset.
-     * @note The position gets reset to 0 before returning the reference.
      */
     public byte[] getData() {
         return m_data;

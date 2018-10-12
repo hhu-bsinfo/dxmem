@@ -28,6 +28,9 @@ public abstract class AbstractLocalBenchmarkRunner implements BenchmarkRunner {
 
     /**
      * Constructor
+     *
+     * @param p_context
+     *         The benchmark context for the runner
      */
     protected AbstractLocalBenchmarkRunner(final BenchmarkContext p_context) {
         m_context = p_context;

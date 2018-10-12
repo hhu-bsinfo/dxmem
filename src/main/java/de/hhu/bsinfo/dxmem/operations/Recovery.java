@@ -66,6 +66,7 @@ public class Recovery {
      *         List of chunk sizes
      * @param p_usedEntries
      *         Specifies the actual number of slots used in the array (may be less than p_lengths)
+     * @return Total size of recovered chunks put
      */
     public long createAndPutRecovered(final long[] p_cids, final long p_dataAddress, final int[] p_offsets,
             final int[] p_lengths, final int p_usedEntries) {

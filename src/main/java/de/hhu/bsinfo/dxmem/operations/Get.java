@@ -81,7 +81,7 @@ public final class Get {
      *         Lock operation to execute with this get operation on the chunk
      * @param p_lockTimeoutMs
      *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
      */
     public boolean get(final AbstractChunk p_chunk, final ChunkLockOperation p_lockOperation,
@@ -185,7 +185,7 @@ public final class Get {
      *         Lock operation to execute with this get operation on the chunk
      * @param p_lockTimeoutMs
      *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return ChunkByteArray. Chunk state determines success or failure of the operation
      */
     public ChunkByteArray get(final long p_cid, final ChunkLockOperation p_lockOperation,
@@ -296,7 +296,7 @@ public final class Get {
      *         Lock operation to execute with this get operation on the chunk
      * @param p_lockTimeoutMs
      *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and > 0 for a timeout value in ms
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return ChunkByteArray. Chunk state determines success or failure of the operation
      */
     public int get(final long p_cid, final byte[] p_buffer, final int p_offset, final int p_size,
