@@ -16,7 +16,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "de.hhu.bsinfo:dxbuild:0.2.0-SNAPSHOT"
+        classpath "de.hhu.bsinfo:dxbuild:0.2.0" + (Boolean.valueOf(System.getProperty('snapshot')) ? '-SNAPSHOT' : '')
     }
 }
 
