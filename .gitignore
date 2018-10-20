@@ -7,3 +7,5 @@ build/
 .idea
 dxmem.iml
 .gradle
+*.ipr
+*.iws
