@@ -199,13 +199,19 @@ public class MemoryOverheadCalculator {
         builder.append('\n');
         builder.append("Total payload memory: ");
         builder.append(m_totalPayloadMem);
-        builder.append('\n');
+        builder.append(" (");
+        builder.append(m_totalPayloadMem.getBytes());
+        builder.append(")\n");
         builder.append("Total overhead only: ");
         builder.append(m_overheadMem);
-        builder.append('\n');
+        builder.append(" (");
+        builder.append(m_overheadMem.getBytes());
+        builder.append(")\n");
         builder.append("Total memory including overhead: ");
         builder.append(m_totalMem);
-        builder.append('\n');
+        builder.append(" (");
+        builder.append(m_totalMem.getBytes());
+        builder.append(")\n");
         builder.append("Overhead (%): ");
         builder.append(m_overhead);
 
