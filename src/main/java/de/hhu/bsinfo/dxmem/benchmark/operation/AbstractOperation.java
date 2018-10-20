@@ -45,7 +45,7 @@ public abstract class AbstractOperation {
     private ReentrantReadWriteLock m_cidsLock;
     private long m_totalOps;
 
-    private long m_curStartTime;
+    private long[] m_curStartTimes;
 
     /**
      * Constructor
@@ -73,6 +73,9 @@ public abstract class AbstractOperation {
         for (int i = 0; i < m_opsReturnCodes.length; i++) {
             m_opsReturnCodes[i] = new AtomicLong(0);
         }
+
+        // Thread local array for start times
+        m_curStartTimes = new long[4096];
     }
 
     /**
@@ -314,14 +317,14 @@ public abstract class AbstractOperation {
      * Call this to start measuring time once you execute your operation
      */
     protected void executeTimeStart() {
-        m_curStartTime = System.nanoTime();
+        m_curStartTimes[(int) Thread.currentThread().getId()] = System.nanoTime();
     }
 
     /**
      * Call this to stop measuring time after you executed your operation
      */
     protected void executeTimeEnd() {
-        m_time.record(System.nanoTime() - m_curStartTime);
+        m_time.recordPerf(System.nanoTime() - m_curStartTimes[(int) Thread.currentThread().getId()]);
     }
 
     /**
