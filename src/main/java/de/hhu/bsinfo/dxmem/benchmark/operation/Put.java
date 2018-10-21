@@ -27,7 +27,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkState;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public class Put extends AbstractOperation {
-    private final ChunkBenchmark m_chunk;
+    private final ChunkBenchmark[] m_chunks;
 
     /**
      * Constructor
@@ -44,7 +44,11 @@ public class Put extends AbstractOperation {
     public Put(final float p_probability, final int p_batchCount, final boolean p_verifyData, final int p_chunkSize) {
         super("put", p_probability, p_batchCount, p_verifyData);
 
-        m_chunk = new ChunkBenchmark(ChunkID.INVALID_ID, p_chunkSize);
+        m_chunks = new ChunkBenchmark[1024];
+
+        for (int i = 0; i < m_chunks.length; i++) {
+            m_chunks[i] = new ChunkBenchmark(ChunkID.INVALID_ID, p_chunkSize);
+        }
     }
 
     @Override
@@ -56,16 +60,18 @@ public class Put extends AbstractOperation {
             return ChunkState.DOES_NOT_EXIST;
         }
 
-        m_chunk.setID(cid);
+        int tid = (int) Thread.currentThread().getId();
+
+        m_chunks[tid].setID(cid);
 
         if (p_verifyData) {
-            m_chunk.fillContents();
+            m_chunks[tid].fillContents();
         }
 
         executeTimeStart();
-        p_context.put(m_chunk);
+        p_context.put(m_chunks[tid]);
         executeTimeEnd();
 
-        return m_chunk.getState();
+        return m_chunks[tid].getState();
     }
 }

@@ -66,7 +66,7 @@ public class Put {
      * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
      */
     public boolean put(final AbstractChunk p_chunk) {
-        return put(p_chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
+        return put(p_chunk, ChunkLockOperation.NONE, -1);
     }
 
     /**
