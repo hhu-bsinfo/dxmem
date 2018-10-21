@@ -33,13 +33,14 @@ public interface BenchmarkContext {
     LIDStoreStatus getLIDStoreStatus();
 
     /**
-     * Create a single chunk on the current instance
+     * Create one or multiple chunks on the current instance
      *
-     * @param p_size
-     *         Size of chunk
-     * @return CID of chunk created
+     * @param p_cids
+     *         Chunk ids of chunks created
+     * @param p_sizes
+     *         Sizes of chunks
      */
-    long create(final int p_size);
+    void create(final long[] p_cids, final int[] p_sizes);
 
     /**
      * Dump the heap of the current instance to a file
@@ -50,26 +51,26 @@ public interface BenchmarkContext {
     void dump(final String p_outFile);
 
     /**
-     * Get the data of a chunk
+     * Get the data of chunks
      *
-     * @param p_chunk
-     *         Chunk to get
+     * @param p_chunks
+     *         Chunks to get
      */
-    void get(final AbstractChunk p_chunk);
+    void get(final AbstractChunk[] p_chunks);
 
     /**
-     * Put the data of a chunk
+     * Put the data of chunks
      *
-     * @param p_chunk
-     *         Chunk to put
+     * @param p_chunks
+     *         Chunks to put
      */
-    void put(final AbstractChunk p_chunk);
+    void put(final AbstractChunk[] p_chunks);
 
     /**
-     * Remove a chunk
+     * Remove chunks
      *
-     * @param p_chunk
-     *         Chunk to remove
+     * @param p_chunks
+     *         Chunks to remove
      */
-    void remove(final AbstractChunk p_chunk);
+    void remove(final AbstractChunk[] p_chunks);
 }

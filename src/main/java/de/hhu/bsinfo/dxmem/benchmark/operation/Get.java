@@ -27,8 +27,11 @@ import de.hhu.bsinfo.dxmem.data.ChunkState;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public class Get extends AbstractOperation {
+    private static final int MAX_THREADS = 1024;
+
     private final int m_maxChunkSize;
-    private final ChunkBenchmark[] m_chunks;
+    private final long[][] m_cids;
+    private final ChunkBenchmark[][] m_chunks;
 
     /**
      * Constructor
@@ -48,37 +51,55 @@ public class Get extends AbstractOperation {
 
         m_maxChunkSize = p_maxChunkSize;
 
-        m_chunks = new ChunkBenchmark[1024];
+        m_cids = new long[MAX_THREADS][p_batchCount];
+        m_chunks = new ChunkBenchmark[MAX_THREADS][p_batchCount];
     }
 
     @Override
     public ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData) {
-        long cid = executeGetRandomCid();
+        int tid = (int) Thread.currentThread().getId();
+        long[] cids = m_cids[tid];
+        ChunkBenchmark[] chunks = m_chunks[tid];
+
+        executeGetRandomCids(cids);
 
         // no chunks available, yet?
-        if (cid == ChunkID.INVALID_ID) {
-            return ChunkState.DOES_NOT_EXIST;
-        }
-
-        int tid = (int) Thread.currentThread().getId();
-
-        if (m_chunks[tid] == null) {
-            m_chunks[tid] = new ChunkBenchmark(m_maxChunkSize);
-        }
-
-        m_chunks[tid].setID(cid);
-
-        executeTimeStart();
-        p_context.get(m_chunks[tid]);
-        executeTimeEnd();
-
-        // verify data in chunk
-        if (p_verifyData && m_chunks[tid].isStateOk()) {
-            if (!m_chunks[tid].verifyContents()) {
-                return ChunkState.DATA_LOST;
+        for (long cid : cids) {
+            if (cid == ChunkID.INVALID_ID) {
+                return ChunkState.DOES_NOT_EXIST;
             }
         }
 
-        return m_chunks[tid].getState();
+        if (chunks[0] == null) {
+            for (int i = 0; i < chunks.length; i++) {
+                chunks[i] = new ChunkBenchmark(m_maxChunkSize);
+            }
+        }
+
+        for (int i = 0; i < chunks.length; i++) {
+            chunks[i].setID(cids[i]);
+        }
+
+        executeTimeStart();
+        p_context.get(chunks);
+        executeTimeEnd();
+
+        // verify data in chunk
+        if (p_verifyData) {
+            for (ChunkBenchmark chunk : chunks) {
+                if (chunk.isStateOk() && !chunk.verifyContents()) {
+                    return ChunkState.DATA_LOST;
+                }
+            }
+        }
+
+        // return error of first failed chunk, only
+        for (ChunkBenchmark chunk : chunks) {
+            if (!chunk.isStateOk()) {
+                return chunk.getState();
+            }
+        }
+
+        return ChunkState.OK;
     }
 }

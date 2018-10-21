@@ -340,6 +340,22 @@ public abstract class AbstractOperation {
     }
 
     /**
+     * Call this if you generated new cids when executing your operation
+     *
+     * @param p_cids
+     *         New cids generated
+     */
+    protected void executeNewCids(final long[] p_cids) {
+        m_cidsLock.writeLock().lock();
+
+        for (long cid : p_cids) {
+            m_cids.add(cid);
+        }
+
+        m_cidsLock.writeLock().unlock();
+    }
+
+    /**
      * Get a random cid for executing your operation
      *
      * @return Random cid
@@ -355,6 +371,21 @@ public abstract class AbstractOperation {
     }
 
     /**
+     * Get multiple random cids for executing your operation
+     *
+     * @param p_cids Array to fill with random cids
+     */
+    protected void executeGetRandomCids(final long[] p_cids) {
+        m_cidsLock.readLock().lock();
+
+        for (int i = 0; i < p_cids.length; i++) {
+            p_cids[i] = m_cids.getRandomCidWithinRanges();
+        }
+
+        m_cidsLock.readLock().unlock();
+    }
+
+    /**
      * Call this if you removed a chunk
      *
      * @param p_cid
@@ -363,6 +394,22 @@ public abstract class AbstractOperation {
     protected void executeRemoveCid(final long p_cid) {
         m_cidsLock.writeLock().lock();
         m_cids.remove(p_cid);
+        m_cidsLock.writeLock().unlock();
+    }
+
+    /**
+     * Call this if you removed multiple chunks
+     *
+     * @param p_cids
+     *         Cids of chunks removed
+     */
+    protected void executeRemoveCids(final long[] p_cids) {
+        m_cidsLock.writeLock().lock();
+
+        for (long cid : p_cids) {
+            m_cids.remove(cid);
+        }
+
         m_cidsLock.writeLock().unlock();
     }
 }

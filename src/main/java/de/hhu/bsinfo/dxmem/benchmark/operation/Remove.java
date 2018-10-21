@@ -17,7 +17,7 @@
 package de.hhu.bsinfo.dxmem.benchmark.operation;
 
 import de.hhu.bsinfo.dxmem.benchmark.BenchmarkContext;
-import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
+import de.hhu.bsinfo.dxmem.data.ChunkDummy;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
@@ -27,7 +27,10 @@ import de.hhu.bsinfo.dxmem.data.ChunkState;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public class Remove extends AbstractOperation {
-    private final ChunkByteArray m_chunk;
+    private static final int MAX_THREADS = 1024;
+
+    private final long[][] m_cids;
+    private final ChunkDummy[][] m_chunks;
 
     /**
      * Constructor
@@ -42,27 +45,48 @@ public class Remove extends AbstractOperation {
     public Remove(final float p_probability, final int p_batchCount, final boolean p_verifyData) {
         super("remove", p_probability, p_batchCount, p_verifyData);
 
-        // dummy
-        m_chunk = new ChunkByteArray(ChunkID.INVALID_ID, 1);
+        m_cids = new long[MAX_THREADS][p_batchCount];
+        m_chunks = new ChunkDummy[MAX_THREADS][p_batchCount];
     }
 
     @Override
     public ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData) {
-        long cid = executeGetRandomCid();
+        int tid = (int) Thread.currentThread().getId();
+        long[] cids = m_cids[tid];
+        ChunkDummy[] chunks = m_chunks[tid];
+
+        executeGetRandomCids(cids);
 
         // no chunks available, yet?
-        if (cid == ChunkID.INVALID_ID) {
-            return ChunkState.DOES_NOT_EXIST;
+        for (long cid : cids) {
+            if (cid == ChunkID.INVALID_ID) {
+                return ChunkState.DOES_NOT_EXIST;
+            }
         }
 
-        m_chunk.setID(cid);
+        if (chunks[0] == null) {
+            for (int i = 0; i < chunks.length; i++) {
+                chunks[i] = new ChunkDummy();
+            }
+        }
+
+        for (int i = 0; i < chunks.length; i++) {
+            chunks[i].setID(cids[i]);
+        }
 
         executeTimeStart();
-        p_context.remove(m_chunk);
+        p_context.remove(chunks);
         executeTimeEnd();
 
-        executeRemoveCid(cid);
+        executeRemoveCids(cids);
 
-        return m_chunk.getState();
+        // return error of first failed chunk, only
+        for (ChunkDummy chunk : chunks) {
+            if (!chunk.isStateOk()) {
+                return chunk.getState();
+            }
+        }
+
+        return ChunkState.OK;
     }
 }

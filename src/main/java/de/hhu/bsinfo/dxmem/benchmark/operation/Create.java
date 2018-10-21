@@ -28,10 +28,14 @@ import de.hhu.bsinfo.dxutils.RandomUtils;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public class Create extends AbstractOperation {
+    private static final int MAX_THREADS = 1024;
+
     private final int m_minSize;
     private final int m_maxSize;
 
-    private final ChunkBenchmark[] m_chunks;
+    private final long[][] m_cids;
+    private final int[][] m_sizes;
+    private final ChunkBenchmark[][] m_chunks;
 
     /**
      * Constructor
@@ -54,45 +58,66 @@ public class Create extends AbstractOperation {
         m_minSize = p_minSize;
         m_maxSize = p_maxSize;
 
-        m_chunks = new ChunkBenchmark[1024];
+        m_cids  = new long[MAX_THREADS][p_batchCount];
+        m_sizes = new int[MAX_THREADS][p_batchCount];
+        m_chunks = new ChunkBenchmark[MAX_THREADS][p_batchCount];
     }
 
     @Override
     public ChunkState execute(final BenchmarkContext p_context, final boolean p_verifyData) {
-        int size;
+        int tid = (int) Thread.currentThread().getId();
+        long[] cids = m_cids[tid];
+        int[] sizes = m_sizes[tid];
+        ChunkBenchmark[] chunks = m_chunks[tid];
 
-        if (m_minSize == m_maxSize) {
-            size = m_minSize;
-        } else {
-            size = RandomUtils.getRandomValue(m_minSize, m_maxSize);
+        for (int i = 0; i < sizes.length; i++) {
+            if (m_minSize == m_maxSize) {
+                sizes[i] = m_minSize;
+            } else {
+                sizes[i] = RandomUtils.getRandomValue(m_minSize, m_maxSize);
+            }
         }
 
         // throw allocation exceptions. the benchmark cannot continue once that happens
         executeTimeStart();
-        long cid = p_context.create(size);
+        p_context.create(cids, sizes);
         executeTimeEnd();
 
-        executeNewCid(cid);
+        executeNewCids(cids);
 
+        // if verify data is on, we have to initialize that chunk with valid data.
+        // otherwise, any following gets without previous puts will fail on data verification
         if (p_verifyData) {
-            int tid = (int) Thread.currentThread().getId();
-
-            if (m_chunks[tid] == null) {
-                m_chunks[tid] = new ChunkBenchmark(m_maxSize);
+            if (chunks[0] == null) {
+                for (int i = 0; i < chunks.length; i++) {
+                    chunks[i] = new ChunkBenchmark(m_maxSize);
+                }
             }
 
-            m_chunks[tid].setID(cid);
-            m_chunks[tid].setCurrentSize(size);
-            m_chunks[tid].fillContents();
+            for (int i = 0; i < chunks.length; i++) {
+                chunks[i].setID(cids[i]);
+                chunks[i].setCurrentSize(sizes[i]);
+                chunks[i].fillContents();
+            }
 
-            p_context.put(m_chunks[tid]);
+            p_context.put(chunks);
 
-            if (!m_chunks[tid].isStateOk()) {
+            // return error of first failed chunk, only
+            for (ChunkBenchmark chunk : chunks) {
+                if (!chunk.isStateOk()) {
+                    return chunk.getState();
+                }
+            }
+        }
+
+        // return error of first failed chunk, only
+        for (long cid : cids) {
+            if (cid == ChunkID.INVALID_ID) {
                 return ChunkState.UNDEFINED;
             }
         }
 
-        return cid != ChunkID.INVALID_ID ? ChunkState.OK : ChunkState.UNDEFINED;
+        return ChunkState.OK;
     }
 
     @Override

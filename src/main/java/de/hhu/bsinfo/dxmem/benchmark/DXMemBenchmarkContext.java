@@ -29,8 +29,8 @@ public class DXMemBenchmarkContext implements BenchmarkContext {
     }
 
     @Override
-    public long create(final int p_size) {
-        return CliContext.getInstance().getMemory().create().create(p_size);
+    public void create(final long[] p_cids, final int[] p_sizes) {
+        CliContext.getInstance().getMemory().create().create(p_cids, 0, false, p_sizes);
     }
 
     @Override
@@ -39,17 +39,23 @@ public class DXMemBenchmarkContext implements BenchmarkContext {
     }
 
     @Override
-    public void get(final AbstractChunk p_chunk) {
-        CliContext.getInstance().getMemory().get().get(p_chunk);
+    public void get(final AbstractChunk[] p_chunks) {
+        for (AbstractChunk chunk : p_chunks) {
+            CliContext.getInstance().getMemory().get().get(chunk);
+        }
     }
 
     @Override
-    public void put(final AbstractChunk p_chunk) {
-        CliContext.getInstance().getMemory().put().put(p_chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
+    public void put(final AbstractChunk[] p_chunks) {
+        for (AbstractChunk chunk : p_chunks) {
+            CliContext.getInstance().getMemory().put().put(chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
+        }
     }
 
     @Override
-    public void remove(final AbstractChunk p_chunk) {
-        CliContext.getInstance().getMemory().remove().remove(p_chunk);
+    public void remove(final AbstractChunk[] p_chunks) {
+        for (AbstractChunk chunk : p_chunks) {
+            CliContext.getInstance().getMemory().remove().remove(chunk);
+        }
     }
 }

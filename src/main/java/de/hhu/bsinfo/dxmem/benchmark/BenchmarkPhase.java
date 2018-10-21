@@ -545,23 +545,20 @@ public class BenchmarkPhase {
 
                 if (opSelected != -1) {
                     // execute in batches
-                    for (int j = 0; j < m_operations[opSelected].getBatchCount(); j++) {
-                        ChunkState state = ChunkState.UNDEFINED;
+                    ChunkState state = ChunkState.UNDEFINED;
 
-                        try {
-                            state = m_operations[opSelected].execute();
-                        } catch (final Exception e) {
-                            // abort benchmark on critical errors
-                            System.out.println("ERROR: " + e.getMessage());
-                            e.printStackTrace();
-                            System.exit(-1);
-                        }
-
-                        m_operations[opSelected].incReturnCode(state);
-
-                        m_opCountExecuted[opSelected]++;
+                    try {
+                        state = m_operations[opSelected].execute();
+                    } catch (final Exception e) {
+                        // abort benchmark on critical errors
+                        System.out.println("ERROR: " + e.getMessage());
+                        e.printStackTrace();
+                        System.exit(-1);
                     }
 
+                    m_operations[opSelected].incReturnCode(state);
+
+                    m_opCountExecuted[opSelected]++;
                     m_progressOperations.incrementAndGet();
                 } else {
                     // no more ops left
