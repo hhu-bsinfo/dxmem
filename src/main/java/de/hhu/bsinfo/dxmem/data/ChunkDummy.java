@@ -28,6 +28,13 @@ public class ChunkDummy extends AbstractChunk {
 
     /**
      * Constructor
+     */
+    public ChunkDummy() {
+        super();
+    }
+
+    /**
+     * Constructor
      *
      * @param p_chunkID
      *         Chunk ID to assign
