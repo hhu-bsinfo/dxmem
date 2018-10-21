@@ -5,6 +5,7 @@ import de.hhu.bsinfo.dxmem.core.CIDTableStatus;
 import de.hhu.bsinfo.dxmem.core.HeapStatus;
 import de.hhu.bsinfo.dxmem.core.LIDStoreStatus;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 
 /**
  * Implementation of BenchmarkContext interface for local DXMem benchmarks
@@ -44,7 +45,7 @@ public class DXMemBenchmarkContext implements BenchmarkContext {
 
     @Override
     public void put(final AbstractChunk p_chunk) {
-        CliContext.getInstance().getMemory().put().put(p_chunk);
+        CliContext.getInstance().getMemory().put().put(p_chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
     }
 
     @Override
