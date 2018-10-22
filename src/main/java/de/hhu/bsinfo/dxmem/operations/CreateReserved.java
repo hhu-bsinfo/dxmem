@@ -24,6 +24,7 @@ import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Allocate memory for an already reserved CID (reserved using the Reserve operation). This can also be
@@ -32,8 +33,8 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class CreateReserved {
-    private static final Value SOP_CREATE_RESERVE = new Value(DXMem.class, "CreateReserve");
-    private static final Value SOP_CREATE_RESERVE_MULTI = new Value(DXMem.class, "CreateReserveMulti");
+    private static final ValuePool SOP_CREATE_RESERVE = new ValuePool(DXMem.class, "CreateReserve");
+    private static final ValuePool SOP_CREATE_RESERVE_MULTI = new ValuePool(DXMem.class, "CreateReserveMulti");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_CREATE_RESERVE);

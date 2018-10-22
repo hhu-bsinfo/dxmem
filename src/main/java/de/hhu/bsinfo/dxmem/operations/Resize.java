@@ -24,7 +24,7 @@ import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Resize an existing chunk
@@ -32,7 +32,7 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Resize {
-    private static final Value SOP_RESIZE = new Value(DXMem.class, "Resize");
+    private static final ValuePool SOP_RESIZE = new ValuePool(DXMem.class, "Resize");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_RESIZE);

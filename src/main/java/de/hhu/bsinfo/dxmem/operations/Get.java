@@ -27,7 +27,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Get the data of a chunk from the heap
@@ -35,9 +35,9 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public final class Get {
-    private static final Value SOP_GET = new Value(DXMem.class, "Get");
-    private static final Value SOP_GET_INVALID_ID = new Value(DXMem.class, "GetInvalidID");
-    private static final Value SOP_GET_NOT_EXISTS = new Value(DXMem.class, "GetNotExists");
+    private static final ValuePool SOP_GET = new ValuePool(DXMem.class, "Get");
+    private static final ValuePool SOP_GET_INVALID_ID = new ValuePool(DXMem.class, "GetInvalidID");
+    private static final ValuePool SOP_GET_NOT_EXISTS = new ValuePool(DXMem.class, "GetNotExists");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_GET);

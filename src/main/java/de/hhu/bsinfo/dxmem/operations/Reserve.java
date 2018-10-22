@@ -19,7 +19,7 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Reserve CIDs without allocating memory. This might be useful for for loading tasks that
@@ -31,8 +31,8 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Reserve {
-    private static final Value SOP_RESERVE = new Value(DXMem.class, "Reserve");
-    private static final Value SOP_RESERVE_MULTI = new Value(DXMem.class, "ReserveMulti");
+    private static final ValuePool SOP_RESERVE = new ValuePool(DXMem.class, "Reserve");
+    private static final ValuePool SOP_RESERVE_MULTI = new ValuePool(DXMem.class, "ReserveMulti");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_RESERVE);

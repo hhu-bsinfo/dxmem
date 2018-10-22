@@ -27,7 +27,7 @@ import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Create a new chunk by generating a CID and allocating memory for it
@@ -37,7 +37,7 @@ import de.hhu.bsinfo.dxutils.stats.Value;
 public final class Create {
     private static final Logger LOGGER = LogManager.getFormatterLogger(Create.class.getSimpleName());
 
-    private static final Value SOP_CREATE = new Value(DXMem.class, "Create");
+    private static final ValuePool SOP_CREATE = new ValuePool(DXMem.class, "Create");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_CREATE);

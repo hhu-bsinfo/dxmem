@@ -26,7 +26,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Remove chunks
@@ -34,8 +34,8 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Remove {
-    private static final Value SOP_REMOVE = new Value(DXMem.class, "Remove");
-    private static final Value SOP_REMOVE_MIGRATED = new Value(DXMem.class, "RemoveMigrated");
+    private static final ValuePool SOP_REMOVE = new ValuePool(DXMem.class, "Remove");
+    private static final ValuePool SOP_REMOVE_MIGRATED = new ValuePool(DXMem.class, "RemoveMigrated");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_REMOVE);

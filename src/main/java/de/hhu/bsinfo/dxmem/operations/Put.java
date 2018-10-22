@@ -26,7 +26,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
  * Put modified data of a chunk back to the heap
@@ -34,9 +34,9 @@ import de.hhu.bsinfo.dxutils.stats.Value;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
  */
 public class Put {
-    private static final Value SOP_PUT = new Value(DXMem.class, "Put");
-    private static final Value SOP_PUT_INVALID_ID = new Value(DXMem.class, "PutInvalidID");
-    private static final Value SOP_PUT_NOT_EXISTS = new Value(DXMem.class, "PutNotExists");
+    private static final ValuePool SOP_PUT = new ValuePool(DXMem.class, "Put");
+    private static final ValuePool SOP_PUT_INVALID_ID = new ValuePool(DXMem.class, "PutInvalidID");
+    private static final ValuePool SOP_PUT_NOT_EXISTS = new ValuePool(DXMem.class, "PutNotExists");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_PUT);
