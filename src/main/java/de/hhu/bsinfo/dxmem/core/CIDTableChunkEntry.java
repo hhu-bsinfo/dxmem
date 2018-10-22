@@ -117,6 +117,13 @@ public final class CIDTableChunkEntry {
     }
 
     /**
+     * Set the current state of the entry as initial state (for CAS operations)
+     */
+    public void currentStateInitialState() {
+        m_initialValue = getValue();
+    }
+
+    /**
      * Set the object. Extracts fields from raw entry
      *
      * @param p_pointer

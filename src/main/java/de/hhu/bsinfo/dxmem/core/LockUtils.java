@@ -16,12 +16,32 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.ValuePool;
+
 /**
  * Utility class for locking chunks in CIDTable
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public final class LockUtils {
+    private static final ValuePool SOP_READ_LOCK_REQS = new ValuePool(DXMem.class, "ReadLockReqs");
+    private static final ValuePool SOP_READ_LOCK_RETRIES = new ValuePool(DXMem.class, "ReadLockRetries");
+    private static final ValuePool SOP_READ_LOCK_TIMEOUTS = new ValuePool(DXMem.class, "ReadLockTimeouts");
+    private static final ValuePool SOP_WRITE_LOCK_REQS = new ValuePool(DXMem.class, "WriteLockReqs");
+    private static final ValuePool SOP_WRITE_LOCK_RETRIES = new ValuePool(DXMem.class, "WriteLockRetries");
+    private static final ValuePool SOP_WRITE_LOCK_TIMEOUTS = new ValuePool(DXMem.class, "WriteLockTimeouts");
+
+    static {
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_READ_LOCK_REQS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_READ_LOCK_RETRIES);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_READ_LOCK_TIMEOUTS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_WRITE_LOCK_REQS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_WRITE_LOCK_RETRIES);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_WRITE_LOCK_TIMEOUTS);
+    }
+
     /**
      * Return value/status for lock operation
      */
@@ -59,10 +79,11 @@ public final class LockUtils {
             startTime = System.nanoTime();
         }
 
-        while (true) {
-            // always get the current state first before CAS
-            p_cidTable.entryReread(p_entry);
+        SOP_READ_LOCK_REQS.inc();
 
+        int retries = 0;
+
+        while (true) {
             // entry turned invalid, e.g. chunk was deleted
             if (!p_entry.isValid()) {
                 return LockStatus.INVALID;
@@ -72,6 +93,10 @@ public final class LockUtils {
                 if (p_entry.acquireReadLock()) {
                     // read lock acquired, try to persist state
                     if (p_cidTable.entryAtomicUpdate(p_entry)) {
+                        if (retries > 0) {
+                            SOP_READ_LOCK_RETRIES.add(retries);
+                        }
+
                         return LockStatus.OK;
                     }
                 }
@@ -83,11 +108,15 @@ public final class LockUtils {
                 if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >= p_retryTimeoutMs * 1000 * 1000) {
                     // return with current state
                     p_cidTable.entryReread(p_entry);
+                    SOP_READ_LOCK_TIMEOUTS.inc();
                     return LockStatus.TIMEOUT;
                 }
             }
 
             Thread.yield();
+            retries++;
+
+            p_cidTable.entryReread(p_entry);
         }
     }
 
@@ -100,10 +129,9 @@ public final class LockUtils {
      *         Chunk entry of CIDTable to unlock
      */
     public static void releaseReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
-        while (true) {
-            // always get the current state first before CAS
-            p_cidTable.entryReread(p_entry);
+        p_entry.currentStateInitialState();
 
+        while (true) {
             // invalid state, chunk was deleted but a lock was still acquired
             assert p_entry.isValid();
             // write lock might be acquired: writer thread blocks all further reader threads and waits for
@@ -118,6 +146,7 @@ public final class LockUtils {
             }
 
             Thread.yield();
+            p_cidTable.entryReread(p_entry);
         }
     }
 
@@ -142,10 +171,11 @@ public final class LockUtils {
             startTime = System.nanoTime();
         }
 
-        while (true) {
-            // always get the current state first before CAS
-            p_cidTable.entryReread(p_entry);
+        SOP_WRITE_LOCK_REQS.inc();
 
+        int retries = 0;
+
+        while (true) {
             // entry turned invalid, e.g. chunk was deleted
             if (!p_entry.isValid()) {
                 return LockStatus.INVALID;
@@ -176,12 +206,18 @@ public final class LockUtils {
 
                                 // return with current state
                                 p_cidTable.entryReread(p_entry);
+                                SOP_WRITE_LOCK_TIMEOUTS.inc();
                                 return LockStatus.TIMEOUT;
                             }
                         }
 
                         Thread.yield();
+                        retries++;
                         p_cidTable.entryReread(p_entry);
+                    }
+
+                    if (retries > 0) {
+                        SOP_WRITE_LOCK_RETRIES.add(retries);
                     }
 
                     // write locked with no readers in section
@@ -199,6 +235,8 @@ public final class LockUtils {
             }
 
             Thread.yield();
+            retries++;
+            p_cidTable.entryReread(p_entry);
         }
     }
 
@@ -211,11 +249,10 @@ public final class LockUtils {
      *         Chunk entry of CIDTable to unlock
      */
     public static void releaseWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
-        while (true) {
-            // always get the current state first before CAS
-            p_cidTable.entryReread(p_entry);
+        p_entry.currentStateInitialState();
 
-            // invalid state, chunk was deleted but a lock was still acquired
+        while (true) {
+              // invalid state, chunk was deleted but a lock was still acquired
             assert p_entry.isValid();
             assert p_entry.isWriteLockAcquired();
             assert !p_entry.areReadLocksAcquired();
@@ -228,6 +265,7 @@ public final class LockUtils {
             }
 
             Thread.yield();
+            p_cidTable.entryReread(p_entry);
         }
     }
 }
