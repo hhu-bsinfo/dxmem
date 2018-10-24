@@ -289,6 +289,11 @@ public abstract class AbstractOperation {
         builder.append(getNameTag());
         builder.append(",Lat999(us),");
         builder.append(m_time.getPercentileScore(0.999f, Time.Prefix.MICRO));
+        builder.append('\n');
+
+        builder.append(getNameTag());
+        builder.append(",Lat9999(us),");
+        builder.append(m_time.getPercentileScore(0.9999f, Time.Prefix.MICRO));
 
         return builder.toString();
     }

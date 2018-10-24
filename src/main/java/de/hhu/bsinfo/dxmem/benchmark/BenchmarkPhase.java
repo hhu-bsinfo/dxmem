@@ -522,6 +522,13 @@ public class BenchmarkPhase {
                     builder.append(m_operations[i].getName());
                     builder.append("],Lat999(us),");
                     builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.999f, Time.Prefix.MICRO));
+                    builder.append('\n');
+                    builder.append("[Thread-");
+                    builder.append(m_id);
+                    builder.append("][");
+                    builder.append(m_operations[i].getName());
+                    builder.append("],Lat9999(us),");
+                    builder.append(m_threadLocalTimePercentiles[i].getPercentileScore(0.9999f, Time.Prefix.MICRO));
 
                     if (i + 1 < m_operations.length) {
                         builder.append('\n');
