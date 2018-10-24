@@ -48,7 +48,8 @@ public final class CIDTranslationCache {
      * @return Address of level 0 table or -1 if not cached
      */
     long getTableLevel0(final long p_chunkID) {
-        return m_cache[(int) Thread.currentThread().getId()].getTableLevel0(p_chunkID);
+        return 0;
+        //        return m_cache[(int) Thread.currentThread().getId()].getTableLevel0(p_chunkID);
     }
 
     /**
@@ -60,7 +61,7 @@ public final class CIDTranslationCache {
      *         Address of the level 0 table
      */
     void putTableLevel0(final long p_chunkID, final long p_addressTable) {
-        m_cache[(int) Thread.currentThread().getId()].putTableLevel0(p_chunkID, p_addressTable);
+        //        m_cache[(int) Thread.currentThread().getId()].putTableLevel0(p_chunkID, p_addressTable);
     }
 
     /**
