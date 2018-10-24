@@ -41,7 +41,7 @@ import de.hhu.bsinfo.dxutils.serialization.Importer;
 public final class CIDTable implements Importable, Exportable {
     private static final Logger LOGGER = LogManager.getFormatterLogger(CIDTable.class.getSimpleName());
 
-    static final int TABLE_0_ALIGNMENT_BYTES = 8;
+    static final int TABLE_ALIGNMENT_BYTES = 8;
     static final byte ENTRY_SIZE = 8;
     static final byte LID_TABLE_LEVELS = 4;
 
@@ -638,19 +638,38 @@ public final class CIDTable implements Importable, Exportable {
         tmp.setLengthField(0);
 
         // TODO reduce pointer length to 6 byte because TableEntry is address only
-        if (!m_heap.malloc(NID_TABLE_SIZE, tmp, true)) {
+        // -> alignment not possible anymore, might harm performance
+        if (!m_heap.malloc(NID_TABLE_SIZE + TABLE_ALIGNMENT_BYTES, tmp, true)) {
             throw new MemoryRuntimeException("Creating the NID table should not fail");
         }
+
+        int alignment = -1;
+
+        for (int i = 0; i < TABLE_ALIGNMENT_BYTES; i++) {
+            if ((tmp.getAddress() + i) % TABLE_ALIGNMENT_BYTES == 0) {
+                alignment = i;
+                break;
+            }
+        }
+
+        if (alignment == -1) {
+            throw new IllegalStateException("Alignment failed for address: " + tmp.getAddress());
+        }
+
+        // null table
+        m_heap.set(tmp.getAddress(), 0, LID_TABLE_SIZE + alignment, (byte) 0);
+
+        // expose aligned origin only
+        tmp.setAddress(tmp.getAddress() + alignment);
 
         p_entry.clear();
         p_entry.setAddress(tmp.getAddress());
 
-        // null table
-        m_heap.set(p_entry.getAddress(), 0, NID_TABLE_SIZE, (byte) 0);
-        m_status.m_totalPayloadMemoryTables += NID_TABLE_SIZE;
+        m_status.m_totalPayloadMemoryTables += NID_TABLE_SIZE + alignment;
         m_status.m_totalTableCount++;
 
-        LOGGER.trace("Created NID table size %d at %X", NID_TABLE_SIZE, p_entry.getAddress());
+        LOGGER.trace("Created NID table size %d at %X (alignment offset +" + alignment, LID_TABLE_SIZE + alignment,
+                p_entry.getAddress());
     }
 
     /**
@@ -669,32 +688,23 @@ public final class CIDTable implements Importable, Exportable {
         tmp.setLengthField(0);
 
         // TODO reduce pointer length for all levels except 0 to 6 byte because TableEntry is address only
+        // -> alignment not possible anymore (might harm performance)
 
-        int alignment = 0;
-
-        // align all level 0 tables containing locks to 8 byte borders
-        // otherwise, the latency for CAS operations sky rockets
-        if (p_level == 0) {
-            alignment = TABLE_0_ALIGNMENT_BYTES;
-        }
-
-        if (!m_heap.malloc(LID_TABLE_SIZE + alignment, tmp, true)) {
+        if (!m_heap.malloc(LID_TABLE_SIZE + TABLE_ALIGNMENT_BYTES, tmp, true)) {
             return false;
         }
 
-        if (alignment > 0) {
-            alignment = -1;
+        int alignment = -1;
 
-            for (int i = 0; i < TABLE_0_ALIGNMENT_BYTES; i++) {
-                if ((tmp.getAddress() + i) % TABLE_0_ALIGNMENT_BYTES == 0) {
-                    alignment = i;
-                    break;
-                }
+        for (int i = 0; i < TABLE_ALIGNMENT_BYTES; i++) {
+            if ((tmp.getAddress() + i) % TABLE_ALIGNMENT_BYTES == 0) {
+                alignment = i;
+                break;
             }
+        }
 
-            if (alignment == -1) {
-                throw new IllegalStateException("Alignment failed for address: " + tmp.getAddress());
-            }
+        if (alignment == -1) {
+            throw new IllegalStateException("Alignment failed for address: " + tmp.getAddress());
         }
 
         // null table
