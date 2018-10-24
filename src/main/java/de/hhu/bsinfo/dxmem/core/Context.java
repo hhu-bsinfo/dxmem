@@ -26,7 +26,6 @@ public class Context {
     private final Heap m_heap;
     private final CIDTable m_cidTable;
     private final LIDStore m_lidStore;
-    private final CIDTranslationCache m_cidTranslationCache;
     private final CIDTableEntryPool m_cidTableEntryPool;
     private final HeapDataStructureImExporterPool m_dataStructureImExporterPool;
     private final Defragmenter m_defragmenter;
@@ -55,7 +54,6 @@ public class Context {
         m_lidStore = loader.getLIDStore();
 
         m_nodeId = m_cidTable.getOwnNodeId();
-        m_cidTranslationCache = m_cidTable.m_cidTranslationCache;
         m_cidTableEntryPool = new CIDTableEntryPool();
 
         m_dataStructureImExporterPool = new HeapDataStructureImExporterPool(m_heap);
@@ -82,12 +80,11 @@ public class Context {
      */
     public Context(final short p_ownNodeId, final long p_sizeBytes, final boolean p_disableChunkLock) {
         m_nodeId = p_ownNodeId;
-        m_cidTranslationCache = new CIDTranslationCache();
         m_cidTableEntryPool = new CIDTableEntryPool();
 
         m_heap = new Heap(p_sizeBytes);
         m_dataStructureImExporterPool = new HeapDataStructureImExporterPool(m_heap);
-        m_cidTable = new CIDTable(p_ownNodeId, m_heap, m_cidTranslationCache);
+        m_cidTable = new CIDTable(p_ownNodeId, m_heap);
         m_lidStore = new LIDStore(p_ownNodeId, m_cidTable);
 
         // TODO non implemented defragmenter disabled for now (hardcoded)

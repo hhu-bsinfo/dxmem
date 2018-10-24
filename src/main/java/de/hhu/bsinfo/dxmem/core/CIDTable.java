@@ -60,7 +60,6 @@ public final class CIDTable implements Importable, Exportable {
     private long m_addressTableDirectory;
     private CIDTableStatus m_status = new CIDTableStatus();
 
-    CIDTranslationCache m_cidTranslationCache;
     Heap m_heap;
 
     // lock to protect CID table on table creation
@@ -74,13 +73,10 @@ public final class CIDTable implements Importable, Exportable {
      *         Node id of current instance
      * @param p_heap
      *         Heap instance
-     * @param p_cidTranslationCache
-     *         CIDTranslationCache instance
      */
-    CIDTable(final short p_ownNodeId, final Heap p_heap, final CIDTranslationCache p_cidTranslationCache) {
+    CIDTable(final short p_ownNodeId, final Heap p_heap) {
         m_ownNodeId = p_ownNodeId;
         m_heap = p_heap;
-        m_cidTranslationCache = p_cidTranslationCache;
 
         CIDTableTableEntry entry = new CIDTableTableEntry();
         createNIDTable(entry);
@@ -130,19 +126,9 @@ public final class CIDTable implements Importable, Exportable {
 
         int level = LID_TABLE_LEVELS;
         long addressTable;
-        boolean putCache;
 
-        // try to jump to table level 0 using the cache
-        addressTable = m_cidTranslationCache.getTableLevel0(p_chunkID);
-
-        if (addressTable != Address.INVALID) {
-            level = 0;
-            putCache = false;
-        } else {
-            // not found in cache, start with directory and add address to cache later
-            addressTable = m_addressTableDirectory;
-            putCache = true;
-        }
+        // start at root table dir
+        addressTable = m_addressTableDirectory;
 
         do {
             if (level == LID_TABLE_LEVELS) {
@@ -163,11 +149,6 @@ public final class CIDTable implements Importable, Exportable {
                 // don't use a temporary CIDTableChunkEntry object here to avoid overhead
                 addressTable = CIDTableTableEntry.getAddressOfRawTableEntry(entry);
             } else {
-                // add table 0 address to cache
-                if (putCache) {
-                    m_cidTranslationCache.putTableLevel0(p_chunkID, addressTable);
-                }
-
                 // update entry state
                 p_entry.set(addressTable + index * ENTRY_SIZE, entry);
                 return;
@@ -192,19 +173,9 @@ public final class CIDTable implements Importable, Exportable {
 
         int level = LID_TABLE_LEVELS;
         long addressTable;
-        boolean putCache;
 
-        // try to jump to table level 0 using the cache
-        addressTable = m_cidTranslationCache.getTableLevel0(p_chunkID);
-
-        if (addressTable != Address.INVALID) {
-            level = 0;
-            putCache = false;
-        } else {
-            // not found in cache, start with directory and add address to cache later
-            addressTable = m_addressTableDirectory;
-            putCache = true;
-        }
+        // start at root table
+        addressTable = m_addressTableDirectory;
 
         do {
             if (level == LID_TABLE_LEVELS) {
@@ -250,11 +221,6 @@ public final class CIDTable implements Importable, Exportable {
                     addressTable = CIDTableTableEntry.getAddressOfRawTableEntry(entry);
                 }
             } else {
-                // add table 0 address to cache to profit from consecutive inserts or lookups
-                if (putCache) {
-                    m_cidTranslationCache.putTableLevel0(p_chunkID, addressTable);
-                }
-
                 // if a new chunk is created, the LIDStore ensures that it doesn't hand out the same chunk ID
                 // multiple times. on creates, this guarantees that the new cid is owned by a single thread, only.
                 // thus, no locking or atomic update is required here
