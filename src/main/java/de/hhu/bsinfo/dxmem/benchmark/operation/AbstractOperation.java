@@ -373,13 +373,32 @@ public abstract class AbstractOperation {
     /**
      * Get multiple random cids for executing your operation
      *
-     * @param p_cids Array to fill with random cids
+     * @param p_cids
+     *         Array to fill with random cids
+     * @param p_consecutive
+     *         True to get consecutive CIDs, false for random
      */
-    protected void executeGetRandomCids(final long[] p_cids) {
+    protected void executeGetRandomCids(final long[] p_cids, final boolean p_consecutive) {
         m_cidsLock.readLock().lock();
 
-        for (int i = 0; i < p_cids.length; i++) {
-            p_cids[i] = m_cids.getRandomCidWithinRanges();
+        if (p_consecutive) {
+            while (true) {
+                p_cids[0] = m_cids.getRandomCidWithinRanges();
+
+                if (!m_cids.isInRange(p_cids[0] + p_cids.length - 1)) {
+                    continue;
+                }
+
+                for (int i = 1; i < p_cids.length; i++) {
+                    p_cids[i] = p_cids[0] + i;
+                }
+
+                break;
+            }
+        } else {
+            for (int i = 0; i < p_cids.length; i++) {
+                p_cids[i] = m_cids.getRandomCidWithinRanges();
+            }
         }
 
         m_cidsLock.readLock().unlock();

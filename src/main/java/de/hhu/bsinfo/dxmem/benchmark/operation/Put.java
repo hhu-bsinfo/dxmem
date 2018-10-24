@@ -60,7 +60,7 @@ public class Put extends AbstractOperation {
         long[] cids = m_cids[tid];
         ChunkBenchmark[] chunks = m_chunks[tid];
 
-        executeGetRandomCids(cids);
+        executeGetRandomCids(cids, true);
 
         // no chunks available, yet?
         for (long cid : cids) {
