@@ -320,7 +320,8 @@ public final class CIDTable implements Importable, Exportable {
         long entry = readTableEntry(m_tableDirectory.getAddress(), p_nodeId & 0xFFFF);
 
         if (entry > 0) {
-            getAllRanges(ret, ChunkID.getChunkID(p_nodeId, 0), entry, LID_TABLE_LEVELS - 1);
+            getAllRanges(ret, ChunkID.getChunkID(p_nodeId, 0), CIDTableTableEntry.getAddressOfRawTableEntry(entry),
+                    LID_TABLE_LEVELS - 1);
         }
 
         return ChunkIDRanges.wrap(ret);
