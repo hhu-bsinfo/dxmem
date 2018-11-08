@@ -524,8 +524,8 @@ public class VirtualMemoryBlock {
 
         if (p_ptr + p_length > m_memorySize || p_ptr + p_length < 0) {
             throw new MemoryRuntimeException(
-                    "Accessing memory at " + p_ptr + ", length " + p_length + " out of bounds: base " + m_memoryBase +
-                            ", size " + m_memorySize);
+                    "Accessing memory at " + Address.toHexString(p_ptr) + ", length " + p_length +
+                            " out of bounds: base " + Address.toHexString(m_memoryBase) + ", size " + m_memorySize);
         }
 
         return true;

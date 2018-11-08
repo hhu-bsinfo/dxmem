@@ -348,7 +348,17 @@ public final class Heap implements Importable, Exportable {
             return false;
         }
 
-        copyNative(newLocation[0].getAddress(), 0, p_tableEntry.getAddress(), 0, oldSize, false);
+        int copySize;
+
+        if (p_newSize < oldSize) {
+            // chunk shrinks, we have to cut off some data
+            copySize = p_newSize;
+        } else {
+            // enough space for old data to fit
+            copySize = oldSize;
+        }
+
+        copyNative(newLocation[0].getAddress(), 0, p_tableEntry.getAddress(), 0, copySize, false);
 
         // start address between marker and length field
         freeReservedBlock(p_tableEntry.getAddress() - p_tableEntry.getSplitLengthFieldSize(),

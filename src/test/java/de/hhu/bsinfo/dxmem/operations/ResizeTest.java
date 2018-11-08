@@ -55,7 +55,7 @@ public class ResizeTest {
     }
 
     @Test
-    public void resize2() {
+    public void resizeShrink() {
         Configurator.setRootLevel(Level.TRACE);
 
         DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
@@ -70,8 +70,9 @@ public class ResizeTest {
         Assert.assertTrue(t1.isStateOk());
 
         Assert.assertTrue(memory.put().put(t1));
+
         Assert.assertTrue(memory.analyze().analyze());
-        
+
         t1.setAbc("123123");
         memory.resize().resize(t1.getID(), t1.sizeofObject());
 
