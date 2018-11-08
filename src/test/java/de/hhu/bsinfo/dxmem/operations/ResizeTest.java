@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
+import de.hhu.bsinfo.dxmem.TestStrChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
@@ -49,6 +50,37 @@ public class ResizeTest {
         Assert.assertTrue(ds.isStateOk());
 
         Assert.assertEquals(ChunkState.DOES_NOT_EXIST, memory.resize().resize(ds.getID(), 1));
+
+        memory.shutdown();
+    }
+
+    @Test
+    public void resize2() {
+        Configurator.setRootLevel(Level.TRACE);
+
+        DXMem memory = new DXMem(DXMemoryTestConstants.NODE_ID, DXMemoryTestConstants.HEAP_SIZE_SMALL);
+
+        Assert.assertTrue(memory.analyze().analyze());
+
+        TestStrChunk t1 = new TestStrChunk();
+        memory.create().create(t1);
+
+        Assert.assertTrue(memory.analyze().analyze());
+
+        Assert.assertTrue(t1.isStateOk());
+
+        Assert.assertTrue(memory.put().put(t1));
+        Assert.assertTrue(memory.analyze().analyze());
+        
+        t1.setAbc("123123");
+        memory.resize().resize(t1.getID(), t1.sizeofObject());
+
+        Assert.assertTrue(memory.analyze().analyze());
+
+        TestStrChunk t3 = new TestStrChunk();
+        memory.create().create(t3);
+
+        Assert.assertTrue(memory.analyze().analyze());
 
         memory.shutdown();
     }

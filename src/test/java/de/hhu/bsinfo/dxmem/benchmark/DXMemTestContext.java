@@ -29,8 +29,10 @@ public class DXMemTestContext implements BenchmarkContext {
     }
 
     @Override
-    public long create(final int p_size) {
-        return m_mem.create().create(p_size);
+    public void create(final long[] p_cids, final int[] p_sizes) {
+        for (int i = 0; i < p_sizes.length; i++) {
+            p_cids[i] = m_mem.create().create(p_sizes[i]);
+        }
     }
 
     @Override
@@ -39,17 +41,23 @@ public class DXMemTestContext implements BenchmarkContext {
     }
 
     @Override
-    public void get(final AbstractChunk p_chunk) {
-        m_mem.get().get(p_chunk);
+    public void get(final AbstractChunk[] p_chunks) {
+        for (AbstractChunk chunk : p_chunks) {
+            m_mem.get().get(chunk);
+        }
     }
 
     @Override
-    public void put(final AbstractChunk p_chunk) {
-        m_mem.put().put(p_chunk);
+    public void put(final AbstractChunk[] p_chunks) {
+        for (AbstractChunk chunk : p_chunks) {
+            m_mem.put().put(chunk);
+        }
     }
 
     @Override
-    public void remove(final AbstractChunk p_chunk) {
-        m_mem.remove().remove(p_chunk);
+    public void remove(final AbstractChunk[] p_chunks) {
+        for (AbstractChunk chunk : p_chunks) {
+            m_mem.remove().remove(chunk);
+        }
     }
 }
