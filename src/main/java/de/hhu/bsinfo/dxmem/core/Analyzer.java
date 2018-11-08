@@ -165,7 +165,8 @@ public class Analyzer {
 
         for (CIDTableTableEntry entry : m_cidTableTableEntries) {
             // only the root table does not have a valid pointer
-            if (entry.getPointer() == Address.INVALID && entry.getAddress() != 0x01) {
+            // consider that root table is aligned to 64-bit bounds
+            if (entry.getPointer() == Address.INVALID && (entry.getAddress() == 0x00 || entry.getAddress() > 0x09)) {
                 LOGGER.error("Invalid pointer value for table entry: %s", entry);
                 return false;
             }
@@ -304,7 +305,8 @@ public class Analyzer {
 
         HeapArea curArea = m_heapTables.get(0);
 
-        if (curArea.getStartAddress() != 0) {
+        // consider 64-bit alignment for root table
+        if (curArea.getStartAddress() >= 8) {
             LOGGER.error("First table is not root table: %s", curArea);
             return false;
         }

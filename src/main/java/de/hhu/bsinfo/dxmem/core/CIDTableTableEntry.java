@@ -28,14 +28,18 @@ public class CIDTableTableEntry {
     static final long RAW_VALUE_FREE = 0;
 
     private static final long BITS_ADDRESS = Address.WIDTH_BITS;
+    private static final long BITS_ALIGNMENT = 3;
 
     private static final long MASK_ADDRESS = (long) Math.pow(2, BITS_ADDRESS) - 1;
+    private static final long MASK_ALIGNMENT = (long) Math.pow(2, BITS_ALIGNMENT) - 1;
 
     static final long OFFSET_ADDRESS = 0;
+    static final long OFFSET_ALIGNMENT = OFFSET_ADDRESS + BITS_ADDRESS;
 
     // raw pointer to the address where the entry is stored
     private long m_pointer;
     private long m_address;
+    private long m_alignment;
 
     /**
      * Constructor
@@ -62,6 +66,7 @@ public class CIDTableTableEntry {
     public void clear() {
         m_pointer = Address.INVALID;
         m_address = Address.INVALID;
+        m_alignment = 0;
     }
 
     /**
@@ -75,6 +80,7 @@ public class CIDTableTableEntry {
     public void set(final long p_pointer, final long p_value) {
         m_pointer = p_pointer;
         m_address = p_value >> OFFSET_ADDRESS & MASK_ADDRESS;
+        m_alignment = p_value >> OFFSET_ALIGNMENT & MASK_ALIGNMENT;
     }
 
     /**
@@ -102,7 +108,7 @@ public class CIDTableTableEntry {
      * @return Value
      */
     public long getValue() {
-        return m_address << OFFSET_ADDRESS & MASK_ADDRESS;
+        return (m_address & MASK_ADDRESS) << OFFSET_ADDRESS | (m_alignment & MASK_ALIGNMENT) << OFFSET_ALIGNMENT;
     }
 
     /**
@@ -136,6 +142,27 @@ public class CIDTableTableEntry {
     }
 
     /**
+     * Set the alignment in bytes
+     *
+     * @param p_alignment
+     *         Alignment offset used in bytes
+     */
+    public void setAlignment(final int p_alignment) {
+        assert p_alignment >= 0 && p_alignment <= 7;
+
+        m_alignment = p_alignment;
+    }
+
+    /**
+     * Get the alignment of the table
+     *
+     * @return Start of table offset in bytes
+     */
+    public int getAlignment() {
+        return (int) m_alignment;
+    }
+
+    /**
      * Get the address part of a table entry from a table
      *
      * @param p_rawValue
@@ -148,6 +175,7 @@ public class CIDTableTableEntry {
 
     @Override
     public String toString() {
-        return "m_pointer " + Address.toHexString(m_pointer) + ", m_address " + Address.toHexString(m_address);
+        return "m_pointer " + Address.toHexString(m_pointer) + ", m_address " + Address.toHexString(m_address) +
+                ", m_alignment " + m_alignment;
     }
 }

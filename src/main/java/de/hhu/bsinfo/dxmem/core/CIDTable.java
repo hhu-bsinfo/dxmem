@@ -57,7 +57,7 @@ public final class CIDTable implements Importable, Exportable {
     private static final long LID_LEVEL_BITMASK = (int) Math.pow(2.0, BITS_PER_LID_LEVEL) - 1;
 
     private short m_ownNodeId;
-    private long m_addressTableDirectory;
+    private CIDTableTableEntry m_tableDirectory;
     private CIDTableStatus m_status = new CIDTableStatus();
 
     Heap m_heap;
@@ -78,12 +78,10 @@ public final class CIDTable implements Importable, Exportable {
         m_ownNodeId = p_ownNodeId;
         m_heap = p_heap;
 
-        CIDTableTableEntry entry = new CIDTableTableEntry();
-        createNIDTable(entry);
+        m_tableDirectory = new CIDTableTableEntry();
+        createNIDTable(m_tableDirectory);
 
-        m_addressTableDirectory = entry.getAddress();
-
-        LOGGER.info("CIDTable: init success (page directory at: 0x%X)", m_addressTableDirectory);
+        LOGGER.info("CIDTable: init success (page directory: %s)", m_tableDirectory);
     }
 
     /**
@@ -128,7 +126,7 @@ public final class CIDTable implements Importable, Exportable {
         long addressTable;
 
         // start at root table dir
-        addressTable = m_addressTableDirectory;
+        addressTable = m_tableDirectory.getAddress();
 
         do {
             if (level == LID_TABLE_LEVELS) {
@@ -175,7 +173,7 @@ public final class CIDTable implements Importable, Exportable {
         long addressTable;
 
         // start at root table
-        addressTable = m_addressTableDirectory;
+        addressTable = m_tableDirectory.getAddress();
 
         do {
             if (level == LID_TABLE_LEVELS) {
@@ -300,7 +298,7 @@ public final class CIDTable implements Importable, Exportable {
         ret = new ArrayListLong();
 
         for (int i = 0; i < ENTRIES_PER_NID_LEVEL; i++) {
-            entry = readTableEntry(m_addressTableDirectory, i);
+            entry = readTableEntry(m_tableDirectory.getAddress(), i);
 
             if (entry > 0) {
                 getAllRanges(ret, (long) i << 48, entry, LID_TABLE_LEVELS - 1);
@@ -319,7 +317,7 @@ public final class CIDTable implements Importable, Exportable {
      */
     public ChunkIDRanges getCIDRangesOfAllChunks(final short p_nodeId) {
         ArrayListLong ret = new ArrayListLong();
-        long entry = readTableEntry(m_addressTableDirectory, p_nodeId & 0xFFFF);
+        long entry = readTableEntry(m_tableDirectory.getAddress(), p_nodeId & 0xFFFF);
 
         if (entry > 0) {
             getAllRanges(ret, ChunkID.getChunkID(p_nodeId, 0), entry, LID_TABLE_LEVELS - 1);
@@ -341,7 +339,7 @@ public final class CIDTable implements Importable, Exportable {
 
         for (int i = 0; i < ENTRIES_PER_NID_LEVEL; i++) {
             if (i != (m_ownNodeId & 0xFFFF)) {
-                entry = readTableEntry(m_addressTableDirectory, i);
+                entry = readTableEntry(m_tableDirectory.getAddress(), i);
 
                 if (entry > 0) {
                     getAllRanges(ret, (long) i << 48, entry, LID_TABLE_LEVELS - 1);
@@ -355,26 +353,28 @@ public final class CIDTable implements Importable, Exportable {
     @Override
     public String toString() {
         return "CIDTable: m_ownNodeId " + NodeID.toHexString(m_ownNodeId) + ", m_addressTableDirectory " +
-                Address.toHexString(m_addressTableDirectory) + ", " + m_status;
+                Address.toHexString(m_tableDirectory.getAddress()) + ", " + m_status;
     }
 
     @Override
     public void exportObject(final Exporter p_exporter) {
         p_exporter.writeShort(m_ownNodeId);
-        p_exporter.writeLong(m_addressTableDirectory);
+        p_exporter.writeLong(m_tableDirectory.getAddress());
+        p_exporter.writeInt(m_tableDirectory.getAlignment());
         p_exporter.exportObject(m_status);
     }
 
     @Override
     public void importObject(final Importer p_importer) {
         m_ownNodeId = p_importer.readShort(m_ownNodeId);
-        m_addressTableDirectory = p_importer.readLong(m_addressTableDirectory);
+        m_tableDirectory.setAddress(p_importer.readLong(m_tableDirectory.getAddress()));
+        m_tableDirectory.setAlignment(p_importer.readInt(m_tableDirectory.getAlignment()));
         p_importer.importObject(m_status);
     }
 
     @Override
     public int sizeofObject() {
-        return Short.BYTES + Long.BYTES + m_status.sizeofObject() + Long.BYTES;
+        return Short.BYTES + Long.BYTES + Integer.BYTES + m_status.sizeofObject() + Long.BYTES;
     }
 
     /**
@@ -432,7 +432,7 @@ public final class CIDTable implements Importable, Exportable {
         p_entry.clear();
         p_entry.setAddress(p_chunkAddress);
 
-        long cid = getTableEntryWithChunkAddressRecursive(p_entry, 0, m_addressTableDirectory, LID_TABLE_LEVELS);
+        long cid = getTableEntryWithChunkAddressRecursive(p_entry, 0, m_tableDirectory.getAddress(), LID_TABLE_LEVELS);
 
         if (cid == ChunkID.INVALID_ID) {
             p_entry.clear();
@@ -457,7 +457,7 @@ public final class CIDTable implements Importable, Exportable {
     int getAndEliminateZombies(final short p_nodeId, final long[] p_ringBuffer, final int p_offset,
             final int p_maxCount) {
         int count = 0;
-        long entry = readTableEntry(m_addressTableDirectory, p_nodeId & 0xFFFF);
+        long entry = readTableEntry(m_tableDirectory.getAddress(), p_nodeId & 0xFFFF);
 
         if (entry != CIDTableTableEntry.RAW_VALUE_FREE) {
             count += getAndEliminateZombiesRecursiveLIDTable(CIDTableTableEntry.getAddressOfRawTableEntry(entry),
@@ -484,15 +484,15 @@ public final class CIDTable implements Importable, Exportable {
             final ArrayList<CIDTableChunkEntry> p_chunkEntries, final ArrayList<CIDTableZombieEntry> p_zombieEntries) {
         // root table
         if (p_tableEntries != null) {
-            p_tableEntries.add(new CIDTableTableEntry(0, m_addressTableDirectory));
+            p_tableEntries.add(new CIDTableTableEntry(0, m_tableDirectory.getValue()));
         }
 
         for (int nid = 0; nid < ENTRIES_PER_NID_LEVEL; nid++) {
-            long entry = readTableEntry(m_addressTableDirectory, nid);
+            long entry = readTableEntry(m_tableDirectory.getAddress(), nid);
 
             if (entry != CIDTableTableEntry.RAW_VALUE_FREE) {
                 if (p_tableEntries != null) {
-                    p_tableEntries.add(new CIDTableTableEntry(m_addressTableDirectory + nid * ENTRY_SIZE, entry));
+                    p_tableEntries.add(new CIDTableTableEntry(m_tableDirectory.getAddress() + nid * ENTRY_SIZE, entry));
                 }
 
                 scanRecursiveLIDTable(CIDTableTableEntry.getAddressOfRawTableEntry(entry), LID_TABLE_LEVELS - 1,
@@ -513,11 +513,14 @@ public final class CIDTable implements Importable, Exportable {
 
         if (p_entry.getPointer() == Address.INVALID) {
             // NID (root) table
-            tableSize = CIDTable.NID_TABLE_SIZE;
+            tableSize = CIDTable.NID_TABLE_SIZE + TABLE_ALIGNMENT_BYTES;
         } else {
             // LID table
-            tableSize = CIDTable.LID_TABLE_SIZE;
+            tableSize = CIDTable.LID_TABLE_SIZE + TABLE_ALIGNMENT_BYTES;
         }
+
+        // revert the alignment of the start address here for analysis
+        p_entry.setAddress(p_entry.getAddress() - p_entry.getAlignment());
 
         // heap areas start with front marker (including) and end with end marker (excluding)
         return new HeapArea(p_entry.getAddress() - 1, p_entry.getAddress() + tableSize);
@@ -637,24 +640,11 @@ public final class CIDTable implements Importable, Exportable {
         // no need to store any length information
         tmp.setLengthField(0);
 
-        // TODO reduce pointer length to 6 byte because TableEntry is address only
-        // -> alignment not possible anymore, might harm performance
         if (!m_heap.malloc(NID_TABLE_SIZE + TABLE_ALIGNMENT_BYTES, tmp, true)) {
             throw new MemoryRuntimeException("Creating the NID table should not fail");
         }
 
-        int alignment = -1;
-
-        for (int i = 0; i < TABLE_ALIGNMENT_BYTES; i++) {
-            if ((tmp.getAddress() + i) % TABLE_ALIGNMENT_BYTES == 0) {
-                alignment = i;
-                break;
-            }
-        }
-
-        if (alignment == -1) {
-            throw new IllegalStateException("Alignment failed for address: " + tmp.getAddress());
-        }
+        int alignment = calculateAlignment(tmp.getAddress());
 
         // null table
         m_heap.set(tmp.getAddress(), 0, LID_TABLE_SIZE + alignment, (byte) 0);
@@ -664,12 +654,13 @@ public final class CIDTable implements Importable, Exportable {
 
         p_entry.clear();
         p_entry.setAddress(tmp.getAddress());
+        p_entry.setAlignment(alignment);
 
         m_status.m_totalPayloadMemoryTables += NID_TABLE_SIZE + alignment;
         m_status.m_totalTableCount++;
 
-        LOGGER.trace("Created NID table size %d at %X (alignment offset +" + alignment, LID_TABLE_SIZE + alignment,
-                p_entry.getAddress());
+        LOGGER.trace("Created NID table size %d at %X (alignment offset +%d)", LID_TABLE_SIZE + alignment,
+                p_entry.getAddress(), alignment);
     }
 
     /**
@@ -687,25 +678,11 @@ public final class CIDTable implements Importable, Exportable {
         // no need to store any length information
         tmp.setLengthField(0);
 
-        // TODO reduce pointer length for all levels except 0 to 6 byte because TableEntry is address only
-        // -> alignment not possible anymore (might harm performance)
-
         if (!m_heap.malloc(LID_TABLE_SIZE + TABLE_ALIGNMENT_BYTES, tmp, true)) {
             return false;
         }
 
-        int alignment = -1;
-
-        for (int i = 0; i < TABLE_ALIGNMENT_BYTES; i++) {
-            if ((tmp.getAddress() + i) % TABLE_ALIGNMENT_BYTES == 0) {
-                alignment = i;
-                break;
-            }
-        }
-
-        if (alignment == -1) {
-            throw new IllegalStateException("Alignment failed for address: " + tmp.getAddress());
-        }
+        int alignment = calculateAlignment(tmp.getAddress());
 
         // null table
         m_heap.set(tmp.getAddress(), 0, LID_TABLE_SIZE + alignment, (byte) 0);
@@ -715,15 +692,40 @@ public final class CIDTable implements Importable, Exportable {
 
         p_entry.clear();
         p_entry.setAddress(tmp.getAddress());
+        p_entry.setAlignment(alignment);
 
         m_status.m_totalPayloadMemoryTables += LID_TABLE_SIZE + alignment;
         m_status.m_tableCountLevel[p_level]++;
         m_status.m_totalTableCount++;
 
-        LOGGER.trace("Created LID table size %d at %X (alignment offset +" + alignment, LID_TABLE_SIZE + alignment,
-                p_entry.getAddress());
+        LOGGER.trace("Created LID table size %d at %X (alignment offset +%d)", LID_TABLE_SIZE + alignment,
+                p_entry.getAddress(), alignment);
 
         return true;
+    }
+
+    /**
+     * Calculate address alignment (for tables)
+     *
+     * @param p_address
+     *         Start address to align to 64-bit bounds
+     * @return Number of bytes to add to address for alignment
+     */
+    private int calculateAlignment(final long p_address) {
+        int alignment = -1;
+
+        for (int i = 0; i < TABLE_ALIGNMENT_BYTES; i++) {
+            if ((p_address + i) % TABLE_ALIGNMENT_BYTES == 0) {
+                alignment = i;
+                break;
+            }
+        }
+
+        if (alignment == -1) {
+            throw new IllegalStateException("Alignment failed for address: " + p_address);
+        }
+
+        return alignment;
     }
 
     /**
