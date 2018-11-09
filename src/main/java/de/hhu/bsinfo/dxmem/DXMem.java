@@ -30,6 +30,7 @@ import de.hhu.bsinfo.dxmem.operations.CreateReserved;
 import de.hhu.bsinfo.dxmem.operations.Dump;
 import de.hhu.bsinfo.dxmem.operations.Exists;
 import de.hhu.bsinfo.dxmem.operations.Get;
+import de.hhu.bsinfo.dxmem.operations.Lock;
 import de.hhu.bsinfo.dxmem.operations.Pinning;
 import de.hhu.bsinfo.dxmem.operations.Put;
 import de.hhu.bsinfo.dxmem.operations.RawRead;
@@ -63,6 +64,7 @@ public class DXMem {
     private Exists m_exists;
     private Size m_size;
     private Resize m_resize;
+    private Lock m_lock;
 
     private Pinning m_pinning;
     private RawRead m_rawRead;
@@ -255,6 +257,15 @@ public class DXMem {
     }
 
     /**
+     * Get the lock operation
+     *
+     * @return Operation
+     */
+    public Lock lock() {
+        return m_lock;
+    }
+
+    /**
      * Get the pinning operation
      *
      * @return Operation
@@ -339,6 +350,7 @@ public class DXMem {
         m_exists = new Exists(m_context);
         m_size = new Size(m_context);
         m_resize = new Resize(m_context);
+        m_lock = new Lock(m_context);
 
         m_pinning = new Pinning(m_context);
         m_rawRead = new RawRead(m_context);
