@@ -133,10 +133,15 @@ public final class LockUtils {
 
         while (true) {
             // invalid state, chunk was deleted but a lock was still acquired
-            assert p_entry.isValid();
+            if (!p_entry.isValid()) {
+                throw new IllegalStateException("Release read lock of deleted chunk " + p_entry);
+            }
+
             // write lock might be acquired: writer thread blocks all further reader threads and waits for
             // current readers in critical section to exit
-            assert p_entry.areReadLocksAcquired();
+            if (!p_entry.areReadLocksAcquired()) {
+                throw new IllegalStateException("Releasing read lock with no read locks acquired for " + p_entry);
+            }
 
             p_entry.releaseReadLock();
 
@@ -253,9 +258,15 @@ public final class LockUtils {
 
         while (true) {
               // invalid state, chunk was deleted but a lock was still acquired
-            assert p_entry.isValid();
-            assert p_entry.isWriteLockAcquired();
-            assert !p_entry.areReadLocksAcquired();
+            if (!p_entry.isValid()) {
+                throw new IllegalStateException("Release write lock of deleted chunk " + p_entry);
+            }
+
+            // invalid lock state
+            if (!p_entry.isWriteLockAcquired() || p_entry.areReadLocksAcquired()) {
+                throw new IllegalStateException(
+                        "Releasing write lock with no write lock acquired or read locks acquired for " + p_entry);
+            }
 
             p_entry.releaseWriteLock();
 
