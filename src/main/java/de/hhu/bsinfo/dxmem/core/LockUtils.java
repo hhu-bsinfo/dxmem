@@ -16,6 +16,9 @@
 
 package de.hhu.bsinfo.dxmem.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.ValuePool;
@@ -26,6 +29,8 @@ import de.hhu.bsinfo.dxutils.stats.ValuePool;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
  */
 public final class LockUtils {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(LockUtils.class.getSimpleName());
+
     private static final ValuePool SOP_READ_LOCK_REQS = new ValuePool(DXMem.class, "ReadLockReqs");
     private static final ValuePool SOP_READ_LOCK_RETRIES = new ValuePool(DXMem.class, "ReadLockRetries");
     private static final ValuePool SOP_READ_LOCK_TIMEOUTS = new ValuePool(DXMem.class, "ReadLockTimeouts");
@@ -98,6 +103,11 @@ public final class LockUtils {
                         }
 
                         return LockStatus.OK;
+                    }
+                } else {
+                    // log once to avoid flooding the log on retries
+                    if (retries == 0) {
+                        LOGGER.warn("Max number of read locks already acquired for %s", p_entry);
                     }
                 }
                 // else: no locks available because too many readers active, we have to wait
