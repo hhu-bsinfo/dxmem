@@ -17,6 +17,7 @@
 package de.hhu.bsinfo.dxmem.data;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
@@ -28,6 +29,13 @@ import de.hhu.bsinfo.dxutils.serialization.Importer;
  */
 public final class ChunkByteArray extends AbstractChunk {
     private byte[] m_data;
+
+    /**
+     * Constructor
+     */
+    public ChunkByteArray() {
+
+    }
 
     /**
      * Constructor
@@ -130,5 +138,16 @@ public final class ChunkByteArray extends AbstractChunk {
     @Override
     public int sizeofObject() {
         return m_data.length;
+    }
+
+    @Override
+    public boolean equals(final Object p_other) {
+        if (p_other instanceof ChunkByteArray) {
+            ChunkByteArray other = (ChunkByteArray) p_other;
+
+            return Arrays.equals(m_data, other.m_data);
+        } else {
+            return false;
+        }
     }
 }

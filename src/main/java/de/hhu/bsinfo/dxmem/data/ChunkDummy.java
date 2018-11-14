@@ -57,4 +57,9 @@ public class ChunkDummy extends AbstractChunk {
     public int sizeofObject() {
         return 0;
     }
+
+    @Override
+    public boolean equals(final Object p_other) {
+        return p_other instanceof ChunkDummy;
+    }
 }
