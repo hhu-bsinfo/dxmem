@@ -21,14 +21,15 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
+
 public class LockTest {
     @Test(timeout = 2000)
     public void readLockSimpleST() {
         Configurator.setRootLevel(Level.TRACE);
 
         Heap heap = new Heap(1024 * 1024);
-        CIDTranslationCache cache = new CIDTranslationCache();
-        CIDTable cidTable = new CIDTable((short) 0, heap, cache);
+        CIDTable cidTable = new CIDTable((short) 0, heap);
 
         CIDTableChunkEntry chunkEntry = new CIDTableChunkEntry();
         long cid = 0;
@@ -40,9 +41,10 @@ public class LockTest {
 
         Assert.assertTrue(chunkEntry.isValid());
 
-        LockUtils.LockStatus status = LockUtils.acquireReadLock(cidTable, chunkEntry, -1);
+        LockManager.LockStatus status = LockManager.executeBeforeOp(cidTable, chunkEntry,
+                ChunkLockOperation.READ_LOCK_ACQ_PRE_OP, -1);
 
-        Assert.assertEquals(LockUtils.LockStatus.OK, status);
+        Assert.assertEquals(LockManager.LockStatus.OK, status);
 
         cidTable.entryReread(chunkEntry);
 
@@ -51,7 +53,7 @@ public class LockTest {
         Assert.assertTrue(chunkEntry.areReadLocksAcquired());
         Assert.assertEquals(1, chunkEntry.getReadLockCounter());
 
-        LockUtils.releaseReadLock(cidTable, chunkEntry);
+        LockManager.executeAfterOp(cidTable, chunkEntry, ChunkLockOperation.READ_LOCK_REL_POST_OP, -1);
 
         cidTable.entryReread(chunkEntry);
 
@@ -66,8 +68,7 @@ public class LockTest {
         Configurator.setRootLevel(Level.TRACE);
 
         Heap heap = new Heap(1024 * 1024);
-        CIDTranslationCache cache = new CIDTranslationCache();
-        CIDTable cidTable = new CIDTable((short) 0, heap, cache);
+        CIDTable cidTable = new CIDTable((short) 0, heap);
 
         CIDTableChunkEntry chunkEntry = new CIDTableChunkEntry();
         long cid = 0;
@@ -80,9 +81,10 @@ public class LockTest {
         Assert.assertTrue(chunkEntry.isValid());
 
         for (int i = 0; i < 1000; i++) {
-            LockUtils.LockStatus status = LockUtils.acquireReadLock(cidTable, chunkEntry, -1);
+            LockManager.LockStatus status = LockManager.executeBeforeOp(cidTable, chunkEntry,
+                    ChunkLockOperation.READ_LOCK_ACQ_PRE_OP, -1);
 
-            Assert.assertEquals(LockUtils.LockStatus.OK, status);
+            Assert.assertEquals(LockManager.LockStatus.OK, status);
 
             cidTable.entryReread(chunkEntry);
 
@@ -91,7 +93,7 @@ public class LockTest {
             Assert.assertTrue(chunkEntry.areReadLocksAcquired());
             Assert.assertEquals(1, chunkEntry.getReadLockCounter());
 
-            LockUtils.releaseReadLock(cidTable, chunkEntry);
+            LockManager.executeAfterOp(cidTable, chunkEntry, ChunkLockOperation.READ_LOCK_REL_POST_OP, -1);
 
             cidTable.entryReread(chunkEntry);
 
@@ -107,8 +109,7 @@ public class LockTest {
         Configurator.setRootLevel(Level.TRACE);
 
         Heap heap = new Heap(1024 * 1024);
-        CIDTranslationCache cache = new CIDTranslationCache();
-        CIDTable cidTable = new CIDTable((short) 0, heap, cache);
+        CIDTable cidTable = new CIDTable((short) 0, heap);
 
         CIDTableChunkEntry chunkEntry = new CIDTableChunkEntry();
         long cid = 0;
@@ -120,9 +121,10 @@ public class LockTest {
 
         Assert.assertTrue(chunkEntry.isValid());
 
-        LockUtils.LockStatus status = LockUtils.acquireWriteLock(cidTable, chunkEntry, -1);
+        LockManager.LockStatus status = LockManager.executeBeforeOp(cidTable, chunkEntry,
+                ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
 
-        Assert.assertEquals(LockUtils.LockStatus.OK, status);
+        Assert.assertEquals(LockManager.LockStatus.OK, status);
 
         cidTable.entryReread(chunkEntry);
 
@@ -131,7 +133,7 @@ public class LockTest {
         Assert.assertFalse(chunkEntry.areReadLocksAcquired());
         Assert.assertEquals(0, chunkEntry.getReadLockCounter());
 
-        LockUtils.releaseWriteLock(cidTable, chunkEntry);
+        LockManager.executeAfterOp(cidTable, chunkEntry, ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
 
         cidTable.entryReread(chunkEntry);
 
@@ -146,8 +148,7 @@ public class LockTest {
         Configurator.setRootLevel(Level.TRACE);
 
         Heap heap = new Heap(1024 * 1024);
-        CIDTranslationCache cache = new CIDTranslationCache();
-        CIDTable cidTable = new CIDTable((short) 0, heap, cache);
+        CIDTable cidTable = new CIDTable((short) 0, heap);
 
         CIDTableChunkEntry chunkEntry = new CIDTableChunkEntry();
         long cid = 0;
@@ -160,9 +161,10 @@ public class LockTest {
         Assert.assertTrue(chunkEntry.isValid());
 
         for (int i = 0; i < 1000; i++) {
-            LockUtils.LockStatus status = LockUtils.acquireWriteLock(cidTable, chunkEntry, -1);
+            LockManager.LockStatus status = LockManager.executeBeforeOp(cidTable, chunkEntry,
+                    ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
 
-            Assert.assertEquals(LockUtils.LockStatus.OK, status);
+            Assert.assertEquals(LockManager.LockStatus.OK, status);
 
             cidTable.entryReread(chunkEntry);
 
@@ -171,7 +173,7 @@ public class LockTest {
             Assert.assertFalse(chunkEntry.areReadLocksAcquired());
             Assert.assertEquals(0, chunkEntry.getReadLockCounter());
 
-            LockUtils.releaseWriteLock(cidTable, chunkEntry);
+            LockManager.executeAfterOp(cidTable, chunkEntry, ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
 
             cidTable.entryReread(chunkEntry);
 
@@ -242,8 +244,7 @@ public class LockTest {
         Configurator.setRootLevel(Level.TRACE);
 
         Heap heap = new Heap(1024 * 1024);
-        CIDTranslationCache cache = new CIDTranslationCache();
-        CIDTable cidTable = new CIDTable((short) 0, heap, cache);
+        CIDTable cidTable = new CIDTable((short) 0, heap);
 
         CIDTableChunkEntry chunkEntry = new CIDTableChunkEntry();
         long cid = 0;
@@ -255,9 +256,10 @@ public class LockTest {
 
         Assert.assertTrue(chunkEntry.isValid());
 
-        LockUtils.LockStatus status = LockUtils.acquireReadLock(cidTable, chunkEntry, -1);
+        LockManager.LockStatus status = LockManager.executeBeforeOp(cidTable, chunkEntry,
+                ChunkLockOperation.READ_LOCK_ACQ_PRE_OP, -1);
 
-        Assert.assertEquals(LockUtils.LockStatus.OK, status);
+        Assert.assertEquals(LockManager.LockStatus.OK, status);
 
         cidTable.entryReread(chunkEntry);
 
@@ -269,7 +271,7 @@ public class LockTest {
         // try to get write lock
         long time = System.nanoTime();
 
-        status = LockUtils.acquireWriteLock(cidTable, chunkEntry, 1000);
+        status = LockManager.executeBeforeOp(cidTable, chunkEntry, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, 1000);
 
         double totalTime = (System.nanoTime() - time) / 1000.0 / 1000.0;
         System.out.printf("Timeout write lock: %f ms\n", totalTime);
@@ -277,14 +279,14 @@ public class LockTest {
 
         cidTable.entryReread(chunkEntry);
 
-        Assert.assertEquals(LockUtils.LockStatus.TIMEOUT, status);
+        Assert.assertEquals(LockManager.LockStatus.TIMEOUT, status);
 
         Assert.assertTrue(chunkEntry.isValid());
         Assert.assertFalse(chunkEntry.isWriteLockAcquired());
         Assert.assertTrue(chunkEntry.areReadLocksAcquired());
         Assert.assertEquals(1, chunkEntry.getReadLockCounter());
 
-        LockUtils.releaseReadLock(cidTable, chunkEntry);
+        LockManager.executeAfterOp(cidTable, chunkEntry, ChunkLockOperation.READ_LOCK_REL_POST_OP, -1);
 
         cidTable.entryReread(chunkEntry);
 
@@ -294,9 +296,9 @@ public class LockTest {
         Assert.assertEquals(0, chunkEntry.getReadLockCounter());
 
         // vice versa: get write lock and try read lock
-        status = LockUtils.acquireWriteLock(cidTable, chunkEntry, -1);
+        status = LockManager.executeBeforeOp(cidTable, chunkEntry, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
 
-        Assert.assertEquals(LockUtils.LockStatus.OK, status);
+        Assert.assertEquals(LockManager.LockStatus.OK, status);
 
         cidTable.entryReread(chunkEntry);
 
@@ -308,20 +310,20 @@ public class LockTest {
         // try read lock
         time = System.nanoTime();
 
-        status = LockUtils.acquireReadLock(cidTable, chunkEntry, 500);
+        status = LockManager.executeBeforeOp(cidTable, chunkEntry, ChunkLockOperation.READ_LOCK_ACQ_PRE_OP, 500);
 
         totalTime = (System.nanoTime() - time) / 1000.0 / 1000.0;
         System.out.printf("Timeout read lock: %f ms\n", totalTime);
         Assert.assertEquals(500, totalTime, 1.0);
 
-        Assert.assertEquals(LockUtils.LockStatus.TIMEOUT, status);
+        Assert.assertEquals(LockManager.LockStatus.TIMEOUT, status);
 
         Assert.assertTrue(chunkEntry.isValid());
         Assert.assertTrue(chunkEntry.isWriteLockAcquired());
         Assert.assertFalse(chunkEntry.areReadLocksAcquired());
         Assert.assertEquals(0, chunkEntry.getReadLockCounter());
 
-        LockUtils.releaseWriteLock(cidTable, chunkEntry);
+        LockManager.executeAfterOp(cidTable, chunkEntry, ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
 
         cidTable.entryReread(chunkEntry);
 
@@ -335,8 +337,7 @@ public class LockTest {
         Configurator.setRootLevel(Level.TRACE);
 
         Heap heap = new Heap(1024 * 1024);
-        CIDTranslationCache cache = new CIDTranslationCache();
-        CIDTable cidTable = new CIDTable((short) 0, heap, cache);
+        CIDTable cidTable = new CIDTable((short) 0, heap);
 
         CIDTableChunkEntry chunkEntry = new CIDTableChunkEntry();
         long cid = 0;
@@ -392,9 +393,10 @@ public class LockTest {
             m_cidTable.translate(0, chunkEntry);
 
             for (int i = 0; i < m_iterations; i++) {
-                LockUtils.LockStatus status = LockUtils.acquireReadLock(m_cidTable, chunkEntry, -1);
+                LockManager.LockStatus status = LockManager.executeBeforeOp(m_cidTable, chunkEntry,
+                        ChunkLockOperation.READ_LOCK_ACQ_PRE_OP, -1);
 
-                Assert.assertEquals(LockUtils.LockStatus.OK, status);
+                Assert.assertEquals(LockManager.LockStatus.OK, status);
 
                 Assert.assertTrue(chunkEntry.isValid());
                 Assert.assertFalse(chunkEntry.isWriteLockAcquired());
@@ -402,7 +404,7 @@ public class LockTest {
                 Assert.assertTrue(chunkEntry.getReadLockCounter() > 0);
                 Assert.assertTrue(chunkEntry.getReadLockCounter() <= m_maxReaders);
 
-                LockUtils.releaseReadLock(m_cidTable, chunkEntry);
+                LockManager.executeAfterOp(m_cidTable, chunkEntry, ChunkLockOperation.READ_LOCK_REL_POST_OP, -1);
 
                 Assert.assertTrue(chunkEntry.isValid());
                 // write lock might be acquired: writer thread blocks all further reader threads and waits for
@@ -434,16 +436,17 @@ public class LockTest {
             m_cidTable.translate(0, chunkEntry);
 
             for (int i = 0; i < m_iterations; i++) {
-                LockUtils.LockStatus status = LockUtils.acquireWriteLock(m_cidTable, chunkEntry, -1);
+                LockManager.LockStatus status = LockManager.executeBeforeOp(m_cidTable, chunkEntry,
+                        ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
 
-                Assert.assertEquals(LockUtils.LockStatus.OK, status);
+                Assert.assertEquals(LockManager.LockStatus.OK, status);
 
                 Assert.assertTrue(chunkEntry.isValid());
                 Assert.assertTrue(chunkEntry.isWriteLockAcquired());
                 Assert.assertFalse(chunkEntry.areReadLocksAcquired());
                 Assert.assertEquals(0, chunkEntry.getReadLockCounter());
 
-                LockUtils.releaseWriteLock(m_cidTable, chunkEntry);
+                LockManager.executeAfterOp(m_cidTable, chunkEntry, ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
 
                 Assert.assertTrue(chunkEntry.isValid());
                 Assert.assertFalse(chunkEntry.isWriteLockAcquired());
