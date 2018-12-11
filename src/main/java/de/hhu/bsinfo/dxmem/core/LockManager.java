@@ -1,35 +1,20 @@
-/*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 package de.hhu.bsinfo.dxmem.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxmem.DXMem;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
- * Utility class for locking chunks in CIDTable
+ * LockManager handling locking for chunks in CIDTable
  *
- * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ * @author Stefan Nothaas, stefan.nothaas@hhu.de, 11.12.2018
  */
-public final class LockUtils {
-    private static final Logger LOGGER = LogManager.getFormatterLogger(LockUtils.class.getSimpleName());
+public class LockManager {
+    private static final Logger LOGGER = LogManager.getFormatterLogger(LockManager.class.getSimpleName());
 
     private static final ValuePool SOP_READ_LOCK_REQS = new ValuePool(DXMem.class, "ReadLockReqs");
     private static final ValuePool SOP_READ_LOCK_RETRIES = new ValuePool(DXMem.class, "ReadLockRetries");
@@ -57,10 +42,90 @@ public final class LockUtils {
     }
 
     /**
-     * Private constructor for utility class
+     * Static class
      */
-    private LockUtils() {
+    private LockManager() {
 
+    }
+
+    /**
+     * Execute a lock operation BEFORE the memory operation
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to lock/unlock
+     * @param p_op
+     *         Lock operation to execute (see enum)
+     * @param p_lockTimeoutMs
+     *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
+     * @return Lock status
+     */
+    public static LockStatus executeBeforeOp(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
+            final ChunkLockOperation p_op, final int p_lockTimeoutMs) {
+        // note: this should be turned into some sort of jumptable by the JIT making it not as expensive as it looks
+        switch (p_op) {
+            case NONE:
+            case WRITE_LOCK_REL_POST_OP:
+            case READ_LOCK_REL_POST_OP:
+                return LockStatus.OK;
+
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case WRITE_LOCK_ACQ_OP_REL:
+                return acquireWriteLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
+            case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_ACQ_OP_REL:
+                return acquireReadLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
+            case SWAP_READ_FOR_WRITE_PRE_OP:
+            case SWAP_READ_FOR_WRITE_POST_OP:
+            case SWAP_WRITE_FOR_READ_PRE_OP:
+            case SWAP_WRITE_FOR_READ_POST_OP:
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
+    }
+
+    /**
+     * Execute a lock operation AFTER the memory operation
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to lock/unlock
+     * @param p_op
+     *         Lock operation to execute (see enum)
+     * @param p_lockTimeoutMs
+     *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
+     * @return Lock status
+     */
+    public static LockStatus executeAfterOp(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
+            final ChunkLockOperation p_op, final int p_lockTimeoutMs) {
+        // note: this should be turned into some sort of jumptable by the JIT making it not as expensive as it looks
+        switch (p_op) {
+            case NONE:
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_ACQ_PRE_OP:
+                return LockStatus.OK;
+
+            case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_ACQ_OP_REL:
+                releaseWriteLock(p_cidTable, p_entry);
+                return LockStatus.OK;
+
+            case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_ACQ_OP_REL:
+                releaseReadLock(p_cidTable, p_entry);
+                return LockStatus.OK;
+
+            case SWAP_READ_FOR_WRITE_PRE_OP:
+            case SWAP_READ_FOR_WRITE_POST_OP:
+            case SWAP_WRITE_FOR_READ_PRE_OP:
+            case SWAP_WRITE_FOR_READ_POST_OP:
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
     }
 
     /**
@@ -76,7 +141,7 @@ public final class LockUtils {
      *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
      * @return Lock status
      */
-    public static LockStatus acquireReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
+    private static LockStatus acquireReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
             final int p_retryTimeoutMs) {
         long startTime = 0;
 
@@ -138,7 +203,7 @@ public final class LockUtils {
      * @param p_entry
      *         Chunk entry of CIDTable to unlock
      */
-    public static void releaseReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
+    private static void releaseReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
         p_entry.currentStateInitialState();
 
         while (true) {
@@ -178,7 +243,7 @@ public final class LockUtils {
      *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
      * @return Lock status
      */
-    public static LockStatus acquireWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
+    private static LockStatus acquireWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
             final int p_retryTimeoutMs) {
         long startTime = 0;
 
@@ -263,11 +328,11 @@ public final class LockUtils {
      * @param p_entry
      *         Chunk entry of CIDTable to unlock
      */
-    public static void releaseWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
+    private static void releaseWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry) {
         p_entry.currentStateInitialState();
 
         while (true) {
-              // invalid state, chunk was deleted but a lock was still acquired
+            // invalid state, chunk was deleted but a lock was still acquired
             if (!p_entry.isValid()) {
                 throw new IllegalStateException("Release write lock of deleted chunk " + p_entry);
             }
