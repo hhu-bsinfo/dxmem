@@ -19,10 +19,11 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
-import de.hhu.bsinfo.dxmem.core.LockUtils;
+import de.hhu.bsinfo.dxmem.core.LockManager;
 import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
@@ -176,7 +177,8 @@ public class Remove {
         }
 
         // acquire write lock to ensure nobody is accessing the chunk while deleting it
-        if (LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1) != LockUtils.LockStatus.OK) {
+        if (LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP,
+                -1) != LockManager.LockStatus.OK) {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             // someone else deleted the chunk while waiting for the lock

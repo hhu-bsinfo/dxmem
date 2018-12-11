@@ -20,7 +20,7 @@ import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapDataStructureImExporter;
-import de.hhu.bsinfo.dxmem.core.LockUtils;
+import de.hhu.bsinfo.dxmem.core.LockManager;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
@@ -66,7 +66,7 @@ public class Put {
      * @return True on success, false on failure. Chunk state with additional information is set in p_chunk
      */
     public boolean put(final AbstractChunk p_chunk) {
-        return put(p_chunk, ChunkLockOperation.NONE, -1);
+        return put(p_chunk, ChunkLockOperation.WRITE_LOCK_ACQ_OP_REL, -1);
     }
 
     /**
@@ -108,25 +108,17 @@ public class Put {
         HeapDataStructureImExporter imExporter = m_context.getDataStructureImExporterPool().get();
         imExporter.setHeapAddress(tableEntry.getAddress());
 
-        LockUtils.LockStatus lockStatus = LockUtils.LockStatus.OK;
-
         if (!m_context.isChunkLockDisabled()) {
-            if (p_lockOperation == ChunkLockOperation.NONE) {
-                lockStatus = LockUtils.acquireReadLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-            } else {
-                if (p_lockOperation == ChunkLockOperation.ACQUIRE_BEFORE_OP ||
-                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                    lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-                }
-            }
+            LockManager.LockStatus lockStatus = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+                    p_lockOperation, p_lockTimeoutMs);
 
-            if (lockStatus != LockUtils.LockStatus.OK) {
+            if (lockStatus != LockManager.LockStatus.OK) {
                 m_context.getDefragmenter().releaseApplicationThreadLock();
 
-                if (lockStatus == LockUtils.LockStatus.INVALID) {
+                if (lockStatus == LockManager.LockStatus.INVALID) {
                     // entry was deleted in the meanwhile
                     p_chunk.setState(ChunkState.DOES_NOT_EXIST);
-                } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
+                } else if (lockStatus == LockManager.LockStatus.TIMEOUT) {
                     // try lock did not succeed
                     p_chunk.setState(ChunkState.LOCK_TIMEOUT);
                 } else {
@@ -143,14 +135,7 @@ public class Put {
         imExporter.exportObject(p_chunk);
 
         if (!m_context.isChunkLockDisabled()) {
-            if (p_lockOperation == ChunkLockOperation.NONE) {
-                LockUtils.releaseReadLock(m_context.getCIDTable(), tableEntry);
-            } else {
-                if (p_lockOperation == ChunkLockOperation.RELEASE_AFTER_OP ||
-                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                    LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
-                }
-            }
+            LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry, p_lockOperation, p_lockTimeoutMs);
         }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
@@ -200,25 +185,17 @@ public class Put {
         HeapDataStructureImExporter imExporter = m_context.getDataStructureImExporterPool().get();
         imExporter.setHeapAddress(tableEntry.getAddress());
 
-        LockUtils.LockStatus lockStatus = LockUtils.LockStatus.OK;
-
         if (!m_context.isChunkLockDisabled()) {
-            if (p_lockOperation == ChunkLockOperation.NONE) {
-                lockStatus = LockUtils.acquireReadLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-            } else {
-                if (p_lockOperation == ChunkLockOperation.ACQUIRE_BEFORE_OP ||
-                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                    lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, p_lockTimeoutMs);
-                }
-            }
+            LockManager.LockStatus lockStatus = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+                    p_lockOperation, p_lockTimeoutMs);
 
-            if (lockStatus != LockUtils.LockStatus.OK) {
+            if (lockStatus != LockManager.LockStatus.OK) {
                 m_context.getDefragmenter().releaseApplicationThreadLock();
 
-                if (lockStatus == LockUtils.LockStatus.INVALID) {
+                if (lockStatus == LockManager.LockStatus.INVALID) {
                     // entry was deleted in the meanwhile
                     return ChunkState.DOES_NOT_EXIST;
-                } else if (lockStatus == LockUtils.LockStatus.TIMEOUT) {
+                } else if (lockStatus == LockManager.LockStatus.TIMEOUT) {
                     // try lock did not succeed
                     return ChunkState.LOCK_TIMEOUT;
                 } else {
@@ -236,14 +213,7 @@ public class Put {
         imExporter.writeBytes(p_data);
 
         if (!m_context.isChunkLockDisabled()) {
-            if (p_lockOperation == ChunkLockOperation.NONE) {
-                LockUtils.releaseReadLock(m_context.getCIDTable(), tableEntry);
-            } else {
-                if (p_lockOperation == ChunkLockOperation.RELEASE_AFTER_OP ||
-                        p_lockOperation == ChunkLockOperation.ACQUIRE_OP_RELEASE) {
-                    LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
-                }
-            }
+            LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry, p_lockOperation, p_lockTimeoutMs);
         }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();

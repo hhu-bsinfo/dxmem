@@ -19,8 +19,9 @@ package de.hhu.bsinfo.dxmem.operations;
 import de.hhu.bsinfo.dxmem.core.Address;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
-import de.hhu.bsinfo.dxmem.core.LockUtils;
+import de.hhu.bsinfo.dxmem.core.LockManager;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
 /**
@@ -80,11 +81,11 @@ public class Pinning {
         }
 
         if (!m_context.isChunkLockDisabled()) {
-            LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry,
-                    p_acquireLockTimeoutMs);
+            LockManager.LockStatus lockStatus = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+                    ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, p_acquireLockTimeoutMs);
 
             // acquire write lock to ensure the chunk is not deleted while trying to pin it
-            if (lockStatus != LockUtils.LockStatus.OK) {
+            if (lockStatus != LockManager.LockStatus.OK) {
                 m_context.getDefragmenter().releaseApplicationThreadLock();
 
                 return new PinnedMemory(ChunkState.DOES_NOT_EXIST);
@@ -96,7 +97,8 @@ public class Pinning {
         m_context.getCIDTable().entryUpdate(tableEntry);
 
         if (!m_context.isChunkLockDisabled()) {
-            LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+            LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry,
+                    ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
         }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
@@ -134,10 +136,11 @@ public class Pinning {
         }
 
         if (!m_context.isChunkLockDisabled()) {
-            LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
+            LockManager.LockStatus lockStatus = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+                    ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
 
             // acquire write lock to ensure the chunk is not deleted while trying to pin it
-            if (lockStatus != LockUtils.LockStatus.OK) {
+            if (lockStatus != LockManager.LockStatus.OK) {
                 m_context.getDefragmenter().releaseApplicationThreadLock();
 
                 throw new IllegalStateException("Pinned chunk with CID " + ChunkID.toHexString(cid) +
@@ -150,7 +153,8 @@ public class Pinning {
         m_context.getCIDTable().entryUpdate(tableEntry);
 
         if (!m_context.isChunkLockDisabled()) {
-            LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+            LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry,
+                    ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
         }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
@@ -183,10 +187,11 @@ public class Pinning {
         }
 
         if (!m_context.isChunkLockDisabled()) {
-            LockUtils.LockStatus lockStatus = LockUtils.acquireWriteLock(m_context.getCIDTable(), tableEntry, -1);
+            LockManager.LockStatus lockStatus = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+                    ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
 
             // acquire write lock to ensure the chunk is not deleted while trying to pin it
-            if (lockStatus != LockUtils.LockStatus.OK) {
+            if (lockStatus != LockManager.LockStatus.OK) {
                 m_context.getDefragmenter().releaseApplicationThreadLock();
 
                 throw new IllegalStateException("Pinned chunk " + ChunkID.toHexString(p_cidOfPinnedChunk) +
@@ -198,7 +203,8 @@ public class Pinning {
 
         m_context.getCIDTable().entryUpdate(tableEntry);
 
-        LockUtils.releaseWriteLock(m_context.getCIDTable(), tableEntry);
+        LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry,
+                ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
     }
