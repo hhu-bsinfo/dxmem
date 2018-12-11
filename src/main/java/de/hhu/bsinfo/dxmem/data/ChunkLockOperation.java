@@ -21,22 +21,68 @@ package de.hhu.bsinfo.dxmem.data;
  */
 public enum ChunkLockOperation {
     /**
-     * Defaults to read lock on get/put operation
+     * _NO_ locks at all. Careless and incorrect usage leads to data corruption and application crashes.
+     * Aside that, if you use it correctly, it allows to to combine multiple operations preceded by a single
+     * lock call with following operations not executing any locking (on the same data).
+     *
+     * For example:
+     * get with write lock acquire
+     * resize with no lock
+     * put with write lock release
      */
     NONE,
 
     /**
-     * Acquire the write lock of a chunk and keep it until it is released with another operation call
+     * Acquire the write lock of a chunk BEFORE the operation and keep it until it is released by another
+     * lock/operation call
      */
-    ACQUIRE_BEFORE_OP,
+    WRITE_LOCK_ACQ_PRE_OP,
 
     /**
-     * Release the write lock of a chunk. must be acquired with a previous operation before issuing this operation
+     * Release the write lock of a chunk AFTER the operation. Requires that the write lock was previously acquired.
      */
-    RELEASE_AFTER_OP,
+    WRITE_LOCK_REL_POST_OP,
 
     /**
-     * Acquire, execute operation, then release the write lock on get/put operations
+     * Execute the operation fully write locked by acquiring the write lock before the operation and releasing it
+     * after the operation has finished
      */
-    ACQUIRE_OP_RELEASE
+    WRITE_LOCK_ACQ_OP_REL,
+
+    /**
+     * Acquire the read lock of a chunk BEFORE the operation and keep it until it is released by another
+     * lock/operation call
+     */
+    READ_LOCK_ACQ_PRE_OP,
+
+    /**
+     * Release the read lock of a chunk AFTER the operation. Requires that the read lock was previously acquired.
+     */
+    READ_LOCK_REL_POST_OP,
+
+    /**
+     * Execute the operation fully read locked by acquiring the read lock before the operation and releasing it
+     * after the operation has finished
+     */
+    READ_LOCK_ACQ_OP_REL,
+
+    /**
+     * Swap the currently acquired read lock for a write lock before executing the operation
+     */
+    SWAP_READ_FOR_WRITE_PRE_OP,
+
+    /**
+     * Swap the currently acquired read lock for a write lock after the operation is executed
+     */
+    SWAP_READ_FOR_WRITE_POST_OP,
+
+    /**
+     * Swap the currently acquired write lock for a read lock before executing the operation
+     */
+    SWAP_WRITE_FOR_READ_PRE_OP,
+
+    /**
+     * Swap the currently acquired write lock for a read lock after the operation is executed
+     */
+    SWAP_WRITE_FOR_READ_POST_OP,
 }
