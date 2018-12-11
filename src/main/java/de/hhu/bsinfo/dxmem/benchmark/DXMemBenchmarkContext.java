@@ -48,7 +48,7 @@ public class DXMemBenchmarkContext implements BenchmarkContext {
     @Override
     public void put(final AbstractChunk[] p_chunks) {
         for (AbstractChunk chunk : p_chunks) {
-            CliContext.getInstance().getMemory().put().put(chunk, ChunkLockOperation.ACQUIRE_OP_RELEASE, -1);
+            CliContext.getInstance().getMemory().put().put(chunk);
         }
     }
 
