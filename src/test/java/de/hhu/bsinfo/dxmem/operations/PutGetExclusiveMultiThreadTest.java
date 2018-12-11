@@ -98,7 +98,7 @@ public class PutGetExclusiveMultiThreadTest {
     private void putGetExclusive(final DXMem p_memory, final ChunkByteArray p_chunk) {
         p_chunk.getData()[0] = (byte) Thread.currentThread().getId();
 
-        p_memory.put().put(p_chunk, ChunkLockOperation.ACQUIRE_BEFORE_OP, -1);
+        p_memory.put().put(p_chunk);
 
         Assert.assertTrue(p_chunk.isStateOk());
 
@@ -108,7 +108,7 @@ public class PutGetExclusiveMultiThreadTest {
 
         }
 
-        p_memory.get().get(p_chunk, ChunkLockOperation.RELEASE_AFTER_OP, -1);
+        p_memory.get().get(p_chunk);
 
         Assert.assertTrue(p_chunk.isStateOk());
 
