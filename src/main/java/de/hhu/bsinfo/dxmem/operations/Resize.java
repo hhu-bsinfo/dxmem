@@ -61,6 +61,25 @@ public class Resize {
      * @return True if succcessful, false on failure
      */
     public ChunkState resize(final long p_cid, final int p_newSize) {
+        return resize(p_cid, p_newSize, ChunkLockOperation.WRITE_LOCK_ACQ_OP_REL, -1);
+    }
+
+    /**
+     * Resize an existing chunk
+     *
+     * @param p_cid
+     *         CID of chunk to resize
+     * @param p_newSize
+     *         New size for chunk
+     * @param p_lockOperation
+     *         Lock operation to execute for chunk to resize
+     * @param p_lockTimeoutMs
+     *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
+     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
+     * @return True if succcessful, false on failure
+     */
+    public ChunkState resize(final long p_cid, final int p_newSize, final ChunkLockOperation p_lockOperation,
+            final int p_lockTimeoutMs) {
         assert p_newSize > 0;
 
         if (m_context.isChunkLockDisabled()) {
@@ -84,7 +103,7 @@ public class Resize {
         }
 
         LockManager.LockStatus lockStatus = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
-                ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP, -1);
+                p_lockOperation, p_lockTimeoutMs);
 
         // use write lock because we might have to change the address and modify metadata
         if (lockStatus != LockManager.LockStatus.OK) {
@@ -99,7 +118,7 @@ public class Resize {
         // update cid table entry
         m_context.getCIDTable().entryUpdate(tableEntry);
 
-        LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry, ChunkLockOperation.WRITE_LOCK_REL_POST_OP, -1);
+        LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry, p_lockOperation, p_lockTimeoutMs);
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
 

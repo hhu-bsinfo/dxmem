@@ -23,8 +23,10 @@ import de.hhu.bsinfo.dxmem.AllocationException;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.core.LockManager;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 import de.hhu.bsinfo.dxutils.stats.ValuePool;
@@ -75,6 +77,19 @@ public final class Create {
      * @return On success, CID assigned to the allocated memory for the chunk, ChunkID.INVALID_ID on failure
      */
     public long create(final int p_size) {
+        return create(p_size, ChunkLockOperation.NONE);
+    }
+
+    /**
+     * Create a new chunk
+     *
+     * @param p_size
+     *         Size of the chunk to create (payload size)
+     * @param p_lockOperation
+     *         Lock operation to execute right after the chunk is created
+     * @return On success, CID assigned to the allocated memory for the chunk, ChunkID.INVALID_ID on failure
+     */
+    public long create(final int p_size, final ChunkLockOperation p_lockOperation) {
         assert p_size > 0;
 
         CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
@@ -96,6 +111,17 @@ public final class Create {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             throw new AllocationException("Allocation of block of memory for LID table failed. Out of memory.");
+        }
+
+        // This is actually
+        LockManager.LockStatus status = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+                p_lockOperation, -1);
+
+        // this should never fail because the chunk was just created and the defragmentation thread lock is still
+        // acquired
+        if (status != LockManager.LockStatus.OK) {
+            throw new IllegalStateException("Executing lock operation after create op " + p_lockOperation +
+                    " for cid " + ChunkID.toHexString(cid) + " failed: " + status);
         }
 
         m_context.getDefragmenter().releaseApplicationThreadLock();
@@ -123,6 +149,29 @@ public final class Create {
      */
     public int create(final long[] p_chunkIDs, final int p_offset, final int p_count, final int p_size,
             final boolean p_consecutiveIDs) {
+        return create(p_chunkIDs, p_offset, p_count, p_size, p_consecutiveIDs, ChunkLockOperation.NONE);
+    }
+
+    /**
+     * Create one or multiple chunks of the same size
+     *
+     * @param p_chunkIDs
+     *         Pre-allocated array for the CIDs returned
+     * @param p_offset
+     *         Offset in array to start putting the CIDs to
+     * @param p_count
+     *         Number of chunks to allocate
+     * @param p_size
+     *         Size of a single chunk
+     * @param p_consecutiveIDs
+     *         True to enforce consecutive CIDs for all chunks to allocate, false might assign non
+     *         consecutive CIDs if available.
+     * @param p_lockOperation
+     *         Lock operation to execute for every chunk right after the chunks are created
+     * @return Number of chunks successfully created
+     */
+    public int create(final long[] p_chunkIDs, final int p_offset, final int p_count, final int p_size,
+            final boolean p_consecutiveIDs, final ChunkLockOperation p_lockOperation) {
         assert p_size > 0;
         assert p_count > 0;
         assert p_offset >= 0;
@@ -159,6 +208,16 @@ public final class Create {
                 }
 
                 successfulMallocs = i;
+            }
+
+            LockManager.LockStatus status = LockManager.executeAfterOp(m_context.getCIDTable(), entries[i],
+                    p_lockOperation, -1);
+
+            // this should never fail because the chunk was just created and the defragmentation thread lock is still
+            // acquired
+            if (status != LockManager.LockStatus.OK) {
+                throw new IllegalStateException("Executing lock operation after create op " + p_lockOperation +
+                        " for cid " + ChunkID.toHexString(p_chunkIDs[p_offset + i]) + " failed: " + status);
             }
         }
 
@@ -201,6 +260,28 @@ public final class Create {
      */
     public int create(final long[] p_chunkIDs, final int p_offset, final boolean p_consecutiveIDs,
             final int... p_sizes) {
+        return create(p_chunkIDs, p_offset, p_consecutiveIDs, ChunkLockOperation.NONE, p_sizes);
+    }
+
+    /**
+     * Create one or multiple chunks with different sizes
+     *
+     * @param p_chunkIDs
+     *         Pre-allocated array for the CIDs returned
+     * @param p_offset
+     *         Offset in array to start putting the CIDs to
+     * @param p_consecutiveIDs
+     *         True to enforce consecutive CIDs for all chunks to allocate, false might assign non
+     *         consecutive CIDs if available.
+     * @param p_sizes
+     *         One or multiple (different) sizes. The amount of sizes declared here denotes the number of
+     *         chunks to create
+     * @param p_lockOperation
+     *         Lock operation to execute for every chunk right after the chunks are created
+     * @return Number of chunks successfully created
+     */
+    public int create(final long[] p_chunkIDs, final int p_offset, final boolean p_consecutiveIDs,
+            final ChunkLockOperation p_lockOperation, final int... p_sizes) {
         assert p_chunkIDs != null;
         assert p_offset >= 0;
         assert p_sizes != null;
@@ -237,6 +318,16 @@ public final class Create {
                 }
 
                 successfulMallocs = i;
+            }
+
+            LockManager.LockStatus status = LockManager.executeAfterOp(m_context.getCIDTable(), entries[i],
+                    p_lockOperation, -1);
+
+            // this should never fail because the chunk was just created and the defragmentation thread lock is still
+            // acquired
+            if (status != LockManager.LockStatus.OK) {
+                throw new IllegalStateException("Executing lock operation after create op " + p_lockOperation +
+                        " for cid " + ChunkID.toHexString(p_chunkIDs[p_offset + i]) + " failed: " + status);
             }
         }
 
@@ -279,6 +370,28 @@ public final class Create {
      */
     public int create(final int p_offset, final int p_count, final boolean p_consecutiveIDs,
             final AbstractChunk... p_chunks) {
+        return create(p_offset, p_count, p_consecutiveIDs, ChunkLockOperation.NONE, p_chunks);
+    }
+
+    /**
+     * Create one or multiple chunks using Chunk instances (with different sizes)
+     *
+     * @param p_offset
+     *         Offset in array to start putting the CIDs to
+     * @param p_count
+     *         Number of chunks to create (might be less than objects provided)
+     * @param p_consecutiveIDs
+     *         True to enforce consecutive CIDs for all chunks to allocate, false might assign non
+     *         consecutive CIDs if available.
+     * @param p_lockOperation
+     *         Lock operation to execute for every chunk right after the chunks are created
+     * @param p_chunks
+     *         Instances of chunk objects to allocate storage for. On success, the CID is assigned to the object
+     *         and the state is set to OK.
+     * @return Number of chunks successfully created. If less than expected, check the chunk objects states for errors.
+     */
+    public int create(final int p_offset, final int p_count, final boolean p_consecutiveIDs,
+            final ChunkLockOperation p_lockOperation, final AbstractChunk... p_chunks) {
         assert p_chunks != null;
 
         long[] cids = new long[p_count];
@@ -288,7 +401,7 @@ public final class Create {
             sizes[i] = p_chunks[p_offset + i].sizeofObject();
         }
 
-        int successfullMallocs = create(cids, 0, p_consecutiveIDs, sizes);
+        int successfullMallocs = create(cids, 0, p_consecutiveIDs, p_lockOperation, sizes);
 
         for (int i = 0; i < successfullMallocs; i++) {
             p_chunks[p_offset + i].setID(cids[i]);

@@ -20,10 +20,11 @@ import de.hhu.bsinfo.dxmem.AllocationException;
 import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
+import de.hhu.bsinfo.dxmem.core.LockManager;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
 import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Value;
 import de.hhu.bsinfo.dxutils.stats.ValuePool;
 
 /**
@@ -53,10 +54,6 @@ public class CreateReserved {
         m_context = p_context;
     }
 
-    // DO NOT pass arbitrary IDs as the first parameter. use the reserve operation to generate
-    // chunk IDs and reserve them
-    // assigning arbitrary values will definitely break something
-
     /**
      * Allocate memory for a reserved CID. DO NOT pass arbitrary CIDs to this function. Always use the Reserve operation
      * to get CIDs which can be used with this operation. Using arbitrary CIDs will definitely break the subsystem.
@@ -67,6 +64,21 @@ public class CreateReserved {
      *         Size of the chunk to allocate
      */
     public void createReserved(final long p_cid, final int p_size) {
+        createReserved(p_cid, p_size);
+    }
+
+    /**
+     * Allocate memory for a reserved CID. DO NOT pass arbitrary CIDs to this function. Always use the Reserve operation
+     * to get CIDs which can be used with this operation. Using arbitrary CIDs will definitely break the subsystem.
+     *
+     * @param p_cid
+     *         Reserved CID to allocate memory for
+     * @param p_size
+     *         Size of the chunk to allocate
+     * @param p_lockOperation
+     *         Lock operation to execute right after the chunk is created
+     */
+    public void createReserved(final long p_cid, final int p_size, final ChunkLockOperation p_lockOperation) {
         assert p_cid != ChunkID.INVALID_ID;
         assert p_size > 0;
 
@@ -88,14 +100,20 @@ public class CreateReserved {
             throw new AllocationException("Allocation of block of memory for LID table failed. Out of memory.");
         }
 
+        LockManager.LockStatus status = LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry,
+                p_lockOperation, -1);
+
+        // this should never fail because the chunk was just created and the defragmentation thread lock is still
+        // acquired
+        if (status != LockManager.LockStatus.OK) {
+            throw new IllegalStateException("Executing lock operation after create op " + p_lockOperation +
+                    " for cid " + ChunkID.toHexString(p_cid) + " failed: " + status);
+        }
+
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         SOP_CREATE_RESERVE.inc();
     }
-
-    // DO NOT pass arbitrary IDs as the first parameter. use the reserve operation to generate
-    // chunk IDs and reserve them
-    // assigning arbitrary values will definitely break something
 
     /**
      * Allocate memory for a reserved CID. DO NOT pass arbitrary CIDs to this function. Always use the Reserve operation
@@ -116,6 +134,30 @@ public class CreateReserved {
      */
     public int createReserved(final long[] p_cids, final long[] p_addresses, final int[] p_sizes,
             final int p_sizesOffset, final int p_sizesLength) {
+        return createReserved(p_cids, p_addresses, p_sizes, p_sizesOffset, p_sizesLength, ChunkLockOperation.NONE);
+    }
+
+    /**
+     * Allocate memory for a reserved CID. DO NOT pass arbitrary CIDs to this function. Always use the Reserve operation
+     * to get CIDs which can be used with this operation. Using arbitrary CIDs will definitely break the subsystem.
+     * Exception: Recovery of non local chunks
+     *
+     * @param p_cids
+     *         Array of reserved (or recovered) CIDs to allocate memory for
+     * @param p_addresses
+     *         Optional (can be null): Array to return the raw addresses of the allocate chunks
+     * @param p_sizes
+     *         Sizes to allocate chunks for
+     * @param p_sizesOffset
+     *         Start offset in size array
+     * @param p_sizesLength
+     *         Number of elements to consider of size array
+     * @param p_lockOperation
+     *         Lock operation to execute for every chunk right after the chunks are created
+     * @return Number of chunks successfully created
+     */
+    public int createReserved(final long[] p_cids, final long[] p_addresses, final int[] p_sizes,
+            final int p_sizesOffset, final int p_sizesLength, final ChunkLockOperation p_lockOperation) {
         assert p_cids != null;
         // p_addresses is optional
         assert p_sizes != null;
@@ -142,6 +184,16 @@ public class CreateReserved {
                 }
 
                 successfulMallocs = i;
+            }
+
+            LockManager.LockStatus status = LockManager.executeAfterOp(m_context.getCIDTable(), entries[i],
+                    p_lockOperation, -1);
+
+            // this should never fail because the chunk was just created and the defragmentation thread lock is still
+            // acquired
+            if (status != LockManager.LockStatus.OK) {
+                throw new IllegalStateException("Executing lock operation after create op " + p_lockOperation +
+                        " for cid " + ChunkID.toHexString(p_cids[i]) + " failed: " + status);
             }
         }
 
@@ -171,6 +223,25 @@ public class CreateReserved {
      * @return Number of chunks successfully created
      */
     public int createReserved(final AbstractChunk[] p_ds, final long[] p_addresses) {
+        return createReserved(p_ds, p_addresses, ChunkLockOperation.NONE);
+    }
+
+    /**
+     * Allocate memory for a reserved chunk. DO NOT pass arbitrary chunks with CIDs to this function.
+     * Always use the Reserve operation to get CIDs which can be used with this operation.
+     * Using arbitrary CIDs will definitely break the subsystem.
+     * Exception: Recovery of non local chunks
+     *
+     * @param p_ds
+     *         Array of chunks with reserved CIDs set
+     * @param p_addresses
+     *         Optional (can be null): Array to return the raw addresses of the allocate chunks
+     * @param p_lockOperation
+     *         Lock operation to execute for every chunk right after the chunks are created
+     * @return Number of chunks successfully created
+     */
+    public int createReserved(final AbstractChunk[] p_ds, final long[] p_addresses,
+            final ChunkLockOperation p_lockOperation) {
         assert p_ds != null;
         // p_addresses is optional
 
@@ -200,6 +271,16 @@ public class CreateReserved {
                 }
 
                 successfulMallocs = i;
+            }
+
+            LockManager.LockStatus status = LockManager.executeAfterOp(m_context.getCIDTable(), entries[i],
+                    p_lockOperation, -1);
+
+            // this should never fail because the chunk was just created and the defragmentation thread lock is still
+            // acquired
+            if (status != LockManager.LockStatus.OK) {
+                throw new IllegalStateException("Executing lock operation after create op " + p_lockOperation +
+                        " for cid " + ChunkID.toHexString(p_ds[i].getID()) + " failed: " + status);
             }
         }
 
