@@ -25,6 +25,8 @@ import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.DXMemoryTestConstants;
 import de.hhu.bsinfo.dxmem.TestStrChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkByteArray;
+import de.hhu.bsinfo.dxmem.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkIDRanges;
 import de.hhu.bsinfo.dxmem.data.ChunkState;
 
 public class ResizeTest {
