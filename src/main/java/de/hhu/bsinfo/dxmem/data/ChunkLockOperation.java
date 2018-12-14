@@ -17,7 +17,11 @@
 package de.hhu.bsinfo.dxmem.data;
 
 /**
- * Lock operations to execute
+ * Lock operations to execute. Encode as enum to get tableswitches (jumptables) in bytecode for low over dispatch.
+ *
+ * Not lock operation is supported by every memory operation. Check the dedicated assertLockOperationSupport methods
+ * of each operation class. Some lock operations are not supported either because it's not possible or doesn't make
+ * sense.
  */
 public enum ChunkLockOperation {
     /**
@@ -33,56 +37,97 @@ public enum ChunkLockOperation {
     NONE,
 
     /**
-     * Acquire the write lock of a chunk BEFORE the operation and keep it until it is released by another
-     * lock/operation call
+     * Acquire the write lock before the operation
      */
     WRITE_LOCK_ACQ_PRE_OP,
 
     /**
-     * Release the write lock of a chunk AFTER the operation. Requires that the write lock was previously acquired.
+     * Swap an already acquired write lock for a read lock before the operation
+     */
+    WRITE_LOCK_SWAP_PRE_OP,
+
+    /**
+     * Acquire the write lock after the operation
+     */
+    WRITE_LOCK_ACQ_POST_OP,
+
+    /**
+     * Release the already acquired write lock after the operation
      */
     WRITE_LOCK_REL_POST_OP,
 
     /**
-     * Execute the operation fully write locked by acquiring the write lock before the operation and releasing it
-     * after the operation has finished
+     * Swap the already acquired write lock for a read lock after the operation
+     */
+    WRITE_LOCK_SWAP_POST_OP,
+
+    /**
+     * Acquire the write lock before the operation, execute the operation and then release the write lock after the
+     * operation is finished
      */
     WRITE_LOCK_ACQ_OP_REL,
 
     /**
-     * Acquire the read lock of a chunk BEFORE the operation and keep it until it is released by another
-     * lock/operation call
+     * Swap an already acquired write lock for a read lock before the operation and release the read lock after
+     * the operation
+     */
+    WRITE_LOCK_SWAP_OP_REL,
+
+    /**
+     * Acquire the write lock before the operation and swap it for a read lock after the operation is finished
+     */
+    WRITE_LOCK_ACQ_OP_SWAP,
+
+    /**
+     * Acquire a read lock before the operation
      */
     READ_LOCK_ACQ_PRE_OP,
 
     /**
-     * Release the read lock of a chunk AFTER the operation. Requires that the read lock was previously acquired.
+     * Swap an already acquired read lock before the operation for a write lock.
+     *
+     * Note: A fully atomic read lock swap operation is not possible (like on the write lock swap). The swap
+     * releases the read lock in a separate operation before acquiring the write lock.
+     */
+    READ_LOCK_SWAP_PRE_OP,
+
+    /**
+     * Acquire a read lock after the operation
+     */
+    READ_LOCK_ACQ_POST_OP,
+
+    /**
+     * Release an already acquired read lock after the operation
      */
     READ_LOCK_REL_POST_OP,
 
     /**
-     * Execute the operation fully read locked by acquiring the read lock before the operation and releasing it
-     * after the operation has finished
+     * Swap an already acquired read lock after the operation for a write lock.
+     *
+     * Note: A fully atomic read lock swap operation is not possible (like on the write lock swap). The swap
+     * releases the read lock in a separate operation before acquiring the write lock.
+     */
+    READ_LOCK_SWAP_POST_OP,
+
+    /**
+     * Acquire a read lock before the operation and release it after the operation is finished
      */
     READ_LOCK_ACQ_OP_REL,
 
     /**
-     * Swap the currently acquired read lock for a write lock before executing the operation
+     * Swap an already acquired read lock before the operation and release it after the operation is finished.
+     *
+     * Note: A fully atomic read lock swap operation is not possible (like on the write lock swap). The swap
+     * releases the read lock in a separate operation before acquiring the write lock.
      */
-    SWAP_READ_FOR_WRITE_PRE_OP,
+    READ_LOCK_SWAP_OP_REL,
 
     /**
-     * Swap the currently acquired read lock for a write lock after the operation is executed
+     * Acquire a read lock before the operation, execute the operation and swap the read lock after the operation is
+     * finished.
+     *
+     * Note: A fully atomic read lock swap operation is not possible (like on the write lock swap). The swap
+     * releases the read lock in a separate operation before acquiring the write lock.
      */
-    SWAP_READ_FOR_WRITE_POST_OP,
-
-    /**
-     * Swap the currently acquired write lock for a read lock before executing the operation
-     */
-    SWAP_WRITE_FOR_READ_PRE_OP,
-
-    /**
-     * Swap the currently acquired write lock for a read lock after the operation is executed
-     */
-    SWAP_WRITE_FOR_READ_POST_OP,
+    READ_LOCK_ACQ_OP_SWAP,
 }

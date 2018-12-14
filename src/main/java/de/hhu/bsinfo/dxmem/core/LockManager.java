@@ -13,7 +13,7 @@ import de.hhu.bsinfo.dxutils.stats.ValuePool;
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 11.12.2018
  */
-public class LockManager {
+public final class LockManager {
     private static final Logger LOGGER = LogManager.getFormatterLogger(LockManager.class.getSimpleName());
 
     private static final ValuePool SOP_READ_LOCK_REQS = new ValuePool(DXMem.class, "ReadLockReqs");
@@ -22,6 +22,12 @@ public class LockManager {
     private static final ValuePool SOP_WRITE_LOCK_REQS = new ValuePool(DXMem.class, "WriteLockReqs");
     private static final ValuePool SOP_WRITE_LOCK_RETRIES = new ValuePool(DXMem.class, "WriteLockRetries");
     private static final ValuePool SOP_WRITE_LOCK_TIMEOUTS = new ValuePool(DXMem.class, "WriteLockTimeouts");
+    private static final ValuePool SOP_SWAP_WRITE_LOCK_REQS = new ValuePool(DXMem.class, "SwapWriteLockReqs");
+    private static final ValuePool SOP_SWAP_WRITE_LOCK_RETRIES = new ValuePool(DXMem.class, "SwapWriteLockRetries");
+    private static final ValuePool SOP_SWAP_WRITE_LOCK_TIMEOUTS = new ValuePool(DXMem.class, "SwapWriteLockTimeouts");
+    private static final ValuePool SOP_SWAP_READ_LOCK_REQS = new ValuePool(DXMem.class, "SwapReadLockReqs");
+    private static final ValuePool SOP_SWAP_READ_LOCK_RETRIES = new ValuePool(DXMem.class, "SwapReadLockRetries");
+    private static final ValuePool SOP_SWAP_READ_LOCK_TIMEOUTS = new ValuePool(DXMem.class, "SwapReadLockTimeouts");
 
     static {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_READ_LOCK_REQS);
@@ -30,6 +36,12 @@ public class LockManager {
         StatisticsManager.get().registerOperation(DXMem.class, SOP_WRITE_LOCK_REQS);
         StatisticsManager.get().registerOperation(DXMem.class, SOP_WRITE_LOCK_RETRIES);
         StatisticsManager.get().registerOperation(DXMem.class, SOP_WRITE_LOCK_TIMEOUTS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_SWAP_WRITE_LOCK_REQS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_SWAP_WRITE_LOCK_RETRIES);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_SWAP_WRITE_LOCK_TIMEOUTS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_SWAP_READ_LOCK_REQS);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_SWAP_READ_LOCK_RETRIES);
+        StatisticsManager.get().registerOperation(DXMem.class, SOP_SWAP_READ_LOCK_TIMEOUTS);
     }
 
     /**
@@ -66,22 +78,32 @@ public class LockManager {
         // note: this should be turned into some sort of jumptable by the JIT making it not as expensive as it looks
         switch (p_op) {
             case NONE:
+            case WRITE_LOCK_ACQ_POST_OP:
             case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_POST_OP:
             case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
                 return LockStatus.OK;
 
             case WRITE_LOCK_ACQ_PRE_OP:
             case WRITE_LOCK_ACQ_OP_REL:
+            case WRITE_LOCK_ACQ_OP_SWAP:
                 return acquireWriteLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
+            case WRITE_LOCK_SWAP_PRE_OP:
+            case WRITE_LOCK_SWAP_OP_REL:
+                return swapWriteLockForReadLock(p_cidTable, p_entry, p_lockTimeoutMs);
 
             case READ_LOCK_ACQ_PRE_OP:
             case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_ACQ_OP_SWAP:
                 return acquireReadLock(p_cidTable, p_entry, p_lockTimeoutMs);
 
-            case SWAP_READ_FOR_WRITE_PRE_OP:
-            case SWAP_READ_FOR_WRITE_POST_OP:
-            case SWAP_WRITE_FOR_READ_PRE_OP:
-            case SWAP_WRITE_FOR_READ_POST_OP:
+            case READ_LOCK_SWAP_PRE_OP:
+            case READ_LOCK_SWAP_OP_REL:
+                return swapReadLockForWriteLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
             default:
                 throw new IllegalStateException("Unhandled lock operation");
         }
@@ -106,23 +128,37 @@ public class LockManager {
         switch (p_op) {
             case NONE:
             case WRITE_LOCK_ACQ_PRE_OP:
+            case WRITE_LOCK_SWAP_PRE_OP:
             case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_SWAP_PRE_OP:
                 return LockStatus.OK;
+
+            case WRITE_LOCK_ACQ_POST_OP:
+                return acquireWriteLock(p_cidTable, p_entry, p_lockTimeoutMs);
 
             case WRITE_LOCK_REL_POST_OP:
             case WRITE_LOCK_ACQ_OP_REL:
+            case WRITE_LOCK_SWAP_OP_REL:
                 releaseWriteLock(p_cidTable, p_entry);
                 return LockStatus.OK;
 
+            case WRITE_LOCK_SWAP_POST_OP:
+            case WRITE_LOCK_ACQ_OP_SWAP:
+                return swapWriteLockForReadLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
+            case READ_LOCK_ACQ_POST_OP:
+                return acquireReadLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
             case READ_LOCK_REL_POST_OP:
             case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_SWAP_OP_REL:
                 releaseReadLock(p_cidTable, p_entry);
                 return LockStatus.OK;
 
-            case SWAP_READ_FOR_WRITE_PRE_OP:
-            case SWAP_READ_FOR_WRITE_POST_OP:
-            case SWAP_WRITE_FOR_READ_PRE_OP:
-            case SWAP_WRITE_FOR_READ_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_OP_SWAP:
+                return swapReadLockForWriteLock(p_cidTable, p_entry, p_lockTimeoutMs);
+
             default:
                 throw new IllegalStateException("Unhandled lock operation");
         }
@@ -152,6 +188,8 @@ public class LockManager {
         SOP_READ_LOCK_REQS.inc();
 
         int retries = 0;
+
+        p_entry.currentStateInitialState();
 
         while (true) {
             // entry turned invalid, e.g. chunk was deleted
@@ -255,6 +293,8 @@ public class LockManager {
 
         int retries = 0;
 
+        p_entry.currentStateInitialState();
+
         while (true) {
             // entry turned invalid, e.g. chunk was deleted
             if (!p_entry.isValid()) {
@@ -351,6 +391,218 @@ public class LockManager {
             }
 
             Thread.yield();
+            p_cidTable.entryReread(p_entry);
+        }
+    }
+
+    /**
+     * Swap an already acquired write lock for a read lock
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to swap lock on
+     * @param p_retryTimeoutMs
+     *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
+     * @return Lock status
+     */
+    private static LockStatus swapWriteLockForReadLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
+            final int p_retryTimeoutMs) {
+        long startTime = 0;
+
+        if (p_retryTimeoutMs > 0) {
+            startTime = System.nanoTime();
+        }
+
+        SOP_SWAP_WRITE_LOCK_REQS.inc();
+
+        int retries = 0;
+
+        p_entry.currentStateInitialState();
+
+        while (true) {
+            // entry turned invalid, e.g. chunk was deleted
+            if (!p_entry.isValid()) {
+                return LockStatus.INVALID;
+            }
+
+            if (!p_entry.isWriteLockAcquired()) {
+                throw new IllegalStateException("Swapping write for read lock not possible, no write lock acquired");
+            }
+
+            // lock swap
+            p_entry.releaseWriteLock();
+
+            if (p_entry.acquireReadLock()) {
+                // read lock acquired, try to persist state
+                if (p_cidTable.entryAtomicUpdate(p_entry)) {
+                    if (retries > 0) {
+                        SOP_SWAP_WRITE_LOCK_RETRIES.add(retries);
+                    }
+
+                    return LockStatus.OK;
+                }
+            } else {
+                // log once to avoid flooding the log on retries
+                if (retries == 0) {
+                    LOGGER.warn("Max number of read locks already acquired for %s", p_entry);
+                }
+            }
+            // else: no locks available because too many readers active, we have to wait
+
+            if (p_retryTimeoutMs >= 0) {
+                if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >= p_retryTimeoutMs * 1000 * 1000) {
+                    // return with current state
+                    p_cidTable.entryReread(p_entry);
+                    SOP_SWAP_WRITE_LOCK_TIMEOUTS.inc();
+                    return LockStatus.TIMEOUT;
+                }
+            }
+
+            Thread.yield();
+            retries++;
+
+            p_cidTable.entryReread(p_entry);
+        }
+    }
+
+    /**
+     * Swap an already acquired read lock for a write lock
+     *
+     * @param p_cidTable
+     *         CIDTable instance
+     * @param p_entry
+     *         Chunk entry of CIDTable to swap lock on
+     * @param p_retryTimeoutMs
+     *         -1 = infinite, 0 = one shot, &gt; 0 timeout in ms
+     * @return Lock status
+     */
+    private static LockStatus swapReadLockForWriteLock(final CIDTable p_cidTable, final CIDTableChunkEntry p_entry,
+            final int p_retryTimeoutMs) {
+        long startTime = 0;
+
+        if (p_retryTimeoutMs > 0) {
+            startTime = System.nanoTime();
+        }
+
+        SOP_SWAP_READ_LOCK_REQS.inc();
+
+        int retries = 0;
+
+        p_entry.currentStateInitialState();
+
+        // important: a fully atomic read to write lock swap is not possible and quickly results in deadlocks
+        // (lock demotion from write -> read is not an issue here)
+        // example: two threads have a read lock acquired and both want to swap it for a write lock. the first
+        // thread is successful in doing so and is waiting for the second thread to release his read lock.
+        // but, the second thread can't because it also wants to execute the atomic swap and can't acquire the
+        // write lock because the first thread already acquired it
+        //
+        // thus, this lock swap is implemented as an "optimized" version of release read lock, acquire write lock
+        // instead of a true atomic lock swap
+
+        // release read lock, first
+        while (true) {
+            // invalid state, chunk was deleted but a lock was still acquired
+            if (!p_entry.isValid()) {
+                throw new IllegalStateException("Release read lock of deleted chunk " + p_entry);
+            }
+
+            // write lock might be acquired: writer thread blocks all further reader threads and waits for
+            // current readers in critical section to exit
+            if (!p_entry.areReadLocksAcquired()) {
+                throw new IllegalStateException("Releasing read lock with no read locks acquired for " + p_entry);
+            }
+
+            p_entry.releaseReadLock();
+
+            // read lock released, try to persist state
+            if (p_cidTable.entryAtomicUpdate(p_entry)) {
+                break;
+            }
+
+            Thread.yield();
+            p_cidTable.entryReread(p_entry);
+        }
+
+        p_entry.currentStateInitialState();
+
+        // acquire write lock
+        while (true) {
+            // entry turned invalid, e.g. chunk was deleted
+            if (!p_entry.isValid()) {
+                return LockStatus.INVALID;
+            }
+
+            if (p_entry.acquireWriteLock()) {
+                // try persist write lock acquired state
+                if (p_cidTable.entryAtomicUpdate(p_entry)) {
+                    // wait for all read locks to be released
+                    while (p_entry.getReadLockCounter() > 0) {
+                        if (p_retryTimeoutMs >= 0) {
+                            if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >=
+                                    p_retryTimeoutMs * 1000 * 1000) {
+                                // rollback: because we have the write lock acquired, no threads were able to
+                                // acquire read locks and we can easily swap the write lock for a read lock to
+                                // revert the changes
+                                assert p_entry.isWriteLockAcquired();
+
+                                p_entry.releaseWriteLock();
+
+                                if (!p_entry.acquireReadLock()) {
+                                    throw new IllegalStateException("No read lock for rollback of lock swap available");
+                                }
+
+                                // enforce this state in order to get out of here with a consistent lock state
+                                while (!p_cidTable.entryAtomicUpdate(p_entry)) {
+                                    Thread.yield();
+                                    p_cidTable.entryReread(p_entry);
+
+                                    assert p_entry.isWriteLockAcquired();
+
+                                    p_entry.releaseWriteLock();
+
+                                    if (!p_entry.acquireReadLock()) {
+                                        throw new IllegalStateException(
+                                                "No read lock for rollback of lock swap available");
+                                    }
+                                }
+
+                                // return with current state
+                                p_cidTable.entryReread(p_entry);
+                                SOP_READ_LOCK_TIMEOUTS.inc();
+                                return LockStatus.TIMEOUT;
+                            }
+                        }
+
+                        Thread.yield();
+                        retries++;
+                        p_cidTable.entryReread(p_entry);
+                    }
+
+                    assert !p_entry.areReadLocksAcquired();
+                    assert p_entry.isWriteLockAcquired();
+
+                    if (retries > 0) {
+                        SOP_READ_LOCK_RETRIES.add(retries);
+                    }
+
+                    // write locked with no readers in section
+                    return LockStatus.OK;
+                }
+            }
+            // else: write lock already acquired
+
+            if (p_retryTimeoutMs >= 0) {
+                if (p_retryTimeoutMs == 0 || System.nanoTime() - startTime >= p_retryTimeoutMs * 1000 * 1000) {
+                    // return with current state
+                    p_cidTable.entryReread(p_entry);
+                    return LockStatus.TIMEOUT;
+                }
+            }
+
+            Thread.yield();
+            retries++;
             p_cidTable.entryReread(p_entry);
         }
     }
