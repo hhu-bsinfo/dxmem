@@ -21,6 +21,7 @@ import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.HeapDataStructureImExporter;
 import de.hhu.bsinfo.dxmem.core.LockManager;
+import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
@@ -85,6 +86,8 @@ public class Put {
      */
     public boolean put(final AbstractChunk p_chunk, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
+        assert assertLockOperationSupport(p_lockOperation);
+
         if (p_chunk.getID() == ChunkID.INVALID_ID) {
             p_chunk.setState(ChunkState.INVALID_ID);
             SOP_PUT_INVALID_ID.inc();
@@ -164,6 +167,8 @@ public class Put {
      */
     public ChunkState put(final long p_chunkID, final byte[] p_data, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
+        assert assertLockOperationSupport(p_lockOperation);
+
         if (p_chunkID == ChunkID.INVALID_ID) {
             SOP_PUT_INVALID_ID.inc();
             return ChunkState.INVALID_ID;
@@ -221,5 +226,39 @@ public class Put {
         SOP_PUT.inc();
 
         return ChunkState.OK;
+    }
+
+    /**
+     * Assert the lock operation used
+     *
+     * @param p_lockOperation Lock operation to use with the current op
+     * @return True if ok, exception thrown if not supported
+     */
+    private boolean assertLockOperationSupport(final ChunkLockOperation p_lockOperation) {
+        switch (p_lockOperation) {
+            case NONE:
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_SWAP_POST_OP:
+            case WRITE_LOCK_ACQ_OP_REL:
+            case WRITE_LOCK_ACQ_OP_SWAP:
+            case READ_LOCK_SWAP_PRE_OP:
+            case READ_LOCK_SWAP_OP_REL:
+                return true;
+
+            case WRITE_LOCK_SWAP_PRE_OP:
+            case WRITE_LOCK_SWAP_OP_REL:
+            case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_ACQ_OP_SWAP:
+            case WRITE_LOCK_ACQ_POST_OP:
+            case READ_LOCK_ACQ_POST_OP:
+                throw new MemoryRuntimeException("Unsupported lock operation on create op: " + p_lockOperation);
+
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
     }
 }

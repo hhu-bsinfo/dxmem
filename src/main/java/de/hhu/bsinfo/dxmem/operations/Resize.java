@@ -80,6 +80,7 @@ public class Resize {
      */
     public ChunkState resize(final long p_cid, final int p_newSize, final ChunkLockOperation p_lockOperation,
             final int p_lockTimeoutMs) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_newSize > 0;
 
         if (m_context.isChunkLockDisabled()) {
@@ -125,5 +126,39 @@ public class Resize {
         SOP_RESIZE.inc();
 
         return ChunkState.OK;
+    }
+
+    /**
+     * Assert the lock operation used
+     *
+     * @param p_lockOperation Lock operation to use with the current op
+     * @return True if ok, exception thrown if not supported
+     */
+    private boolean assertLockOperationSupport(final ChunkLockOperation p_lockOperation) {
+        switch (p_lockOperation) {
+            case NONE:
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_SWAP_POST_OP:
+            case WRITE_LOCK_ACQ_OP_REL:
+            case WRITE_LOCK_ACQ_OP_SWAP:
+            case READ_LOCK_SWAP_PRE_OP:
+            case READ_LOCK_SWAP_OP_REL:
+                return true;
+
+            case WRITE_LOCK_SWAP_PRE_OP:
+            case WRITE_LOCK_SWAP_OP_REL:
+            case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_ACQ_OP_SWAP:
+            case WRITE_LOCK_ACQ_POST_OP:
+            case READ_LOCK_ACQ_POST_OP:
+                throw new MemoryRuntimeException("Unsupported lock operation on create op: " + p_lockOperation);
+
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
     }
 }

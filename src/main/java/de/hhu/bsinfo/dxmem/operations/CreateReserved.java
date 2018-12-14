@@ -21,6 +21,7 @@ import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.LockManager;
+import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
@@ -79,6 +80,7 @@ public class CreateReserved {
      *         Lock operation to execute right after the chunk is created
      */
     public void createReserved(final long p_cid, final int p_size, final ChunkLockOperation p_lockOperation) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_cid != ChunkID.INVALID_ID;
         assert p_size > 0;
 
@@ -158,6 +160,7 @@ public class CreateReserved {
      */
     public int createReserved(final long[] p_cids, final long[] p_addresses, final int[] p_sizes,
             final int p_sizesOffset, final int p_sizesLength, final ChunkLockOperation p_lockOperation) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_cids != null;
         // p_addresses is optional
         assert p_sizes != null;
@@ -242,6 +245,7 @@ public class CreateReserved {
      */
     public int createReserved(final AbstractChunk[] p_ds, final long[] p_addresses,
             final ChunkLockOperation p_lockOperation) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_ds != null;
         // p_addresses is optional
 
@@ -295,5 +299,39 @@ public class CreateReserved {
         SOP_CREATE_RESERVE_MULTI.inc();
 
         return successfulMallocs;
+    }
+
+    /**
+     * Assert the lock operation used
+     *
+     * @param p_lockOperation Lock operation to use with the current op
+     * @return True if ok, exception thrown if not supported
+     */
+    private boolean assertLockOperationSupport(final ChunkLockOperation p_lockOperation) {
+        switch (p_lockOperation) {
+            case NONE:
+            case WRITE_LOCK_ACQ_POST_OP:
+            case READ_LOCK_ACQ_POST_OP:
+                return true;
+
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case WRITE_LOCK_SWAP_PRE_OP:
+            case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_SWAP_POST_OP:
+            case WRITE_LOCK_ACQ_OP_REL:
+            case WRITE_LOCK_SWAP_OP_REL:
+            case WRITE_LOCK_ACQ_OP_SWAP:
+            case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_SWAP_PRE_OP:
+            case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_SWAP_OP_REL:
+            case READ_LOCK_ACQ_OP_SWAP:
+                throw new MemoryRuntimeException("Unsupported lock operation on create op: " + p_lockOperation);
+
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
     }
 }

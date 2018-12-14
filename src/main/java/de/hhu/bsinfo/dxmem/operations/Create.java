@@ -24,6 +24,7 @@ import de.hhu.bsinfo.dxmem.DXMem;
 import de.hhu.bsinfo.dxmem.core.CIDTableChunkEntry;
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.LockManager;
+import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.ChunkLockOperation;
@@ -72,6 +73,20 @@ public final class Create {
     /**
      * Create a new chunk
      *
+     * @param p_ds
+     *         AbstractChunk to create/allocate memory for. On success, the resulting CID will be assigned to the
+     *         AbstractChunk and the state is set to OK. If the operation failed, the state indicates the error.
+     * @param p_lockOperation
+     *         Lock operation to execute right after the chunk is created
+     */
+    public void create(final AbstractChunk p_ds, final ChunkLockOperation p_lockOperation) {
+        p_ds.setID(create(p_ds.sizeofObject(), p_lockOperation));
+        p_ds.setState(ChunkState.OK);
+    }
+
+    /**
+     * Create a new chunk
+     *
      * @param p_size
      *         Size of the chunk to create (payload size)
      * @return On success, CID assigned to the allocated memory for the chunk, ChunkID.INVALID_ID on failure
@@ -90,6 +105,7 @@ public final class Create {
      * @return On success, CID assigned to the allocated memory for the chunk, ChunkID.INVALID_ID on failure
      */
     public long create(final int p_size, final ChunkLockOperation p_lockOperation) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_size > 0;
 
         CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
@@ -114,7 +130,7 @@ public final class Create {
         }
 
         // This is actually
-        LockManager.LockStatus status = LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry,
+        LockManager.LockStatus status = LockManager.executeAfterOp(m_context.getCIDTable(), tableEntry,
                 p_lockOperation, -1);
 
         // this should never fail because the chunk was just created and the defragmentation thread lock is still
@@ -172,6 +188,7 @@ public final class Create {
      */
     public int create(final long[] p_chunkIDs, final int p_offset, final int p_count, final int p_size,
             final boolean p_consecutiveIDs, final ChunkLockOperation p_lockOperation) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_size > 0;
         assert p_count > 0;
         assert p_offset >= 0;
@@ -282,6 +299,7 @@ public final class Create {
      */
     public int create(final long[] p_chunkIDs, final int p_offset, final boolean p_consecutiveIDs,
             final ChunkLockOperation p_lockOperation, final int... p_sizes) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_chunkIDs != null;
         assert p_offset >= 0;
         assert p_sizes != null;
@@ -392,6 +410,7 @@ public final class Create {
      */
     public int create(final int p_offset, final int p_count, final boolean p_consecutiveIDs,
             final ChunkLockOperation p_lockOperation, final AbstractChunk... p_chunks) {
+        assert assertLockOperationSupport(p_lockOperation);
         assert p_chunks != null;
 
         long[] cids = new long[p_count];
@@ -414,5 +433,39 @@ public final class Create {
         }
 
         return successfullMallocs;
+    }
+
+    /**
+     * Assert the lock operation used
+     *
+     * @param p_lockOperation Lock operation to use with the current op
+     * @return True if ok, exception thrown if not supported
+     */
+    private boolean assertLockOperationSupport(final ChunkLockOperation p_lockOperation) {
+        switch (p_lockOperation) {
+            case NONE:
+            case WRITE_LOCK_ACQ_POST_OP:
+            case READ_LOCK_ACQ_POST_OP:
+                return true;
+
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case WRITE_LOCK_SWAP_PRE_OP:
+            case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_SWAP_POST_OP:
+            case WRITE_LOCK_ACQ_OP_REL:
+            case WRITE_LOCK_SWAP_OP_REL:
+            case WRITE_LOCK_ACQ_OP_SWAP:
+            case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_SWAP_PRE_OP:
+            case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_SWAP_OP_REL:
+            case READ_LOCK_ACQ_OP_SWAP:
+                throw new MemoryRuntimeException("Unsupported lock operation on create op: " + p_lockOperation);
+
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
     }
 }

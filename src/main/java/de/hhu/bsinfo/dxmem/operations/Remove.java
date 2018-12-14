@@ -100,7 +100,26 @@ public class Remove {
      * @return On success, size of chunk removed, on failure negative ChunkState
      */
     public int remove(final AbstractChunk p_ds) {
-        int state = remove(p_ds.getID(), false);
+        int state = remove(p_ds.getID(), false, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+
+        if (state < 0) {
+            p_ds.setState(ChunkState.values()[-state]);
+        }
+
+        return state;
+    }
+
+    /**
+     * Remove a chunk
+     *
+     * @param p_ds
+     *         Chunk to remove
+     * @param p_lockOperation
+     *         Lock operation to execute before removal of the chunk
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
+    public int remove(final AbstractChunk p_ds, final ChunkLockOperation p_lockOperation) {
+        int state = remove(p_ds.getID(), false, p_lockOperation);
 
         if (state < 0) {
             p_ds.setState(ChunkState.values()[-state]);
@@ -116,10 +135,12 @@ public class Remove {
      *         Chunk to remove
      * @param p_wasMigrated
      *         True if the chunk was migrated, false otherwise
+     * @param p_lockOperation
+     *         Lock operation to execute before removal of the chunk
      * @return On success, size of chunk removed, on failure negative ChunkState
      */
-    public int remove(final AbstractChunk p_ds, final boolean p_wasMigrated) {
-        int state = remove(p_ds.getID(), p_wasMigrated);
+    public int remove(final AbstractChunk p_ds, final boolean p_wasMigrated, final ChunkLockOperation p_lockOperation) {
+        int state = remove(p_ds.getID(), p_wasMigrated, p_lockOperation);
 
         if (state < 0) {
             p_ds.setState(ChunkState.values()[-state]);
@@ -136,7 +157,20 @@ public class Remove {
      * @return On success, size of chunk removed, on failure negative ChunkState
      */
     public int remove(final long p_cid) {
-        return remove(p_cid, false);
+        return remove(p_cid, false, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+    }
+
+    /**
+     * Remove a chunk
+     *
+     * @param p_cid
+     *         CID of chunk to remove
+     * @param p_lockOperation
+     *         Lock operation to execute before removal of the chunk
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
+    public int remove(final long p_cid, final ChunkLockOperation p_lockOperation) {
+        return remove(p_cid, false, p_lockOperation);
     }
 
     /**
@@ -146,9 +180,13 @@ public class Remove {
      *         CID of chunk to remove
      * @param p_wasMigrated
      *         True if the chunk was migrated, false otherwise
+     * @param p_lockOperation
+     *         Lock operation to execute before removal of the chunk
      * @return On success, size of chunk removed, on failure negative ChunkState
      */
-    public int remove(final long p_cid, final boolean p_wasMigrated) {
+    public int remove(final long p_cid, final boolean p_wasMigrated, final ChunkLockOperation p_lockOperation) {
+        assert assertLockOperationSupport(p_lockOperation);
+
         if (m_context.isChunkLockDisabled()) {
             throw new MemoryRuntimeException("Not supporting remove operation if chunk locks are disabled");
         }
@@ -177,8 +215,8 @@ public class Remove {
         }
 
         // acquire write lock to ensure nobody is accessing the chunk while deleting it
-        if (LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP,
-                -1) != LockManager.LockStatus.OK) {
+        if (LockManager.executeBeforeOp(m_context.getCIDTable(), tableEntry, p_lockOperation, -1) !=
+                LockManager.LockStatus.OK) {
             m_context.getDefragmenter().releaseApplicationThreadLock();
 
             // someone else deleted the chunk while waiting for the lock
@@ -208,5 +246,39 @@ public class Remove {
         }
 
         return chunkSize;
+    }
+
+    /**
+     * Assert the lock operation used
+     *
+     * @param p_lockOperation Lock operation to use with the current op
+     * @return True if ok, exception thrown if not supported
+     */
+    private boolean assertLockOperationSupport(final ChunkLockOperation p_lockOperation) {
+        switch (p_lockOperation) {
+            case NONE:
+            case WRITE_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_SWAP_PRE_OP:
+                return true;
+
+            case WRITE_LOCK_SWAP_PRE_OP:
+            case WRITE_LOCK_REL_POST_OP:
+            case WRITE_LOCK_SWAP_POST_OP:
+            case WRITE_LOCK_SWAP_OP_REL:
+            case WRITE_LOCK_ACQ_OP_SWAP:
+            case WRITE_LOCK_ACQ_OP_REL:
+            case READ_LOCK_ACQ_PRE_OP:
+            case READ_LOCK_REL_POST_OP:
+            case READ_LOCK_SWAP_POST_OP:
+            case READ_LOCK_ACQ_OP_REL:
+            case READ_LOCK_SWAP_OP_REL:
+            case READ_LOCK_ACQ_OP_SWAP:
+            case WRITE_LOCK_ACQ_POST_OP:
+            case READ_LOCK_ACQ_POST_OP:
+                throw new MemoryRuntimeException("Unsupported lock operation on create op: " + p_lockOperation);
+
+            default:
+                throw new IllegalStateException("Unhandled lock operation");
+        }
     }
 }
