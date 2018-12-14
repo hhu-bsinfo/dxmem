@@ -114,6 +114,25 @@ public class Remove {
      *
      * @param p_ds
      *         Chunk to remove
+     * @param p_wasMigrated
+     *         True if the chunk was migrated, false otherwise
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
+    public int remove(final AbstractChunk p_ds, final boolean p_wasMigrated) {
+        int state = remove(p_ds.getID(), p_wasMigrated, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+
+        if (state < 0) {
+            p_ds.setState(ChunkState.values()[-state]);
+        }
+
+        return state;
+    }
+
+    /**
+     * Remove a chunk
+     *
+     * @param p_ds
+     *         Chunk to remove
      * @param p_lockOperation
      *         Lock operation to execute before removal of the chunk
      * @return On success, size of chunk removed, on failure negative ChunkState
@@ -158,6 +177,19 @@ public class Remove {
      */
     public int remove(final long p_cid) {
         return remove(p_cid, false, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
+    }
+
+    /**
+     * Remove a chunk
+     *
+     * @param p_cid
+     *         CID of chunk to remove
+     * @param p_wasMigrated
+     *         True if the chunk was migrated, false otherwise
+     * @return On success, size of chunk removed, on failure negative ChunkState
+     */
+    public int remove(final long p_cid, final boolean p_wasMigrated) {
+        return remove(p_cid, p_wasMigrated, ChunkLockOperation.WRITE_LOCK_ACQ_PRE_OP);
     }
 
     /**
