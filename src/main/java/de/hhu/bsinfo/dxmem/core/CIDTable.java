@@ -225,7 +225,7 @@ public final class CIDTable implements Importable, Exportable {
                 writeTableEntry(addressTable, index, p_entry.getValue());
 
                 // update entry state
-                p_entry.setPointer(addressTable + index * ENTRY_SIZE);
+                p_entry.set(addressTable + index * ENTRY_SIZE, p_entry.getValue());
                 return true;
             }
 
