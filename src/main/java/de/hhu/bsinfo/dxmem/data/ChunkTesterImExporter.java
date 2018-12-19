@@ -27,8 +27,10 @@ class ChunkTesterImExporter implements Importer, Exporter {
     /**
      * Constructor
      *
-     * @param p_buffer ByteBuffer with serialized chunk data for importing
-     * @param p_randomAbort True to randomly abort serialization, false otherwise
+     * @param p_buffer
+     *         ByteBuffer with serialized chunk data for importing
+     * @param p_randomAbort
+     *         True to randomly abort serialization, false otherwise
      */
     ChunkTesterImExporter(final ByteBuffer p_buffer, final boolean p_randomAbort) {
         m_buffer = ByteBuffer.allocate(p_buffer.capacity());
@@ -50,8 +52,10 @@ class ChunkTesterImExporter implements Importer, Exporter {
     /**
      * Constructor
      *
-     * @param p_chunk Chunk to export
-     * @param p_randomAbort True to randomly abort serialization, false otherwise
+     * @param p_chunk
+     *         Chunk to export
+     * @param p_randomAbort
+     *         True to randomly abort serialization, false otherwise
      */
     ChunkTesterImExporter(final AbstractChunk p_chunk, final boolean p_randomAbort) {
         m_initialSize = p_chunk.sizeofObject();
@@ -190,6 +194,22 @@ class ChunkTesterImExporter implements Importer, Exporter {
     }
 
     @Override
+    public int writeFloats(final float[] p_array) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.writeFloats(p_array);
+        m_currentPos += p_array.length * Float.BYTES;
+        return ret;
+    }
+
+    @Override
+    public int writeDoubles(final double[] p_array) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.writeDoubles(p_array);
+        m_currentPos += p_array.length * Double.BYTES;
+        return ret;
+    }
+
+    @Override
     public int writeBytes(final byte[] p_array, final int p_offset, final int p_length) {
         checkIfRandomAbort();
         int ret = m_imExporter.writeBytes(p_array, p_offset, p_length);
@@ -230,6 +250,22 @@ class ChunkTesterImExporter implements Importer, Exporter {
     }
 
     @Override
+    public int writeFloats(final float[] p_array, final int p_offset, final int p_length) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.writeFloats(p_array, p_offset, p_length);
+        m_currentPos += p_length * Float.BYTES;
+        return ret;
+    }
+
+    @Override
+    public int writeDoubles(final double[] p_array, final int p_offset, final int p_length) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.writeDoubles(p_array, p_offset, p_length);
+        m_currentPos += p_length * Double.BYTES;
+        return ret;
+    }
+
+    @Override
     public void writeByteArray(final byte[] p_array) {
         checkIfRandomAbort();
         m_imExporter.writeByteArray(p_array);
@@ -262,6 +298,20 @@ class ChunkTesterImExporter implements Importer, Exporter {
         checkIfRandomAbort();
         m_imExporter.writeLongArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(p_array.length) + p_array.length * Long.BYTES;
+    }
+
+    @Override
+    public void writeFloatArray(final float[] p_array) {
+        checkIfRandomAbort();
+        m_imExporter.writeFloatArray(p_array);
+        m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(p_array.length) + p_array.length * Float.BYTES;
+    }
+
+    @Override
+    public void writeDoubleArray(final double[] p_array) {
+        checkIfRandomAbort();
+        m_imExporter.writeDoubleArray(p_array);
+        m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(p_array.length) + p_array.length * Double.BYTES;
     }
 
     @Override
@@ -392,6 +442,22 @@ class ChunkTesterImExporter implements Importer, Exporter {
     }
 
     @Override
+    public int readFloats(final float[] p_array) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.readFloats(p_array);
+        m_currentPos += p_array.length * Float.BYTES;
+        return ret;
+    }
+
+    @Override
+    public int readDoubles(final double[] p_array) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.readDoubles(p_array);
+        m_currentPos += p_array.length * Double.BYTES;
+        return ret;
+    }
+
+    @Override
     public int readBytes(final byte[] p_array, final int p_offset, final int p_length) {
         checkIfRandomAbort();
         int ret = m_imExporter.readBytes(p_array, p_offset, p_length);
@@ -428,6 +494,22 @@ class ChunkTesterImExporter implements Importer, Exporter {
         checkIfRandomAbort();
         int ret = m_imExporter.readLongs(p_array, p_offset, p_length);
         m_currentPos += p_length * Long.BYTES;
+        return ret;
+    }
+
+    @Override
+    public int readFloats(final float[] p_array, final int p_offset, final int p_length) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.readFloats(p_array, p_offset, p_length);
+        m_currentPos += p_length * Float.BYTES;
+        return ret;
+    }
+
+    @Override
+    public int readDoubles(final double[] p_array, final int p_offset, final int p_length) {
+        checkIfRandomAbort();
+        int ret = m_imExporter.readDoubles(p_array, p_offset, p_length);
+        m_currentPos += p_length * Double.BYTES;
         return ret;
     }
 
@@ -471,13 +553,29 @@ class ChunkTesterImExporter implements Importer, Exporter {
         return ret;
     }
 
+    @Override
+    public float[] readFloatArray(final float[] p_array) {
+        checkIfRandomAbort();
+        float[] ret = readFloatArray(p_array);
+        m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Long.BYTES;
+        return ret;
+    }
+
+    @Override
+    public double[] readDoubleArray(final double[] p_array) {
+        checkIfRandomAbort();
+        double[] ret = readDoubleArray(p_array);
+        m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Long.BYTES;
+        return ret;
+    }
+
     /**
      * Check if we have to abort the serialization and throw an ArrayIndexOutOfBoundsException
      */
     private void checkIfRandomAbort() {
         if (m_randomAbortAtPos != -1) {
             if (m_currentPos >= m_randomAbortAtPos) {
-                throw new ArrayIndexOutOfBoundsException("Random abort at "+ m_randomAbortAtPos);
+                throw new ArrayIndexOutOfBoundsException("Random abort at " + m_randomAbortAtPos);
             }
         }
     }
