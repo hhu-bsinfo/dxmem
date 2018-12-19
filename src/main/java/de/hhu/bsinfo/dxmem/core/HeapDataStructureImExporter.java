@@ -98,16 +98,18 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
 
     @Override
     public void writeFloat(final float p_v) {
-        writeInt(Float.floatToIntBits(p_v));
+        m_heap.writeFloat(m_addressPayload, m_currentOffset, p_v);
+        m_currentOffset += Float.BYTES;
     }
 
     @Override
     public void writeDouble(final double p_v) {
-        writeLong(Double.doubleToLongBits(p_v));
+        m_heap.writeDouble(m_addressPayload, m_currentOffset, p_v);
+        m_currentOffset += Double.BYTES;
     }
 
     @Override
-    public void writeCompactNumber(int p_v) {
+    public void writeCompactNumber(final int p_v) {
         int length = ObjectSizeUtil.sizeofCompactedNumber(p_v);
 
         int i;
@@ -163,7 +165,7 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     }
 
     @Override
-    public char readChar(char p_char) {
+    public char readChar(final char p_char) {
         char v = m_heap.readChar(m_addressPayload, m_currentOffset);
         m_currentOffset += Character.BYTES;
         return v;
@@ -185,12 +187,16 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
 
     @Override
     public float readFloat(final float p_float) {
-        return Float.intBitsToFloat(readInt(0));
+        float v = m_heap.readFloat(m_addressPayload, m_currentOffset);
+        m_currentOffset += Float.BYTES;
+        return v;
     }
 
     @Override
     public double readDouble(final double p_double) {
-        return Double.longBitsToDouble(readLong(0));
+        double v = m_heap.readDouble(m_addressPayload, m_currentOffset);
+        m_currentOffset += Double.BYTES;
+        return v;
     }
 
     @Override
@@ -244,7 +250,7 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     }
 
     @Override
-    public char[] readCharArray(char[] p_array) {
+    public char[] readCharArray(final char[] p_array) {
         char[] arr = new char[readCompactNumber(0)];
         readChars(arr);
         return arr;
@@ -261,6 +267,20 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     public long[] readLongArray(final long[] p_array) {
         long[] arr = new long[readCompactNumber(0)];
         readLongs(arr);
+        return arr;
+    }
+
+    @Override
+    public float[] readFloatArray(float[] p_array) {
+        float[] arr = new float[readCompactNumber(0)];
+        readFloats(arr);
+        return arr;
+    }
+
+    @Override
+    public double[] readDoubleArray(double[] p_array) {
+        double[] arr = new double[readCompactNumber(0)];
+        readDoubles(arr);
         return arr;
     }
 
@@ -282,6 +302,16 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     @Override
     public int writeLongs(final long[] p_array) {
         return writeLongs(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int writeFloats(final float[] p_array) {
+        return writeFloats(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int writeDoubles(final double[] p_array) {
+        return writeDoubles(p_array, 0, p_array.length);
     }
 
     @Override
@@ -321,6 +351,24 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     }
 
     @Override
+    public int writeFloats(final float[] p_array, final int p_offset, final int p_length) {
+        int written = m_heap.writeFloats(m_addressPayload, m_currentOffset, p_array, p_offset, p_length);
+        if (written != -1) {
+            m_currentOffset += written * Float.BYTES;
+        }
+        return written;
+    }
+
+    @Override
+    public int writeDoubles(final double[] p_array, final int p_offset, final int p_length) {
+        int written = m_heap.writeDoubles(m_addressPayload, m_currentOffset, p_array, p_offset, p_length);
+        if (written != -1) {
+            m_currentOffset += written * Double.BYTES;
+        }
+        return written;
+    }
+
+    @Override
     public void writeByteArray(final byte[] p_array) {
         writeCompactNumber(p_array.length);
         writeBytes(p_array);
@@ -351,6 +399,18 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     }
 
     @Override
+    public void writeFloatArray(final float[] p_array) {
+        writeCompactNumber(p_array.length);
+        writeFloats(p_array);
+    }
+
+    @Override
+    public void writeDoubleArray(final double[] p_array) {
+        writeCompactNumber(p_array.length);
+        writeDoubles(p_array);
+    }
+
+    @Override
     public int readShorts(final short[] p_array) {
         return readShorts(p_array, 0, p_array.length);
     }
@@ -368,6 +428,16 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
     @Override
     public int readLongs(final long[] p_array) {
         return readLongs(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int readFloats(float[] p_array) {
+        return readFloats(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int readDoubles(double[] p_array) {
+        return readDoubles(p_array, 0, p_array.length);
     }
 
     @Override
@@ -402,6 +472,24 @@ public final class HeapDataStructureImExporter implements Importer, Exporter {
         int read = m_heap.readLongs(m_addressPayload, m_currentOffset, p_array, p_offset, p_length);
         if (read != -1) {
             m_currentOffset += read * Long.BYTES;
+        }
+        return read;
+    }
+
+    @Override
+    public int readFloats(float[] p_array, int p_offset, int p_length) {
+        int read = m_heap.readFloats(m_addressPayload, m_currentOffset, p_array, p_offset, p_length);
+        if (read != -1) {
+            m_currentOffset += read * Float.BYTES;
+        }
+        return read;
+    }
+
+    @Override
+    public int readDoubles(double[] p_array, int p_offset, int p_length) {
+        int read = m_heap.readDoubles(m_addressPayload, m_currentOffset, p_array, p_offset, p_length);
+        if (read != -1) {
+            m_currentOffset += read * Double.BYTES;
         }
         return read;
     }
