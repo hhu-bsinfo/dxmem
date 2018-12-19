@@ -219,6 +219,44 @@ public class VirtualMemoryBlock {
     }
 
     /**
+     * Read data from the VMB into a float array.
+     *
+     * @param p_ptr
+     *         Start position in VMB.
+     * @param p_array
+     *         Array to read the data into.
+     * @param p_arrayOffset
+     *         Start offset in array to start writing the longs to.
+     * @param p_length
+     *         Number of longs to read from specified start.
+     * @return Number of read elements.
+     */
+    public int readFloats(final long p_ptr, final float[] p_array, final int p_arrayOffset, final int p_length) {
+        assert assertMemoryBounds(p_ptr, Float.BYTES * p_length);
+
+        return UnsafeMemory.readFloats(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
+    }
+
+    /**
+     * Read data from the VMB into a double array.
+     *
+     * @param p_ptr
+     *         Start position in VMB.
+     * @param p_array
+     *         Array to read the data into.
+     * @param p_arrayOffset
+     *         Start offset in array to start writing the longs to.
+     * @param p_length
+     *         Number of longs to read from specified start.
+     * @return Number of read elements.
+     */
+    public int readDoubles(final long p_ptr, final double[] p_array, final int p_arrayOffset, final int p_length) {
+        assert assertMemoryBounds(p_ptr, Double.BYTES * p_length);
+
+        return UnsafeMemory.readDoubles(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
+    }
+
+    /**
      * Read a single byte value.
      *
      * @param p_ptr
@@ -281,6 +319,32 @@ public class VirtualMemoryBlock {
         assert assertMemoryBounds(p_ptr, Long.BYTES);
 
         return UnsafeMemory.readLong(m_memoryBase + p_ptr);
+    }
+
+    /**
+     * Read a single float value.
+     *
+     * @param p_ptr
+     *         Position to read from.
+     * @return Float read.
+     */
+    public float readFloat(final long p_ptr) {
+        assert assertMemoryBounds(p_ptr, Float.BYTES);
+
+        return UnsafeMemory.readFloat(m_memoryBase + p_ptr);
+    }
+
+    /**
+     * Read a single double value.
+     *
+     * @param p_ptr
+     *         Position to read from.
+     * @return Double read.
+     */
+    public double readDouble(final long p_ptr) {
+        assert assertMemoryBounds(p_ptr, Double.BYTES);
+
+        return UnsafeMemory.readDouble(m_memoryBase + p_ptr);
     }
 
     /**
@@ -379,6 +443,44 @@ public class VirtualMemoryBlock {
     }
 
     /**
+     * Write an array of floats to the VMB.
+     *
+     * @param p_ptr
+     *         Start address to write to.
+     * @param p_array
+     *         Array with data to write.
+     * @param p_arrayOffset
+     *         Offset in array to start reading the data from.
+     * @param p_length
+     *         Number of elements to write.
+     * @return Number of written elements
+     */
+    public int writeFloats(final long p_ptr, final float[] p_array, final int p_arrayOffset, final int p_length) {
+        assert assertMemoryBounds(p_ptr, Float.BYTES * p_length);
+
+        return UnsafeMemory.writeFloats(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
+    }
+
+    /**
+     * Write an array of doubles to the VMB.
+     *
+     * @param p_ptr
+     *         Start address to write to.
+     * @param p_array
+     *         Array with data to write.
+     * @param p_arrayOffset
+     *         Offset in array to start reading the data from.
+     * @param p_length
+     *         Number of elements to write.
+     * @return Number of written elements
+     */
+    public int writeDoubles(final long p_ptr, final double[] p_array, final int p_arrayOffset, final int p_length) {
+        assert assertMemoryBounds(p_ptr, Double.BYTES * p_length);
+
+        return UnsafeMemory.writeDoubles(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
+    }
+
+    /**
      * Write a single byte value to the VMB.
      *
      * @param p_ptr
@@ -446,6 +548,34 @@ public class VirtualMemoryBlock {
         assert assertMemoryBounds(p_ptr, Long.BYTES);
 
         UnsafeMemory.writeLong(m_memoryBase + p_ptr, p_value);
+    }
+
+    /**
+     * Write a single float value to the VMB.
+     *
+     * @param p_ptr
+     *         Address to write to.
+     * @param p_value
+     *         Value to write.
+     */
+    public void writeFloat(final long p_ptr, final float p_value) {
+        assert assertMemoryBounds(p_ptr, Float.BYTES);
+
+        UnsafeMemory.writeFloat(m_memoryBase + p_ptr, p_value);
+    }
+
+    /**
+     * Write a single double value to the VMB.
+     *
+     * @param p_ptr
+     *         Address to write to.
+     * @param p_value
+     *         Value to write.
+     */
+    public void writeDouble(final long p_ptr, final double p_value) {
+        assert assertMemoryBounds(p_ptr, Double.BYTES);
+
+        UnsafeMemory.writeDouble(m_memoryBase + p_ptr, p_value);
     }
 
     /**
