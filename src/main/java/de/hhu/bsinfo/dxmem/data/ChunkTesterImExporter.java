@@ -516,7 +516,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public byte[] readByteArray(final byte[] p_array) {
         checkIfRandomAbort();
-        byte[] ret = readByteArray(p_array);
+        byte[] ret = m_imExporter.readByteArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Byte.BYTES;
         return ret;
     }
@@ -524,7 +524,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public short[] readShortArray(final short[] p_array) {
         checkIfRandomAbort();
-        short[] ret = readShortArray(p_array);
+        short[] ret = m_imExporter.readShortArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Short.BYTES;
         return ret;
     }
@@ -532,7 +532,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public char[] readCharArray(final char[] p_array) {
         checkIfRandomAbort();
-        char[] ret = readCharArray(p_array);
+        char[] ret = m_imExporter.readCharArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Character.BYTES;
         return ret;
     }
@@ -540,7 +540,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public int[] readIntArray(final int[] p_array) {
         checkIfRandomAbort();
-        int[] ret = readIntArray(p_array);
+        int[] ret = m_imExporter.readIntArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Integer.BYTES;
         return ret;
     }
@@ -548,7 +548,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public long[] readLongArray(final long[] p_array) {
         checkIfRandomAbort();
-        long[] ret = readLongArray(p_array);
+        long[] ret = m_imExporter.readLongArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Long.BYTES;
         return ret;
     }
@@ -556,7 +556,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public float[] readFloatArray(final float[] p_array) {
         checkIfRandomAbort();
-        float[] ret = readFloatArray(p_array);
+        float[] ret = m_imExporter.readFloatArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Long.BYTES;
         return ret;
     }
@@ -564,7 +564,7 @@ class ChunkTesterImExporter implements Importer, Exporter {
     @Override
     public double[] readDoubleArray(final double[] p_array) {
         checkIfRandomAbort();
-        double[] ret = readDoubleArray(p_array);
+        double[] ret = m_imExporter.readDoubleArray(p_array);
         m_currentPos += ObjectSizeUtil.sizeofCompactedNumber(ret.length) + ret.length * Long.BYTES;
         return ret;
     }
