@@ -65,7 +65,7 @@ public class CreateReserved {
      *         Size of the chunk to allocate
      */
     public void createReserved(final long p_cid, final int p_size) {
-        createReserved(p_cid, p_size);
+        createReserved(p_cid, p_size, ChunkLockOperation.NONE);
     }
 
     /**
