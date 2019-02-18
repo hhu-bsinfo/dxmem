@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
 /**
  * Implementation of a chunk based on a generic byte array
@@ -137,7 +138,7 @@ public final class ChunkByteArray extends AbstractChunk {
 
     @Override
     public int sizeofObject() {
-        return m_data.length;
+        return ObjectSizeUtil.sizeofByteArray(m_data);
     }
 
     @Override
