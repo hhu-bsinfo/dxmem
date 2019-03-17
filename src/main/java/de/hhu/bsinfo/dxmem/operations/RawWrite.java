@@ -23,6 +23,7 @@ import de.hhu.bsinfo.dxmem.core.Context;
  * the address, first)
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 21.06.2018
+ * @author Ruslan Curbanov, ruslan.curbanov@uni-duesseldorf.de, 14.03.2019
  */
 public class RawWrite {
     private final Context m_context;
@@ -63,6 +64,14 @@ public class RawWrite {
         m_context.getHeap().writeLong(p_address, p_addressOffset, p_value);
     }
 
+    public void writeDouble(final long p_address, final int p_addressOffset, final double p_value) {
+        m_context.getHeap().writeDouble(p_address, p_addressOffset, p_value);
+    }
+
+    public void writeFloat(final long p_address, final int p_addressOffset, final float p_value) {
+        m_context.getHeap().writeFloat(p_address, p_addressOffset, p_value);
+    }
+
     public void write(final long p_address, final int p_addressOffset, final byte[] p_array) {
         write(p_address, p_addressOffset, p_array, 0, p_array.length);
     }
@@ -80,6 +89,14 @@ public class RawWrite {
     }
 
     public void write(final long p_address, final int p_addressOffset, final long[] p_array) {
+        write(p_address, p_addressOffset, p_array, 0, p_array.length);
+    }
+
+    public void write(final long p_address, final int p_addressOffset, final double[] p_array) {
+        write(p_address, p_addressOffset, p_array, 0, p_array.length);
+    }
+
+    public void write(final long p_address, final int p_addressOffset, final float[] p_array) {
         write(p_address, p_addressOffset, p_array, 0, p_array.length);
     }
 
@@ -106,5 +123,15 @@ public class RawWrite {
     public void write(final long p_address, final int p_addressOffset, final long[] p_array, final int p_offset,
             final int p_length) {
         m_context.getHeap().writeLongs(p_address, p_addressOffset, p_array, p_offset, p_length);
+    }
+
+    public void write(final long p_address, final int p_addressOffset, final double[] p_array, final int p_offset,
+            final int p_length) {
+        m_context.getHeap().writeDoubles(p_address, p_addressOffset, p_array, p_offset, p_length);
+    }
+
+    public void write(final long p_address, final int p_addressOffset, final float[] p_array, final int p_offset,
+            final int p_length) {
+        m_context.getHeap().writeFloats(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 }
