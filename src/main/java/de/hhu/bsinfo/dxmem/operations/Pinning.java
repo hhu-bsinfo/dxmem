@@ -28,6 +28,7 @@ import de.hhu.bsinfo.dxmem.data.ChunkState;
  * Pin a chunk to allow direct access to heap data using the address (and for RDMA)
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
+ * @author Ruslan Curbanov, ruslan.curbanov@uni-duesseldorf.de, 18.03.2019
  */
 public class Pinning {
     private final Context m_context;
@@ -104,6 +105,18 @@ public class Pinning {
         m_context.getDefragmenter().releaseApplicationThreadLock();
 
         return new PinnedMemory(tableEntry.getAddress());
+    }
+
+    /**
+     * Translates a pinned chunk ID into the raw address.
+     *
+     * @param p_cid The chunk ID to translate
+     * @return The raw address of the chunk in memory
+     */
+    public long translate(final long p_cid) {
+        CIDTableChunkEntry tableEntry = m_context.getCIDTableEntryPool().get();
+        m_context.getCIDTable().translate(p_cid, tableEntry);
+        return tableEntry.getAddress();
     }
 
     /**
