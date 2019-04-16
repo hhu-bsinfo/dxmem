@@ -437,6 +437,21 @@ public final class Heap implements Importable, Exportable {
     }
 
     /**
+     * Read a single boolean from the specified address + offset.
+     *
+     * @param p_address
+     *         (Start) address of allocated memory block (taken from table entry)
+     * @param p_offset
+     *         Offset to add to the address.
+     * @return Boolean read.
+     */
+    public boolean readBoolean(final long p_address, final long p_offset) {
+        assert assertMemoryBounds(p_address, p_offset, Byte.BYTES);
+
+        return m_memory.readBoolean(p_address + p_offset);
+    }
+
+    /**
      * Read a single byte from the specified address + offset.
      *
      * @param p_address
@@ -539,6 +554,28 @@ public final class Heap implements Importable, Exportable {
         assert assertMemoryBounds(p_address, p_offset, Double.BYTES);
 
         return m_memory.readDouble(p_address + p_offset);
+    }
+
+    /**
+     * Read data into a boolean array.
+     *
+     * @param p_address
+     *         (Start) address of allocated memory block (taken from table entry)
+     * @param p_offset
+     *         Offset to add to start address.
+     * @param p_buffer
+     *         Buffer to read into.
+     * @param p_offsetArray
+     *         Offset within the buffer.
+     * @param p_length
+     *         Number of elements to read.
+     * @return Number of elements read.
+     */
+    public int readBooleans(final long p_address, final long p_offset, final boolean[] p_buffer, final int p_offsetArray,
+            final int p_length) {
+        assert assertMemoryBounds(p_address, p_offset, p_length * Byte.BYTES);
+
+        return m_memory.readBooleans(p_address + p_offset, p_buffer, p_offsetArray, p_length);
     }
 
     /**
@@ -696,6 +733,22 @@ public final class Heap implements Importable, Exportable {
     }
 
     /**
+     * Write a single boolean to the specified address + offset.
+     *
+     * @param p_address
+     *         (Start) address of allocated memory block (taken from table entry)
+     * @param p_offset
+     *         Offset to add to the address.
+     * @param p_value
+     *         Boolean to write.
+     */
+    public void writeBoolean(final long p_address, final long p_offset, final boolean p_value) {
+        assert assertMemoryBounds(p_address, p_offset, Byte.BYTES);
+
+        m_memory.writeBoolean(p_address + p_offset, p_value);
+    }
+
+    /**
      * Write a single byte to the specified address + offset.
      *
      * @param p_address
@@ -805,6 +858,28 @@ public final class Heap implements Importable, Exportable {
         assert assertMemoryBounds(p_address, p_offset, Double.BYTES);
 
         m_memory.writeDouble(p_address + p_offset, p_value);
+    }
+
+    /**
+     * Write an array of booleans to the specified address + offset.
+     *
+     * @param p_address
+     *         (Start) address of allocated memory block (taken from table entry)
+     * @param p_offset
+     *         Offset to add to the address.
+     * @param p_value
+     *         Booleans to write.
+     * @param p_offsetArray
+     *         Offset within the buffer.
+     * @param p_length
+     *         Number of elements to read.
+     * @return Number of elements written.
+     */
+    public int writeBooleans(final long p_address, final long p_offset, final boolean[] p_value, final int p_offsetArray,
+            final int p_length) {
+        assert assertMemoryBounds(p_address, p_offset, p_length * Byte.BYTES);
+
+        return m_memory.writeBooleans(p_address + p_offset, p_value, p_offsetArray, p_length);
     }
 
     /**

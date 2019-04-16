@@ -124,6 +124,25 @@ public class VirtualMemoryBlock {
     }
 
     /**
+     * Read data from the VMB into a boolean array.
+     *
+     * @param p_ptr
+     *         Start position in VMB.
+     * @param p_array
+     *         Array to read the data into.
+     * @param p_arrayOffset
+     *         Start offset in array to start writing the booleans to.
+     * @param p_length
+     *         Number of booleans/bytes to read from specified start.
+     * @return Number of read elements.
+     */
+    public int readBooleans(final long p_ptr, final boolean[] p_array, final int p_arrayOffset, final int p_length) {
+        assert assertMemoryBounds(p_ptr, Byte.BYTES * p_length);
+
+        return UnsafeMemory.readBooleans(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
+    }
+
+    /**
      * Read data from the VMB into a byte array.
      *
      * @param p_ptr
@@ -257,6 +276,19 @@ public class VirtualMemoryBlock {
     }
 
     /**
+     * Read a single boolean value.
+     *
+     * @param p_ptr
+     *         Position to read from.
+     * @return Boolean read.
+     */
+    public boolean readBoolean(final long p_ptr) {
+        assert assertMemoryBounds(p_ptr, Byte.BYTES);
+
+        return UnsafeMemory.readBoolean(m_memoryBase + p_ptr);
+    }
+
+    /**
      * Read a single byte value.
      *
      * @param p_ptr
@@ -345,6 +377,25 @@ public class VirtualMemoryBlock {
         assert assertMemoryBounds(p_ptr, Double.BYTES);
 
         return UnsafeMemory.readDouble(m_memoryBase + p_ptr);
+    }
+
+    /**
+     * Write an array of booleans to the VMB.
+     *
+     * @param p_ptr
+     *         Start address to write to.
+     * @param p_array
+     *         Array with data to write.
+     * @param p_arrayOffset
+     *         Offset in array to start reading the data from.
+     * @param p_length
+     *         Number of elements to write.
+     * @return Number of written elements
+     */
+    public int writeBooleans(final long p_ptr, final boolean[] p_array, final int p_arrayOffset, final int p_length) {
+        assert assertMemoryBounds(p_ptr, Byte.BYTES * p_length);
+
+        return UnsafeMemory.writeBooleans(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
     }
 
     /**
@@ -478,6 +529,20 @@ public class VirtualMemoryBlock {
         assert assertMemoryBounds(p_ptr, Double.BYTES * p_length);
 
         return UnsafeMemory.writeDoubles(m_memoryBase + p_ptr, p_array, p_arrayOffset, p_length);
+    }
+
+    /**
+     * Write a single boolean value to the VMB.
+     *
+     * @param p_ptr
+     *         Address to write to.
+     * @param p_value
+     *         Value to write.
+     */
+    public void writeBoolean(final long p_ptr, final boolean p_value) {
+        assert assertMemoryBounds(p_ptr, Byte.BYTES);
+
+        UnsafeMemory.writeBoolean(m_memoryBase + p_ptr, p_value);
     }
 
     /**
