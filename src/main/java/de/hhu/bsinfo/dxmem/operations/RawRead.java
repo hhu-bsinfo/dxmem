@@ -38,6 +38,10 @@ public class RawRead {
         m_context = p_context;
     }
 
+    public boolean readBoolean(final long p_address, final int p_addressOffset) {
+        return m_context.getHeap().readBoolean(p_address, p_addressOffset);
+    }
+
     public byte readByte(final long p_address, final int p_addressOffset) {
         return m_context.getHeap().readByte(p_address, p_addressOffset);
     }
@@ -66,6 +70,10 @@ public class RawRead {
         return m_context.getHeap().readFloat(p_address, p_addressOffset);
     }
 
+    public void read(final long p_address, final int p_addressOffset, final boolean[] p_array) {
+        read(p_address, p_addressOffset, p_array, 0, p_array.length);
+    }
+
     public void read(final long p_address, final int p_addressOffset, final byte[] p_array) {
         read(p_address, p_addressOffset, p_array, 0, p_array.length);
     }
@@ -92,6 +100,11 @@ public class RawRead {
 
     public void read(final long p_address, final int p_addressOffset, final float[] p_array) {
         read(p_address, p_addressOffset, p_array, 0, p_array.length);
+    }
+
+    public void read(final long p_address, final int p_addressOffset, final boolean[] p_array, final int p_offset,
+            final int p_length) {
+        m_context.getHeap().readBooleans(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final byte[] p_array, final int p_offset,

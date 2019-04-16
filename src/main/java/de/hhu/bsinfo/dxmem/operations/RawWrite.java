@@ -44,6 +44,10 @@ public class RawWrite {
                 .copyNative(p_address, p_addressOffset, p_addressSource, p_offset, p_length, p_isAddressSourceAbsolute);
     }
 
+    public void writeBoolean(final long p_address, final int p_addressOffset, final boolean p_value) {
+        m_context.getHeap().writeBoolean(p_address, p_addressOffset, p_value);
+    }
+
     public void writeByte(final long p_address, final int p_addressOffset, final byte p_value) {
         m_context.getHeap().writeByte(p_address, p_addressOffset, p_value);
     }
@@ -72,6 +76,10 @@ public class RawWrite {
         m_context.getHeap().writeFloat(p_address, p_addressOffset, p_value);
     }
 
+    public void write(final long p_address, final int p_addressOffset, final boolean[] p_array) {
+        write(p_address, p_addressOffset, p_array, 0, p_array.length);
+    }
+
     public void write(final long p_address, final int p_addressOffset, final byte[] p_array) {
         write(p_address, p_addressOffset, p_array, 0, p_array.length);
     }
@@ -98,6 +106,11 @@ public class RawWrite {
 
     public void write(final long p_address, final int p_addressOffset, final float[] p_array) {
         write(p_address, p_addressOffset, p_array, 0, p_array.length);
+    }
+
+    public void write(final long p_address, final int p_addressOffset, final boolean[] p_array, final int p_offset,
+            final int p_length) {
+        m_context.getHeap().writeBooleans(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void write(final long p_address, final int p_addressOffset, final byte[] p_array, final int p_offset,
