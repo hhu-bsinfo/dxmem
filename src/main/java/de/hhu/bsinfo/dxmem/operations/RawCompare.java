@@ -39,12 +39,12 @@ public class RawCompare {
      * <p>
      * Special attention to the range it will ce compare. The length of the given byte array is equal to the
      * number of iterations.
+     * For the byte comparison it uses the {@link #compare(long, int, byte)} method.
      *
      * @param p_address physical address
      * @param p_offset  offset that will be added on p_address
      * @param p_suspect byte array which will be compared
      * @return true if the byte array is completely equal.
-     * @see {@link #compare(long, int, byte)}
      */
     public boolean compare(final long p_address, final int p_offset, final byte[] p_suspect) {
         int offset = p_offset;
