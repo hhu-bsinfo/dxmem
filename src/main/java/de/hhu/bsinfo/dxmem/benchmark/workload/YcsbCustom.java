@@ -1,22 +1,4 @@
-/*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 package de.hhu.bsinfo.dxmem.benchmark.workload;
-
-import picocli.CommandLine;
 
 import de.hhu.bsinfo.dxmem.benchmark.Benchmark;
 import de.hhu.bsinfo.dxmem.benchmark.BenchmarkPhase;
@@ -24,18 +6,13 @@ import de.hhu.bsinfo.dxmem.benchmark.operation.Create;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Dump;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Get;
 import de.hhu.bsinfo.dxmem.benchmark.operation.Put;
+import picocli.CommandLine;
 
-/**
- * Base class for YCSB type benchmarks
- *
- * @author Stefan Nothaas, stefan.nothaas@hhu.de, 31.08.2018
- */
-public abstract class AbstractYcsb extends AbstractWorkload {
-    private final String m_name;
-    private int m_batchCount;
-    private int m_objectSize;
-    private float m_probGet;
-    private float m_probPut;
+@CommandLine.Command(
+        name = "ycsb-custom",
+        description = "Customizable YCSB workload"
+)
+public class YcsbCustom extends AbstractWorkload {
 
     @CommandLine.Parameters(
             index = "0",
@@ -73,36 +50,37 @@ public abstract class AbstractYcsb extends AbstractWorkload {
             description = "Total number of run operations to execute (on all threads)")
     private long m_runTotalOperations;
 
-    /**
-     * Constructor
-     *
-     * @param p_name
-     *         Name of the benchmark
-     * @param p_batchCount
-     *         Batch count for operation
-     * @param p_objectSize
-     *         Size of a single object
-     * @param p_probGet
-     *         Probability for get operations
-     * @param p_probPut
-     *         Probability for put operations
-     */
-    AbstractYcsb(final String p_name, final int p_batchCount, final int p_objectSize, final float p_probGet,
-            final float p_probPut) {
-        m_name = p_name;
-        m_batchCount = p_batchCount;
-        m_objectSize = p_objectSize;
-        m_probGet = p_probGet;
-        m_probPut = p_probPut;
-    }
+    @CommandLine.Parameters(
+            index = "6",
+            paramLabel = "<batchCount>",
+            description = "Batch count for operation"
+    )
+    private int m_batchCount;
 
-    AbstractYcsb(final String p_name) {
-        m_name = p_name;
-    }
+    @CommandLine.Parameters(
+            index = "7",
+            paramLabel = "<objectSize>",
+            description = "Size of a single object"
+    )
+    private int m_objectSize;
+
+    @CommandLine.Parameters(
+            index = "8",
+            paramLabel = "<probGet>",
+            description = "Probability for get operations"
+    )
+    private float m_probGet;
+
+    @CommandLine.Parameters(
+            index = "9",
+            paramLabel = "<probPut>",
+            description = "Probability for put operations"
+    )
+    private float m_probPut;
 
     @Override
     public Benchmark createWorkload() {
-        Benchmark benchmark = new Benchmark(m_name);
+        Benchmark benchmark = new Benchmark("ycsb-custom");
 
         benchmark.addPhase(new BenchmarkPhase("load", m_loadThreads, m_loadTotalObjects, 0,
                 new Create(1.0f, m_batchCount, m_verifyData, m_objectSize, m_objectSize)));
