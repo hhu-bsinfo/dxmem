@@ -374,14 +374,14 @@ public class DXMem {
             throw new MemoryRuntimeException(e.getMessage());
         }
 
-        StorageUnit freeMem = state.getFree();
+        StorageUnit availableMem = state.getAvailable();
 
-        if (p_heapSize.getMBDouble() > freeMem.getMBDouble()) {
+        if (p_heapSize.getMBDouble() > availableMem.getMBDouble()) {
             throw new MemoryRuntimeException(
-                    "Cannot create heap insufficient free RAM: " + p_heapSize + " > " + freeMem);
+                    "Cannot create heap insufficient free RAM: " + p_heapSize + " > " + availableMem);
         }
 
-        if (freeMem.getGBDouble() - p_heapSize.getGBDouble() < 1.0) {
+        if (availableMem.getGBDouble() - p_heapSize.getGBDouble() < 1.0) {
             LOGGER.warn("Less than 1 GB of free RAM available after allocating heap. This might lead to performance " +
                     "issues or even out of memory. Consider creating a smaller heap.");
         }
