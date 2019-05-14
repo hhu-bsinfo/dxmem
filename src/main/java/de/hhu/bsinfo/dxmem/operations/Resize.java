@@ -44,8 +44,7 @@ public class Resize {
     /**
      * Constructor
      *
-     * @param p_context
-     *         Context
+     * @param p_context Context
      */
     public Resize(final Context p_context) {
         m_context = p_context;
@@ -54,10 +53,8 @@ public class Resize {
     /**
      * Resize an existing chunk
      *
-     * @param p_cid
-     *         CID of chunk to resize
-     * @param p_newSize
-     *         New size for chunk
+     * @param p_cid     CID of chunk to resize
+     * @param p_newSize New size for chunk
      * @return True if succcessful, false on failure
      */
     public ChunkState resize(final long p_cid, final int p_newSize) {
@@ -67,19 +64,15 @@ public class Resize {
     /**
      * Resize an existing chunk
      *
-     * @param p_cid
-     *         CID of chunk to resize
-     * @param p_newSize
-     *         New size for chunk
-     * @param p_lockOperation
-     *         Lock operation to execute for chunk to resize
-     * @param p_lockTimeoutMs
-     *         If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
-     *         succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
+     * @param p_cid           CID of chunk to resize
+     * @param p_newSize       New size for chunk
+     * @param p_lockOperation Lock operation to execute for chunk to resize
+     * @param p_lockTimeoutMs If a lock operation is set, set to -1 for infinite retries (busy polling) until the lock operation
+     *                        succeeds. 0 for a one shot try and &gt; 0 for a timeout value in ms
      * @return True if succcessful, false on failure
      */
     public ChunkState resize(final long p_cid, final int p_newSize, final ChunkLockOperation p_lockOperation,
-            final int p_lockTimeoutMs) {
+                             final int p_lockTimeoutMs) {
         assert assertLockOperationSupport(p_lockOperation);
         assert p_newSize > 0;
 
@@ -114,7 +107,9 @@ public class Resize {
             return ChunkState.DOES_NOT_EXIST;
         }
 
-        m_context.getHeap().resize(tableEntry, p_newSize);
+        if (!m_context.getHeap().resize(tableEntry, p_newSize)) {
+            return ChunkState.RESIZE_FAILED;
+        }
 
         // update cid table entry
         m_context.getCIDTable().entryUpdate(tableEntry);

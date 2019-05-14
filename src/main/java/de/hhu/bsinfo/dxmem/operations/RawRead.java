@@ -31,8 +31,7 @@ public class RawRead {
     /**
      * Constructor
      *
-     * @param p_context
-     *         Context
+     * @param p_context Context
      */
     public RawRead(final Context p_context) {
         m_context = p_context;
@@ -70,6 +69,12 @@ public class RawRead {
         return m_context.getHeap().readFloat(p_address, p_addressOffset);
     }
 
+    public byte[] readByteArray(final long p_address, final int p_addressOffset, final int p_length) {
+        byte[] arr = new byte[p_length];
+        read(p_address, p_addressOffset, arr, 0, p_length);
+        return arr;
+    }
+
     public void read(final long p_address, final int p_addressOffset, final boolean[] p_array) {
         read(p_address, p_addressOffset, p_array, 0, p_array.length);
     }
@@ -103,42 +108,43 @@ public class RawRead {
     }
 
     public void read(final long p_address, final int p_addressOffset, final boolean[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readBooleans(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final byte[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readBytes(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final short[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readShorts(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final char[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readChars(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final int[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readInts(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final long[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readLongs(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final double[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readDoubles(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
 
     public void read(final long p_address, final int p_addressOffset, final float[] p_array, final int p_offset,
-            final int p_length) {
+                     final int p_length) {
         m_context.getHeap().readFloats(p_address, p_addressOffset, p_array, p_offset, p_length);
     }
+
 }

@@ -37,7 +37,7 @@ public class RawCompare {
      * Compares a byte array at a given address + offset with a given byte array.
      * It iterates over the byte array and will return if it found a unequal at current iteration.
      * <p>
-     * Special attention to the range it will ce compare. The length of the given byte array is equal to the
+     * Special attention to the range it will compare. The length of the given byte array is equal to the
      * number of iterations.
      * For the byte comparison it uses the {@link #compare(long, int, byte)} method.
      *
@@ -48,8 +48,9 @@ public class RawCompare {
      */
     public boolean compare(final long p_address, final int p_offset, final byte[] p_suspect) {
         int offset = p_offset;
-        for (int i = 0; i < p_suspect.length; i++) {
-            if (compare(p_address, offset, p_suspect[i]))
+
+        for (byte b : p_suspect) {
+            if (!compare(p_address, offset, b))
                 return false;
             offset += Byte.BYTES;
         }
