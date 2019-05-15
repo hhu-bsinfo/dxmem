@@ -65,4 +65,9 @@ public enum ChunkState {
      * Typically, one simply issues the timed out operation again (maybe add a short delay).
      */
     REMOTE_REQUEST_TIMEOUT,
+
+    /**
+     * Chunk could not resized.
+     */
+    RESIZE_FAILED
 }

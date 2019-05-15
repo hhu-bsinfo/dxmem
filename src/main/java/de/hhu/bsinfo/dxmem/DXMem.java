@@ -18,29 +18,12 @@ package de.hhu.bsinfo.dxmem;
 
 import java.io.File;
 
+import de.hhu.bsinfo.dxmem.operations.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxmem.core.Context;
 import de.hhu.bsinfo.dxmem.core.MemoryRuntimeException;
-import de.hhu.bsinfo.dxmem.operations.Analyze;
-import de.hhu.bsinfo.dxmem.operations.CIDStatus;
-import de.hhu.bsinfo.dxmem.operations.Create;
-import de.hhu.bsinfo.dxmem.operations.CreateReserved;
-import de.hhu.bsinfo.dxmem.operations.Dump;
-import de.hhu.bsinfo.dxmem.operations.Exists;
-import de.hhu.bsinfo.dxmem.operations.Get;
-import de.hhu.bsinfo.dxmem.operations.Lock;
-import de.hhu.bsinfo.dxmem.operations.Pinning;
-import de.hhu.bsinfo.dxmem.operations.Put;
-import de.hhu.bsinfo.dxmem.operations.RawRead;
-import de.hhu.bsinfo.dxmem.operations.RawWrite;
-import de.hhu.bsinfo.dxmem.operations.Recovery;
-import de.hhu.bsinfo.dxmem.operations.Remove;
-import de.hhu.bsinfo.dxmem.operations.Reserve;
-import de.hhu.bsinfo.dxmem.operations.Resize;
-import de.hhu.bsinfo.dxmem.operations.Size;
-import de.hhu.bsinfo.dxmem.operations.Stats;
 import de.hhu.bsinfo.dxmonitor.state.MemState;
 import de.hhu.bsinfo.dxmonitor.state.StateUpdateException;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
@@ -69,6 +52,7 @@ public class DXMem {
     private Pinning m_pinning;
     private RawRead m_rawRead;
     private RawWrite m_rawWrite;
+    private RawCompare m_rawCompare;
 
     private CIDStatus m_cidStatus;
     private Stats m_stats;
@@ -82,8 +66,7 @@ public class DXMem {
      * Constructor
      * Load a memory dump from a file and initialize DXMem with it.
      *
-     * @param p_memdumpFile
-     *         Path to memory dump file
+     * @param p_memdumpFile Path to memory dump file
      */
     public DXMem(final String p_memdumpFile) {
         this(p_memdumpFile, false);
@@ -93,14 +76,12 @@ public class DXMem {
      * Constructor
      * Load a memory dump from a file and initialize DXMem with it.
      *
-     * @param p_memdumpFile
-     *         Path to memory dump file
-     * @param p_disableChunkLock
-     *         Disable the chunk lock mechanism which increases performance but blocks the remove
-     *         and resize operations. All lock operation arguments provided on operation calls are
-     *         ignored. DXMem cannot guarantee application data consistency on parallel writes to
-     *         the same chunk. Useful for read only applications or if the application handles
-     *         synchronization when writing to chunks.
+     * @param p_memdumpFile      Path to memory dump file
+     * @param p_disableChunkLock Disable the chunk lock mechanism which increases performance but blocks the remove
+     *                           and resize operations. All lock operation arguments provided on operation calls are
+     *                           ignored. DXMem cannot guarantee application data consistency on parallel writes to
+     *                           the same chunk. Useful for read only applications or if the application handles
+     *                           synchronization when writing to chunks.
      */
     public DXMem(final String p_memdumpFile, final boolean p_disableChunkLock) {
         checkSufficientMemory(new StorageUnit(new File(p_memdumpFile).length(), StorageUnit.BYTE));
@@ -118,10 +99,8 @@ public class DXMem {
      * Constructor
      * Create a new empty heap and initialize DXMem.
      *
-     * @param p_nodeId
-     *         Node id of current instance
-     * @param p_heapSize
-     *         Size of heap to create (in bytes)
+     * @param p_nodeId   Node id of current instance
+     * @param p_heapSize Size of heap to create (in bytes)
      */
     public DXMem(final short p_nodeId, final long p_heapSize) {
         this(p_nodeId, p_heapSize, false);
@@ -131,16 +110,13 @@ public class DXMem {
      * Constructor
      * Create a new empty heap and initialize DXMem.
      *
-     * @param p_nodeId
-     *         Node id of current instance
-     * @param p_heapSize
-     *         Size of heap to create (in bytes)
-     * @param p_disableChunkLock
-     *         Disable the chunk lock mechanism which increases performance but blocks the remove
-     *         and resize operations. All lock operation arguments provided on operation calls are
-     *         ignored. DXMem cannot guarantee application data consistency on parallel writes to
-     *         the same chunk. Useful for read only applications or if the application handles
-     *         synchronization when writing to chunks.
+     * @param p_nodeId           Node id of current instance
+     * @param p_heapSize         Size of heap to create (in bytes)
+     * @param p_disableChunkLock Disable the chunk lock mechanism which increases performance but blocks the remove
+     *                           and resize operations. All lock operation arguments provided on operation calls are
+     *                           ignored. DXMem cannot guarantee application data consistency on parallel writes to
+     *                           the same chunk. Useful for read only applications or if the application handles
+     *                           synchronization when writing to chunks.
      */
     public DXMem(final short p_nodeId, final long p_heapSize, final boolean p_disableChunkLock) {
         checkSufficientMemory(new StorageUnit(p_heapSize, StorageUnit.BYTE));
@@ -293,6 +269,15 @@ public class DXMem {
     }
 
     /**
+     * Return the rawCompare Operation.
+     *
+     * @return the rawCompare Operation.
+     */
+    public RawCompare rawCompare() {
+        return m_rawCompare;
+    }
+
+    /**
      * Get the cidStatus operation
      *
      * @return Operation
@@ -355,6 +340,7 @@ public class DXMem {
         m_pinning = new Pinning(m_context);
         m_rawRead = new RawRead(m_context);
         m_rawWrite = new RawWrite(m_context);
+        m_rawCompare = new RawCompare(m_context);
 
         m_cidStatus = new CIDStatus(m_context);
         m_stats = new Stats(m_context);
